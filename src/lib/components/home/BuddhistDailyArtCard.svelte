@@ -133,6 +133,10 @@
   .art-credit{grid-column:1 / -1;font-size: var(--font-size-meta);line-height:1.6;color:var(--muted)}
   .art-credit a{color:inherit;text-underline-offset:2px}
   .art-placeholder{height:90%;width:90%;padding:24px;color:var(--calendar-accent);opacity:.3}
+  :global([data-theme='dark']) .art-main{background:radial-gradient(ellipse at 10% 5%,var(--card),var(--bg2))}
+  :global([data-theme='dark']) .art-left-panel{background:linear-gradient(145deg,var(--card),var(--bg2));border-color:var(--border);box-shadow:none}
+  :global([data-theme='dark']) .art-shuffle-btn{background:var(--card)}
+  :global([data-theme='dark']) .art-visual{background:radial-gradient(ellipse at 65% 45%,var(--card),var(--bg2))}
   @keyframes art-reveal{from{opacity:.2}to{opacity:1}}
   @media(max-width:540px){.art-main{min-height:300px}.art-left-panel{padding:20px 12px;min-height:276px}.art-eyebrow{margin-bottom:22px;font-size: var(--font-size-meta);letter-spacing:.02em;gap:5px}.art-line{width:12px}.art-huge-day{font-size:80px}.art-lunar-month{font-size:18px}.art-footer{padding:14px 16px;gap:6px 10px}}
   @media(prefers-reduced-motion:reduce){.art-bg-img{animation:none}.art-shuffle-btn{transition:none}}

@@ -12,7 +12,7 @@ vi.mock('@capacitor/status-bar', () => ({
   StatusBar: { setStyle: mocks.iosStyle, setBackgroundColor: mocks.iosBackground },
   Style: { Dark: 'DARK', Light: 'LIGHT' },
 }));
-import { syncNativeSystemBars } from '../../src/lib/browser/native-system-bars';
+import { overrideNativeSystemBars, syncNativeSystemBars } from '../../src/lib/browser/native-system-bars';
 
 afterEach(() => { vi.clearAllMocks(); mocks.native = false; mocks.platform = 'web'; });
 
@@ -45,4 +45,43 @@ it('keeps theme usable if the Android bridge rejects a call', async () => {
   await expect(syncNativeSystemBars(true, '#15120d')).resolves.toBeUndefined();
   expect(warning).toHaveBeenCalledTimes(1);
   warning.mockRestore();
+});
+
+it('keeps light status text on a dark modal when the app theme changes, then restores the latest theme', async () => {
+  mocks.native = true; mocks.platform = 'ios';
+  await syncNativeSystemBars(false, '#FAF1E4');
+  const restore = overrideNativeSystemBars(true, '#171320');
+  await syncNativeSystemBars(false, '#FAF1E4');
+  expect(mocks.iosStyle).toHaveBeenLastCalledWith({ style: 'DARK' });
+  expect(mocks.iosBackground).toHaveBeenLastCalledWith({ color: '#171320' });
+  restore();
+  await syncNativeSystemBars(false, '#FAF1E4');
+  expect(mocks.iosStyle).toHaveBeenLastCalledWith({ style: 'LIGHT' });
+  expect(mocks.iosBackground).toHaveBeenLastCalledWith({ color: '#FAF1E4' });
+});
+
+it('restores Android system bars after a modal closes before an earlier bridge update completes', async () => {
+  mocks.native = true; mocks.platform = 'android';
+  let finish!: () => void;
+  mocks.setStyle.mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
+  const initial = syncNativeSystemBars(false, '#FAF1E4');
+  await vi.waitFor(() => expect(finish).toBeTypeOf('function'));
+  const restore = overrideNativeSystemBars(true, '#171320');
+  restore();
+  finish();
+  await initial;
+  await syncNativeSystemBars(false, '#FAF1E4');
+  expect(mocks.setStyle.mock.calls.map(([appearance]) => appearance)).toEqual([
+    { dark: false, backgroundColor: '#FAF1E4' },
+    { dark: true, backgroundColor: '#171320' },
+    { dark: false, backgroundColor: '#FAF1E4' },
+    { dark: false, backgroundColor: '#FAF1E4' },
+  ]);
+});
+
+it('does not retain native modal overrides in the web runtime', async () => {
+  const restore = overrideNativeSystemBars(true, '#171320');
+  restore();
+  expect(mocks.iosStyle).not.toHaveBeenCalled();
+  expect(mocks.setStyle).not.toHaveBeenCalled();
 });

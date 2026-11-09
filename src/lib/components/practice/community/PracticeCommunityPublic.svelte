@@ -160,7 +160,7 @@
   {#if refreshError}<p class="practice-community-public__notice" role="status">{refreshError}</p>{/if}
 
   {#if communityEnabled}
-    <PracticeLeaderboard {leaderboard} presence={null} principalId={principal} />
+    <PracticeLeaderboard {leaderboard} principalId={principal} />
     <PracticeCampaigns {campaigns} {busyCampaignId} {errorCampaignId} errorMessage={actionError} authenticated={isUserAuthenticated} onMembership={handleMembership} />
   {:else}
     <p class="practice-community-public__notice" role="status">{isEn ? 'Practice community features are temporarily paused.' : 'Tính năng cộng đồng tu tập đang tạm dừng.'}</p>

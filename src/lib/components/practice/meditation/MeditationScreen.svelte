@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { onDestroy, tick } from 'svelte';
+  import { onDestroy, onMount, tick } from 'svelte';
   import { getLocaleContext } from '$lib/stores/locale.svelte';
   import { modalDialog } from '$lib/browser/modal-dialog';
   import type { MeditationSessionState } from '$lib/domain/practice/guided-sessions';
@@ -13,6 +13,7 @@
   import { uiMotion } from '$lib/browser/ui-motion';
   import { setImmersiveFullscreen } from '$lib/browser/native-fullscreen';
   import { isNativeApp } from '$lib/browser/native-platform';
+  import { overrideNativeSystemBars } from '$lib/browser/native-system-bars';
 
   interface Props {
     routineControls?: Snippet;
@@ -35,6 +36,11 @@
   let waterCanvas = $state<HTMLCanvasElement>();
   let water = $state<ReturnType<typeof createMeditationWater> | null>(null);
   let contentScrollable = $state(true);
+
+  onMount(() => {
+    if (!screen) return;
+    return overrideNativeSystemBars(true, getComputedStyle(screen).getPropertyValue('--meditation-surface').trim());
+  });
 
   $effect(() => {
     if (!screen) return;
@@ -328,7 +334,7 @@
 <style>
   .meditation-modal{inset:0;width:100%;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#171320;overflow:hidden}
   .meditation-modal::backdrop{background:#171320}
-  .meditation-screen{box-sizing:border-box;position:fixed;z-index:11000;inset:0;display:grid;width:100%;height:100dvh;grid-template-rows:auto 1fr auto;background:radial-gradient(circle at 50% 35%,#44365f 0%,#241d35 46%,#171320 100%);color:#fff;font-family:var(--font-app);isolation:isolate}
+  .meditation-screen{box-sizing:border-box;position:fixed;z-index:11000;inset:0;display:grid;width:100%;height:100dvh;grid-template-rows:auto 1fr auto;background:radial-gradient(circle at 50% 35%,#44365f 0%,#241d35 46%,var(--meditation-surface) 100%);color:#fff;font-family:var(--font-app);isolation:isolate}
   .meditation-screen::before{position:absolute;z-index:-1;inset:0;background-image:radial-gradient(circle at 20% 20%,rgba(229,195,255,.08) 0 1px,transparent 1.5px),radial-gradient(circle at 80% 70%,rgba(255,231,178,.08) 0 1px,transparent 1.5px);background-size:46px 46px,64px 64px;content:''}
   .meditation-screen__photo{position:absolute;z-index:-1;inset:0;pointer-events:none}
   .meditation-screen__water{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
@@ -344,7 +350,7 @@
   .meditation-background-picker__tile{position:relative;display:flex;min-width:0;min-height:44px;flex-direction:column;gap:var(--radius-sm);padding:var(--radius-sm);border:2px solid var(--border);border-radius:var(--radius-control);background:rgba(255,255,255,.08);color:inherit;cursor:pointer;font:inherit;font-size:var(--font-size-label);line-height:1.5;text-align:center;overflow-wrap:anywhere}
   .meditation-background-picker__tile.selected{border-color:var(--gold)}
   .meditation-background-picker__tile img,.meditation-background-picker__default{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--radius-sm)}
-  .meditation-background-picker__default{background:radial-gradient(circle at 50% 35%,#44365f 0%,#241d35 46%,#171320 100%)}
+  .meditation-background-picker__default{background:radial-gradient(circle at 50% 35%,#44365f 0%,#241d35 46%,var(--meditation-surface) 100%)}
   .meditation-background-picker__selected{position:absolute;top:var(--radius-sm);right:var(--radius-sm);padding:0 var(--radius-sm);border-radius:var(--radius-sm);background:var(--gold);color:var(--on-gold);font-weight:700}
   .meditation-background-picker__footer{display:flex;justify-content:flex-end;padding-top:var(--radius-control)}
   .meditation-background-picker__footer button{width:100%;min-width:44px;min-height:44px;padding:0 var(--space-page);border:1px solid var(--gold);border-radius:var(--radius-control);background:var(--gold);color:var(--on-gold);font:700 1rem/1.5 var(--font-app);cursor:pointer}

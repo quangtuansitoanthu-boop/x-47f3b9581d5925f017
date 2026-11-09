@@ -29,8 +29,7 @@ describe('practice progress and community UI', () => {
     } as any }).body;
     expect(body).toContain('aria-label="Báo cáo hồ sơ Tên đã duyệt"');
     expect(body).toContain('aria-label="Chặn Tên đã duyệt"');
-    expect(body).toContain('aria-label="Báo cáo hồ sơ Người đang tu"');
-    expect(body).toContain('aria-label="Chặn Người đang tu"');
+    expect(body).not.toContain('Người đang tu');
     expect(body).not.toContain('aria-label="Báo cáo hồ sơ Hồ sơ của tôi"');
     expect(body).not.toContain('aria-label="Chặn Hồ sơ của tôi"');
     expect(body).not.toContain('aria-label="Chặn Dữ liệu phiên bản cũ"');
@@ -82,7 +81,6 @@ describe('practice progress and community UI', () => {
             sessions: 8,
           }],
         },
-        presence: null,
       },
     }).body;
 
@@ -174,7 +172,7 @@ describe('practice progress and community UI', () => {
     expect(hooks).toContain("if (event.locals.session) response.headers.set('Cache-Control', 'private, no-store')");
     expect(adminLoader).toContain('/api/practice/campaigns?includeDrafts=1');
     expect(dashboard).toContain('leaderboardOptIn');
-    expect(dashboard).toContain('presenceOptIn');
+    expect(dashboard).not.toContain('presenceOptIn');
     expect(dashboard).toContain('selectedBadge');
     expect(dashboard).toContain('@media(prefers-reduced-motion:reduce)');
     expect(admin).toContain('{member.displayName}');

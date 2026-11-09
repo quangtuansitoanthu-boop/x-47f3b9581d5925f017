@@ -5,7 +5,6 @@
   import { SESSION_CHANGE_EVENT } from '$lib/stores/session.svelte';
   import type { PageSessionDTO } from '$lib/server/auth/types';
   import type { AdminCommunityData, CommunityPeriod } from '$lib/server/services/admin-community';
-  import OnlineVisitorsTable from '../dashboard/OnlineVisitorsTable.svelte';
   import AdminRefreshControl from '../shared/AdminRefreshControl.svelte';
   import AdminModerationQueue from './AdminModerationQueue.svelte';
 
@@ -82,20 +81,11 @@
 
 <main class="admin-community" aria-busy={busy}>
   <header class="admin-overview-header">
-    <div><span>Cộng đồng</span><h1>Hoạt động cộng đồng</h1><p>Theo dõi người đang online và sự đều đặn trong hành trình tu tập.</p></div>
+    <div><span>Cộng đồng</span><h1>Hoạt động cộng đồng</h1><p>Theo dõi sự đều đặn trong hành trình tu tập.</p></div>
     <AdminRefreshControl busy={busy} generatedAt={community.generatedAt} onRefresh={refresh} />
   </header>
   {#if refreshError}<p class="admin-overview-notice" role="status">{refreshError}</p>{/if}
   {#if moderationReady}<AdminModerationQueue />{/if}
-
-  <dl class="admin-community__metrics" aria-label="Người đang hoạt động trong 120 giây gần nhất">
-    <div><dt>Tổng đang online</dt><dd>{numberFormat.format(community.online.total)}</dd><small>phiên hoạt động</small></div>
-    <div><dt>Thành viên</dt><dd>{numberFormat.format(community.online.members)}</dd><small>đã đăng nhập</small></div>
-    <div><dt>Khách</dt><dd>{numberFormat.format(community.online.guests)}</dd><small>trình duyệt ẩn danh</small></div>
-    <div><dt>Nội bộ</dt><dd>{numberFormat.format(community.online.internal)}</dd><small>Admin và CTV</small></div>
-  </dl>
-
-  <OnlineVisitorsTable generatedAt={community.generatedAt} totalVisitors={community.online.total} visitors={community.online.visitors} />
 
   <section class="admin-community__ranking" aria-labelledby="community-ranking-title">
     <header>

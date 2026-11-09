@@ -173,48 +173,32 @@ jobs:
         run: |
           cat build/release-evidence/privacy-manifests.txt
           cat build/release-evidence/Podfile.lock
-      - name: Test the native guest rosary and motion settings
-        timeout-minutes: 25
-        run: |
-          set -euo pipefail
-          test "$TUTAM_QA_HOSTS_ISOLATED" = 1
-          xcodebuild \
-            -workspace ios/App/App.xcworkspace -scheme App -configuration Debug \
-            -sdk iphonesimulator -destination "platform=iOS Simulator,id=$TUTAM_QA_SIMULATOR" \
-            -derivedDataPath build/ios-simulator \
-            -resultBundlePath build/release-evidence/NativeGuestSmoke.xcresult \
-            -only-testing:AppUITests/NativeGuestSmokeTests -only-testing:AppUITests/NativeExtendedGuestTests \
-            -parallel-testing-enabled NO \
-            -test-timeouts-enabled YES \
-            -default-test-execution-time-allowance 600 \
-            -maximum-test-execution-time-allowance 600 \
-            CODE_SIGNING_ALLOWED=NO test-without-building 2>&1 | tee build/release-evidence/native-ui-test.log
-      - name: Require executed native UI tests with no failures or skips
+      - name: Test seven isolated native guest flows
+        timeout-minutes: 45
+        run: python3 scripts/ci/ios-native-seven.py
+      - name: Require all seven native UI tests with no failures or skips
         if: always()
         run: |
-          set -euo pipefail
-          result=build/release-evidence/NativeGuestSmoke.xcresult
-          test -d "$result"
-          xcrun xcresulttool get test-results summary --path "$result" > build/release-evidence/native-ui-summary.json
           python3 - <<'PY'
           import json
           data=json.load(open('build/release-evidence/native-ui-summary.json'))
-          assert data['passedTests'] >= 7, 'All seven native tests must execute and pass'
-          assert data['failedTests'] == 0, 'Native UI test failures'
-          assert data['skippedTests'] == 0, 'Native UI tests must not be skipped'
-          print('Verified native UI test execution:',data['passedTests'],'passed, 0 failed, 0 skipped')
+          assert data['passedTests'] == 7 and data['totalTestCount'] == 7, 'All seven tests must execute and pass'
+          assert data['failedTests'] == 0 and data['skippedTests'] == 0, 'No failures or skips allowed'
+          assert len(data['cases']) == 7 and all(not c['infrastructureError'] and c['xcodeExitCode'] == 0 for c in data['cases']), 'All Xcode invocations must succeed'
+          print('Verified 7 native UI tests passed, 0 failed, 0 skipped, 7 independent installations')
           PY
       - name: Capture native simulator evidence
         if: always()
         run: |
-          mkdir -p build/release-evidence
-          if [ -n "${TUTAM_QA_SIMULATOR:-}" ]; then
-            xcrun simctl io "$TUTAM_QA_SIMULATOR" screenshot build/release-evidence/native-ui-final.png
-          fi
-          result=build/release-evidence/NativeGuestSmoke.xcresult
-          if [ -d "$result" ]; then
-            xcrun xcresulttool export attachments --path "$result" --output-path build/release-evidence/native-ui-attachments
-          fi
+          python3 - <<'PY'
+          import pathlib, subprocess, os
+          root=pathlib.Path('build/release-evidence')
+          simulator=os.environ.get('TUTAM_QA_SIMULATOR')
+          if simulator:
+              subprocess.run(['xcrun','simctl','io',simulator,'screenshot',str(root/'native-ui-final.png')],check=True,timeout=45)
+          for result in sorted(root.glob('native-*.xcresult')):
+              subprocess.run(['xcrun','xcresulttool','export','attachments','--path',str(result),'--output-path',str(root/'native-ui-attachments'/result.stem)],check=True,timeout=120)
+          PY
       - name: Shut down the CI simulator before restoring network resolution
         if: always()
         run: |
@@ -237,5 +221,6 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: ios-native-extended-${{ github.run_number }}
+          retention-days: 7
           path: build/release-evidence/
           if-no-files-found: error

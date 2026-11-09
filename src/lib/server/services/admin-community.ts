@@ -1,9 +1,7 @@
 import type { CloudflareRequestContext } from '../cloudflare-context';
 import { vietnamDateKey } from '../domain/visitor-client';
 import { createAdminCommunityRepository } from '../repositories/admin-community-repository';
-import { createAdminDashboardRepository } from '../repositories/admin-dashboard-repository';
-import { serializeOnlineVisitors, type AdminDashboardData } from './admin-dashboard';
-import { ACTIVE_WINDOW_SECONDS } from './presence';
+import type { AdminDashboardData } from './admin-dashboard';
 
 export type CommunityPeriod = 'week' | 'month' | 'year';
 
@@ -34,17 +32,12 @@ export function normalizeCommunityPeriod(value: unknown): CommunityPeriod {
 
 export function createAdminCommunityService(context: CloudflareRequestContext) {
   const repository = createAdminCommunityRepository(context.env);
-  const onlineRepository = createAdminDashboardRepository(context.env);
   return {
     async getCommunity(periodInput: unknown, now = Date.now()): Promise<AdminCommunityData> {
       const period = normalizeCommunityPeriod(periodInput);
       const today = vietnamDateKey(now);
       const startDate = periodStart(today, period);
-      const [onlineRows, breakdown, aggregateRows] = await Promise.all([
-        onlineRepository.onlineVisitors(now - ACTIVE_WINDOW_SECONDS * 1000),
-        repository.onlineBreakdown(now - ACTIVE_WINDOW_SECONDS * 1000),
-        repository.practiceRanking(startDate, today),
-      ]);
+      const aggregateRows = await repository.practiceRanking(startDate, today);
       const ranking = aggregateRows.map((row) => ({
         activeDays: number(row.active_days),
         avatarUrl: row.avatar_url || '',
@@ -63,11 +56,7 @@ export function createAdminCommunityService(context: CloudflareRequestContext) {
 
       return {
         generatedAt: new Date(now).toISOString(),
-        online: {
-          members: number(breakdown?.members), guests: number(breakdown?.guests),
-          internal: number(breakdown?.internal), total: number(breakdown?.total),
-          visitors: serializeOnlineVisitors(onlineRows),
-        },
+        online: { members: 0, guests: 0, internal: 0, total: 0, visitors: [] },
         period,
         ranking,
       };

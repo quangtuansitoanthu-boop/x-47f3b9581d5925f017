@@ -17,8 +17,6 @@
   import ReaderBoundary from '$lib/components/library/ReaderBoundary.svelte';
   import ContinueReadingShelf from '$lib/components/library/ContinueReadingShelf.svelte';
   import { type ArticleCategory, type LibraryArticle, LIBRARY_SECTIONS, getCategoryLabel } from '$lib/components/library/article';
-  import PresenceChip from '$lib/components/presence/PresenceChip.svelte';
-  import { listenPresence } from '$lib/browser/presence';
   import { fetchWithSessionRefresh } from '$lib/browser/session-csrf';
   import { fetchHomepageWithOfflinePdfs } from '$lib/browser/offline-pdf-library';
   import { listOfflinePdfMetadata } from '$lib/browser/offline-pdf-database';
@@ -57,7 +55,6 @@
   let selectedArticle = $state<LibraryArticle | null>(null);
   let editingArticle = $state<LibraryArticle | null | 'new'>(null);
   let importJsonOpen = $state(false);
-  let presenceCount = $state<number | null>(null);
   let catalogEnabled = $state(false);
   let downloadedPdfIds = $state<Set<string>>(new Set());
 
@@ -291,7 +288,6 @@
 
   onMount(() => {
     catalogEnabled = true;
-    const stopPresence = listenPresence((snapshot) => presenceCount = snapshot?.activeCount ?? null);
     const openEditor = (event: Event) => {
       const detail = (event as CustomEvent<{ mode?: string }>).detail;
       if (detail?.mode === 'create' && canManage) editingArticle = 'new';
@@ -368,7 +364,6 @@
     window.addEventListener('popstate', onPopState);
     return () => {
       downloadedPdfGeneration += 1;
-      stopPresence();
       window.removeEventListener('quangtu:open-book', onOpenBook);
       window.removeEventListener('quangtu:article-editor', openEditor);
       window.removeEventListener('quangtu:import-json', openImportJson);
@@ -443,7 +438,6 @@
           {#if query}
             <button class="search-clear-btn" type="button" aria-label={localizeUi("Xóa tìm kiếm")} onclick={() => { query = ''; }}>✕</button>
           {/if}
-          <PresenceChip count={presenceCount} hidden={presenceCount === null} />
         </label>
         <button class="library-options-toggle" type="button" aria-expanded={filtersOpen} aria-controls="library-options" onclick={() => filtersOpen = !filtersOpen}><SlidersHorizontal size={18} aria-hidden="true" />{isEnglish ? 'Filter' : localizeUi('Lọc')}{activeSection !== 'all' || activeTag ? ' •' : ''}</button>
         <TopTenDialog title={localizeUi("Top 10 sách được xem nhiều nhất")} {loading} unit={localizeUi("lượt xem")}
@@ -538,8 +532,6 @@
   .kinh-sach-container :global(.search-input[type="search"]::-webkit-search-cancel-button){-webkit-appearance:none;appearance:none}
   .kinh-sach-container :global(.search-wrap.has-query .search-input){padding-left:44px}
   .kinh-sach-container :global(.search-clear-btn){left:0;right:auto}
-  .kinh-sach-container :global(.search-wrap .presence-chip){position:static;flex:0 1 auto;min-width:0;max-width:45%;transform:none}
-  .kinh-sach-container :global(.search-wrap .presence-chip>span:last-child){overflow:hidden;text-overflow:ellipsis}
   .library-options-toggle{display:inline-flex;align-items:center;justify-content:center;gap:calc(var(--space-page) / 4);min-height:44px;padding:8px 16px;border:1px solid var(--border);border-radius:var(--radius-control);background:var(--card);color:var(--text);font:600 13px var(--font-app);white-space:nowrap;cursor:pointer}
   .library-options-toggle:focus-visible,.library-my-quotes:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   .library-options{max-width:1160px;margin:0 auto;padding:calc(var(--space-page) * .9);border:1px solid var(--border2);border-radius:14px;background:var(--card);box-shadow:0 2px 10px rgba(0,0,0,.06)}

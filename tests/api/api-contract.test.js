@@ -1206,7 +1206,8 @@ describe('phase 3 api contracts', () => {
         content: { articles: 3, pdfs: 1, privateTalks: 1, publicTalks: 1, rituals: 1, sutras: 1, talks: 2 },
         engagement: { articleViews: 37, comments: 1 },
         members: { admins: 1, collaborators: 1, members: 6, users: 4 },
-        onlineVisitorCount: 6,
+        onlineVisitorCount: 0,
+        onlineVisitors: [],
         range: '28d',
         system: { analyticsAvailable: true, mediaConfigured: true, presenceEnabled: false },
         traffic: { rangeVisitors: 4, today: 2, thisMonth: 3, thisYear: 5 },
@@ -1309,7 +1310,7 @@ describe('phase 3 api contracts', () => {
       expect(adminCommunity.status).toBe(200);
       const communityPayload = await adminCommunity.json();
       expect(communityPayload).toMatchObject({
-        online: { members: 1, guests: 2, internal: 3, total: 6 },
+        online: { members: 0, guests: 0, internal: 0, total: 0, visitors: [] },
         period: 'month',
         ranking: [
           { activeDays: 3, displayName: 'Người chăm', logCount: 3, rank: 1, streak: 3, totalsByType: [{ count: 6, type: 'niệm Phật' }] },

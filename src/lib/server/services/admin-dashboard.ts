@@ -7,7 +7,6 @@ import {
 } from '../../domain/admin-date-range';
 import { vietnamDateKey } from '../domain/visitor-client';
 import { createAdminDashboardRepository, type OnlineVisitorRow } from '../repositories/admin-dashboard-repository';
-import { ACTIVE_WINDOW_SECONDS } from './presence';
 
 export interface AdminDashboardData {
   content: {
@@ -60,13 +59,9 @@ export function createAdminDashboardService(context: CloudflareRequestContext) {
       const analyticsPromise = Promise.all([
         repository.trafficSummary(today, `${today.slice(0, 7)}-01`, `${today.slice(0, 4)}-01-01`, window.startDate, window.endDate),
         repository.trafficSeries(window.startDate, window.endDate, window.interval),
-        repository.onlineVisitors(now - ACTIVE_WINDOW_SECONDS * 1000),
-        repository.onlineVisitorCount(now - ACTIVE_WINDOW_SECONDS * 1000),
-      ]).then(([traffic, dailyRows, onlineRows, onlineVisitorCount]) => ({
+      ]).then(([traffic, dailyRows]) => ({
         available: true,
         dailyRows,
-        onlineRows,
-        onlineVisitorCount,
         traffic,
       }))
         .catch((error: unknown) => {
@@ -80,7 +75,7 @@ export function createAdminDashboardService(context: CloudflareRequestContext) {
         repository.memberSummary(),
         analyticsPromise,
       ]);
-      const { traffic, dailyRows, onlineRows } = analytics;
+      const { traffic, dailyRows } = analytics;
       const dailyByDate = new Map(dailyRows.map((row) => [String(row.visit_date), number(row.visitor_count)]));
       return {
         content: {
@@ -103,13 +98,13 @@ export function createAdminDashboardService(context: CloudflareRequestContext) {
           members: number(members?.members),
           users: number(members?.users),
         },
-        onlineVisitorCount: analytics.onlineVisitorCount,
-        onlineVisitors: serializeOnlineVisitors(onlineRows),
+        onlineVisitorCount: 0,
+        onlineVisitors: [],
         range: window.range,
         system: {
           analyticsAvailable: analytics.available,
           mediaConfigured: Boolean(context.env.MEDIA),
-          presenceEnabled: analytics.available && String(context.env.PRESENCE_ENABLED || 'true').toLowerCase() !== 'false',
+          presenceEnabled: false,
         },
         traffic: {
           daily: chartDates.map((date) => ({ date, visitors: dailyByDate.get(date) || 0 })),

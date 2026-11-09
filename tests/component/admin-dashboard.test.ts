@@ -158,11 +158,15 @@ describe('admin dashboard surfaces', () => {
     expect(body).toContain('Tu tập &amp; Nghi thức');
     expect(body).toContain('href="/admin/phap-thoai"');
     expect(body).toContain('href="/admin/tu-tap"');
-    expect(body).toContain('Đang hoạt động');
+    // DTO cũ có thể còn các field online; dashboard đã ngừng hiển thị presence.
+    expect(body).not.toContain('Đang hoạt động');
+    expect(body).not.toContain('admin-dashboard__live-dot');
     expect(body).toContain('28 ngày gần nhất');
     expect(body).toContain('/admin/analytics?range=28d');
     expect(body).toContain('/admin/analytics');
-    expect(body).toContain('Presence:');
+    expect(body).not.toContain('Presence:');
+    expect(body).toContain('D1 Database: Đang kết nối');
+    expect(body).toMatch(/Media R2:\s*(?:<!--.*?-->\s*)*Đã kết nối/u);
     expect(body).not.toContain('1 tài khoản đăng nhập và 1 khách trong danh sách gần nhất.');
     expect(body).toContain('Vận hành &amp; Hệ thống');
   });
@@ -262,6 +266,8 @@ describe('admin dashboard surfaces', () => {
     expect(adminCommunitySource).toContain('leaveAdmin()');
     expect(adminCommunitySource).toContain('AdminRefreshControl');
     expect(adminCommunitySource).toContain('class="admin-community__periods"');
+    expect(adminCommunitySource).not.toContain('OnlineVisitorsTable');
+    expect(adminCommunitySource).not.toContain('community.online.');
 
     const ctvSidebar = render(AdminSidebar, {
       props: {
@@ -328,7 +334,7 @@ describe('admin dashboard surfaces', () => {
 
   it('renders the dashboard body with the expected summary and live-visitor sections', () => {
     const { body } = render(AdminDashboard, {props:{initialData:sampleDashboard}});
-    for(const label of ['Bảng điều khiển','Quản lý nội dung','Vận hành &amp; Hệ thống','/admin/analytics?range=28d','/admin/community']) expect(body).toContain(label);
+    for(const label of ['Bảng điều khiển','Quản lý nội dung','Vận hành &amp; Hệ thống','/admin/analytics?range=28d']) expect(body).toContain(label);
     expect(body).toContain('aria-labelledby=');
     expect(body).not.toContain('1 tài khoản đăng nhập và 1 khách trong danh sách gần nhất.');
   });

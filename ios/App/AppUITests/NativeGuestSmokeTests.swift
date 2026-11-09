@@ -1,427 +1,360 @@
 import XCTest
 import UIKit
 
-final class NativeGuestSmokeTests: XCTestCase {
+// Mỗi phương thức chạy trên bản cài mới của Simulator CI; không chỉnh storage hoặc quyền bằng test hook.
+class NativeGuestUITestCase: XCTestCase {
+    private var evidenceApplication: XCUIApplication?
+
+    override func tearDown() async throws {
+        await MainActor.run {
+            if let app = evidenceApplication {
+                evidence("final-" + name, app: app)
+                evidence("system-final-" + name, app: XCUIApplication(bundleIdentifier: "com.apple.springboard"))
+            }
+            XCUIDevice.shared.orientation = .portrait
+        }
+        try await super.tearDown()
+    }
+
     @MainActor
-    private func evidence(_ name: String, app: XCUIApplication) {
+    func evidence(_ name: String, app: XCUIApplication) {
+        // Lấy snapshot AX trước để WebKit kết thúc cập nhật layout trước ảnh hiển thị tương ứng.
+        let tree = XCTAttachment(string: app.debugDescription)
+        tree.name = name + "-accessibility"
+        tree.lifetime = .keepAlways
         let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         screenshot.name = name
         screenshot.lifetime = .keepAlways
         add(screenshot)
-        let tree = XCTAttachment(string: app.debugDescription)
-        tree.name = name + "-accessibility"
-        tree.lifetime = .keepAlways
         add(tree)
     }
 
     @MainActor
-    private func launchGuest() -> XCUIApplication {
+    func launchGuest() -> XCUIApplication {
         continueAfterFailure = false
+        XCUIDevice.shared.orientation = .portrait
         let app = XCUIApplication()
+        evidenceApplication = app
         app.launchArguments = ["-AppleLanguages", "(vi)", "-AppleLocale", "vi_VN"]
         app.launch()
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 30), "Native WKWebView must load")
+        XCTAssertTrue(app.links["Cá nhân"].firstMatch.waitForExistence(timeout: 30), "Native app must finish rendering its navigation")
         return app
     }
 
     @MainActor
-    private func open(_ path: String, app: XCUIApplication) {
-        // XCUIApplication.open is available from iOS 16.4; this test target requires 17.
-        let later = app.webViews.buttons["Để sau"].firstMatch
-        if later.waitForExistence(timeout: 3) { later.tap() }
-        app.open(URL(string: "vn.quangtu.tutam:///" + path)!)
-        if later.waitForExistence(timeout: 3) { later.tap() }
+    func waitUntil(_ message: String, timeout: TimeInterval = 15, _ condition: @escaping () -> Bool) {
+        let ready = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in condition() }, object: NSObject())
+        XCTAssertEqual(XCTWaiter.wait(for: [ready], timeout: timeout), .completed, message)
     }
 
     @MainActor
-    private func confirmRosaryStart(_ app: XCUIApplication) {
-        let start = app.webViews.buttons["Bắt đầu 🙏"].firstMatch
-        XCTAssertTrue(start.waitForExistence(timeout: 20), "Existing rosary confirmation must open")
-        start.tap()
-        XCTAssertTrue(app.webViews.buttons["Quay lại tu tập"].firstMatch.waitForExistence(timeout: 10))
+    func insideViewport(_ element: XCUIElement, app: XCUIApplication) -> Bool {
+        guard element.exists else { return false }
+        let frame = element.frame
+        return frame.width > 0 && frame.height > 0 && app.frame.contains(frame) && element.isHittable
     }
 
     @MainActor
-    private func openRosary(_ app: XCUIApplication) {
-        open("tu-tap?action=rosary", app: app)
-        confirmRosaryStart(app)
-    }
-
-    @MainActor
-    private func reopenRosary(_ app: XCUIApplication) {
-        let later = app.webViews.buttons["Để sau"].firstMatch
-        if later.waitForExistence(timeout: 3) { later.tap() }
-        // PracticeCatalog's real tool card preserves a warm app; URL opening starts another automation session.
-        let card = app.webViews.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Lần tràng hạt")).firstMatch
-        XCTAssertTrue(card.waitForExistence(timeout: 20))
-        for _ in 0..<8 {
-            if card.isHittable { break }
-            // Back and rotation preserve catalog scroll; the card may now be above the viewport.
-            let viewport = app.webViews.firstMatch
-            if card.frame.midY < viewport.frame.midY {
-                viewport.swipeDown()
-            } else {
-                viewport.swipeUp()
-            }
-        }
-        if !card.isHittable { evidence("rosary-catalog-reopen-failure", app: app) }
-        XCTAssertTrue(card.isHittable)
-        card.tap()
-        confirmRosaryStart(app)
-    }
-
-    @MainActor
-    private func rosaryCount(_ app: XCUIApplication) -> Int {
-        // The modal exposes one plain numeric live counter; goals and cycle labels include other text.
-        let counters = app.webViews.staticTexts.matching(NSPredicate(format: "label MATCHES %@", "^[0-9]+$"))
-        XCTAssertEqual(counters.count, 1, "Rosary counter must be uniquely exposed to accessibility")
-        let value = Int(counters.firstMatch.label)
-        XCTAssertNotNil(value)
-        return value ?? -1
-    }
-
-    @MainActor
-    func testRosaryBackPreservesCountInPortraitAndLandscape() {
-        let app = launchGuest()
-        defer {
-            evidence("rosary-final", app: app)
-            XCUIDevice.shared.orientation = .portrait
-        }
-        for pass in 1...5 {
-            for orientation in [UIDeviceOrientation.portrait, .landscapeLeft] {
-                XCUIDevice.shared.orientation = orientation
-                let name = "rosary-pass-\(pass)-\(orientation == .portrait ? "portrait" : "landscape")"
-                if pass == 1 && orientation == .portrait { openRosary(app) }
-                else { reopenRosary(app) }
-                let count = rosaryCount(app)
-                let bead = app.webViews.buttons["Niệm một hạt"].firstMatch
-                XCTAssertTrue(bead.isHittable)
-                bead.tap()
-                let updated = app.webViews.staticTexts[String(count + 1)].firstMatch
-                XCTAssertTrue(updated.waitForExistence(timeout: 5))
-                XCTAssertEqual(rosaryCount(app), count + 1)
-                let back = app.webViews.buttons["Quay lại tu tập"].firstMatch
-                XCTAssertTrue(back.isHittable, "Back must receive a real native accessibility tap")
-                XCTAssertGreaterThanOrEqual(back.frame.width, 44)
-                XCTAssertGreaterThanOrEqual(back.frame.height, 44)
-                XCTAssertTrue(app.frame.contains(back.frame), "Back must remain inside the native viewport")
-                evidence(name, app: app)
-                back.tap()
-                let closed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: back)
-                XCTAssertEqual(XCTWaiter.wait(for: [closed], timeout: 10), .completed)
-                reopenRosary(app)
-                XCTAssertEqual(rosaryCount(app), count + 1, "Back must preserve the existing rosary count")
-                app.webViews.buttons["Quay lại tu tập"].firstMatch.tap()
-            }
+    func dismissPracticeSyncNotice(_ app: XCUIApplication) {
+        // Chỉ xử lý banner công phu đã lưu, không chạm các nút Để sau của hướng dẫn/thông báo tài khoản.
+        let message = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Đã lưu trên thiết bị. Đăng nhập lại để đồng bộ công phu.")).firstMatch
+        guard message.exists, app.frame.intersects(message.frame) else { return }
+        let noticeFrame = message.frame
+        let candidates = app.buttons.matching(identifier: "Để sau").allElementsBoundByIndex
+        if let later = candidates.first(where: {
+            insideViewport($0, app: app) && $0.frame.minY >= noticeFrame.minY &&
+            $0.frame.minY <= noticeFrame.maxY + 100 && $0.frame.midX >= noticeFrame.minX && $0.frame.midX <= noticeFrame.maxX
+        }) {
+            later.tap()
+            waitUntil("Dismissed practice-sync notice must disappear") { !message.exists }
         }
     }
 
     @MainActor
-    private func motionSwitch(_ app: XCUIApplication) -> XCUIElement {
-        let label = "Hiệu ứng chuyển động"
-        let toggle = app.webViews.switches[label].firstMatch
-        if toggle.exists { return toggle }
-        return app.webViews.buttons[label].firstMatch
+    func reveal(_ element: XCUIElement, app: XCUIApplication) {
+        XCTAssertTrue(element.waitForExistence(timeout: 25), "Expected actual native accessibility control")
+        for _ in 0..<12 {
+            dismissPracticeSyncNotice(app)
+            if insideViewport(element, app: app) { return }
+            if element.frame.midY < app.frame.midY { app.swipeDown() }
+            else { app.swipeUp() }
+        }
+        evidence("unreachable-control-" + element.label, app: app)
+        XCTAssertTrue(insideViewport(element, app: app), "Control must be visible and reachable inside the native viewport")
     }
 
     @MainActor
-    private func checked(_ element: XCUIElement) -> Bool? {
+    func tap(_ element: XCUIElement, app: XCUIApplication) {
+        reveal(element, app: app)
+        element.tap()
+    }
+
+    @MainActor
+    func navigate(_ label: String, app: XCUIApplication) {
+        dismissPracticeSyncNotice(app)
+        let links = app.links.matching(identifier: label)
+        XCTAssertTrue(links.firstMatch.waitForExistence(timeout: 20), "Bottom navigation must expose \(label)")
+        let visible = links.allElementsBoundByIndex.filter { insideViewport($0, app: app) }
+        guard let tab = visible.max(by: { $0.frame.midY < $1.frame.midY }) else {
+            evidence("missing-bottom-tab-" + label, app: app)
+            XCTFail("Expected visible bottom navigation link \(label)")
+            return
+        }
+        tab.tap()
+    }
+
+    @MainActor
+    func openSettings(_ app: XCUIApplication) {
+        navigate("Cá nhân", app: app)
+        let settings = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Cài đặt ứng dụng")).firstMatch
+        tap(settings, app: app)
+        XCTAssertTrue(app.switches["Bật thông báo nhắc nhở tu tập"].firstMatch.waitForExistence(timeout: 20))
+    }
+
+    @MainActor
+    func openAppearance(_ app: XCUIApplication) {
+        let motion = app.switches["Hiệu ứng chuyển động"].firstMatch
+        if !motion.exists || motion.frame.width == 0 || motion.frame.height == 0 {
+            let summary = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@ AND label != %@", "Giao diện & ngôn ngữ ", "Giao diện & ngôn ngữ")).firstMatch
+            tap(summary, app: app)
+        }
+        reveal(motion, app: app)
+    }
+
+    @MainActor
+    func checked(_ element: XCUIElement) -> Bool? {
         if let value = element.value as? String {
-            switch value.lowercased() {
-            case "1", "true": return true
-            case "0", "false": return false
-            default: return nil
-            }
+            if ["1", "true"].contains(value.lowercased()) { return true }
+            if ["0", "false"].contains(value.lowercased()) { return false }
         }
         return (element.value as? NSNumber)?.boolValue
     }
 
     @MainActor
-    private func setMotion(_ enabled: Bool, app: XCUIApplication) {
-        let toggle = motionSwitch(app)
-        XCTAssertTrue(toggle.exists)
-        XCTAssertNotNil(checked(toggle), "The actual switch must expose its checked state")
+    func setMotion(_ enabled: Bool, app: XCUIApplication) {
+        let toggle = app.switches["Hiệu ứng chuyển động"].firstMatch
+        reveal(toggle, app: app)
+        XCTAssertNotNil(checked(toggle), "Actual motion switch must expose checked state")
         if checked(toggle) != enabled { toggle.tap() }
-        let expected = enabled ? ["1", "true", "TRUE"] : ["0", "false", "FALSE"]
-        let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value IN %@ OR value == %@", expected as NSArray, NSNumber(value: enabled)), object: toggle)
-        XCTAssertEqual(XCTWaiter.wait(for: [changed], timeout: 5), .completed)
-        XCTAssertEqual(checked(toggle), enabled)
+        waitUntil("Motion switch must reflect requested state") { self.checked(toggle) == enabled }
+    }
+
+    @MainActor
+    func openRosaryFromCatalog(_ app: XCUIApplication) {
+        let card = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Lần tràng hạt")).firstMatch
+        tap(card, app: app)
+        let start = app.buttons["Bắt đầu 🙏"].firstMatch
+        tap(start, app: app)
+        XCTAssertTrue(app.buttons["Quay lại tu tập"].firstMatch.waitForExistence(timeout: 15))
+    }
+
+    @MainActor
+    func rosaryCount(_ app: XCUIApplication) -> Int {
+        let numbers = app.staticTexts.matching(NSPredicate(format: "label MATCHES %@", "^[0-9]+$"))
+        XCTAssertEqual(numbers.count, 1, "Actual rosary counter must be uniquely exposed")
+        guard let count = Int(numbers.firstMatch.label) else { XCTFail("Rosary counter must be numeric"); return -1 }
+        return count
+    }
+
+    @MainActor
+    func librarySearch(_ app: XCUIApplication) -> XCUIElement {
+        let field = app.searchFields["Tìm kiếm bài viết"].firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 20))
+        reveal(field, app: app)
+        return field
+    }
+
+    @MainActor
+    func rotate(_ orientation: UIDeviceOrientation, app: XCUIApplication) {
+        XCUIDevice.shared.orientation = orientation
+        waitUntil("Native viewport must complete rotation") {
+            orientation == .portrait ? app.frame.height > app.frame.width : app.frame.width > app.frame.height
+        }
+    }
+}
+
+final class NativeGuestSmokeTests: NativeGuestUITestCase {
+    @MainActor
+    func testRosaryBackPreservesCountInPortraitAndLandscape() {
+        let app = launchGuest()
+        navigate("Tu tập", app: app)
+        openRosaryFromCatalog(app)
+        for pass in 1...5 {
+            for orientation in [UIDeviceOrientation.portrait, .landscapeLeft] {
+                rotate(orientation, app: app)
+                let count = rosaryCount(app)
+                tap(app.buttons["Niệm một hạt"].firstMatch, app: app)
+                XCTAssertTrue(app.staticTexts[String(count + 1)].firstMatch.waitForExistence(timeout: 10))
+                XCTAssertEqual(rosaryCount(app), count + 1, "One real tap must increase the rosary count exactly once")
+                let back = app.buttons["Quay lại tu tập"].firstMatch
+                reveal(back, app: app)
+                XCTAssertGreaterThanOrEqual(back.frame.width, 44)
+                XCTAssertGreaterThanOrEqual(back.frame.height, 44)
+                evidence("rosary-pass-\(pass)-\(orientation == .portrait ? "portrait" : "landscape")", app: app)
+                back.tap()
+                waitUntil("Rosary back must close the tool") { !back.exists }
+                openRosaryFromCatalog(app)
+                XCTAssertEqual(rosaryCount(app), count + 1, "Real Back and catalog reopening must preserve the count")
+            }
+        }
     }
 
     @MainActor
     func testMotionSettingPersistsAcrossNativeDeepLinks() {
         let app = launchGuest()
-        defer { evidence("motion-final", app: app) }
-        open("ca-nhan?tab=settings", app: app)
-        let appearance = app.webViews.buttons["Giao diện & ngôn ngữ"].firstMatch
-        XCTAssertTrue(appearance.waitForExistence(timeout: 20))
-        for _ in 0..<8 {
-            if appearance.isHittable { break }
-            app.webViews.firstMatch.swipeUp()
-        }
-        XCTAssertTrue(appearance.isHittable)
-        appearance.tap()
-        for _ in 0..<8 {
-            if motionSwitch(app).isHittable { break }
-            app.webViews.firstMatch.swipeUp()
-        }
-        XCTAssertTrue(motionSwitch(app).isHittable)
-        XCTAssertEqual(checked(motionSwitch(app)), true, "Fresh guest installation defaults to motion enabled")
+        openSettings(app)
+        openAppearance(app)
+        XCTAssertEqual(checked(app.switches["Hiệu ứng chuyển động"].firstMatch), true, "Fresh install enables motion")
         setMotion(false, app: app)
         evidence("motion-off", app: app)
-        openRosary(app)
+        // Một deep link ấm và một deep link lạnh kiểm chứng chính contract native, không dùng cho mọi bước điều hướng.
+        app.open(URL(string: "vn.quangtu.tutam:///tu-tap?action=rosary")!)
+        tap(app.buttons["Bắt đầu 🙏"].firstMatch, app: app)
         evidence("rosary-motion-off", app: app)
-        app.webViews.buttons["Quay lại tu tập"].firstMatch.tap()
-        open("ca-nhan?tab=settings", app: app)
-        let reloadedAppearance = app.webViews.buttons["Giao diện & ngôn ngữ"].firstMatch
-        XCTAssertTrue(reloadedAppearance.waitForExistence(timeout: 20))
-        for _ in 0..<8 {
-            if reloadedAppearance.isHittable { break }
-            app.webViews.firstMatch.swipeUp()
-        }
-        if !motionSwitch(app).exists { reloadedAppearance.tap() }
-        for _ in 0..<8 {
-            if motionSwitch(app).isHittable { break }
-            app.webViews.firstMatch.swipeUp()
-        }
-        XCTAssertEqual(checked(motionSwitch(app)), false)
+        tap(app.buttons["Quay lại tu tập"].firstMatch, app: app)
+        openSettings(app)
+        openAppearance(app)
+        XCTAssertEqual(checked(app.switches["Hiệu ứng chuyển động"].firstMatch), false)
+        app.terminate()
+        app.open(URL(string: "vn.quangtu.tutam:///ca-nhan?tab=settings")!)
+        XCTAssertTrue(app.switches["Bật thông báo nhắc nhở tu tập"].firstMatch.waitForExistence(timeout: 30))
+        openAppearance(app)
+        XCTAssertEqual(checked(app.switches["Hiệu ứng chuyển động"].firstMatch), false, "Motion setting must survive native cold deep link")
         setMotion(true, app: app)
-        evidence("motion-on", app: app)
+        evidence("motion-restored", app: app)
     }
+
     @MainActor
     func testExistingNotificationButtonDeliversToSystemNotificationCenter() {
-        XCUIDevice.shared.orientation = .portrait
         let app = launchGuest()
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-        defer {
-            evidence("notification-app-final", app: app)
-            evidence("notification-system-final", app: springboard)
-        }
-        let title = "🔔 Kiểm tra thông báo Tu Tập"
-        let bodyPrefix = "Nhắc nhở tu tập hoạt động tốt!"
-
-        // Fresh-install precondition is enforced by the CI Simulator lifecycle;
-        // no notification settings are changed through test-only app code.
-        open("ca-nhan?tab=settings", app: app)
-        // Types grounded in ios-native-smoke-10 motion-failure-accessibility.txt:
-        // master is Switch, summary title is nested Button (not StaticText).
-        let master = app.webViews.switches["Bật thông báo nhắc nhở tu tập"].firstMatch
-        XCTAssertTrue(master.waitForExistence(timeout: 20))
-        XCTAssertEqual(master.value as? String, "1", "Fresh installation must enable reminder controls")
-        let section = app.webViews.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Âm thanh & rung thông báo Âm thanh:")).firstMatch
-        for _ in 0..<10 {
-            if section.isHittable { break }
-            app.webViews.firstMatch.swipeUp()
-        }
-        XCTAssertTrue(section.isHittable, "Fresh install must have reminders enabled")
-        let send = app.webViews.buttons["🔔 Gửi thử thông báo mẫu"].firstMatch
-        // SettingsSection renders <details>; its children remain mounted while closed.
-        // The fresh-install activeSection is empty, so open its summary exactly once.
-        if !send.exists { section.tap() }
-        evidence("notification-section-open", app: app)
-        for _ in 0..<6 {
-            if send.isHittable { break }
-            app.webViews.firstMatch.swipeUp()
-        }
-        if !send.isHittable { evidence("notification-send-unreachable", app: app) }
-        XCTAssertTrue(send.isHittable)
-        send.tap()
-
-        // Handle only a notification-permission dialog. Never use CONTAINS 'Allow',
-        // which can match the refusal button. Unexpected dialogs fail with evidence.
-        let systemPermission = springboard.alerts.firstMatch
-        let permission = systemPermission.waitForExistence(timeout: 10)
-            ? systemPermission : app.alerts.firstMatch
-        XCTAssertTrue(permission.waitForExistence(timeout: 10), "Expected fresh-install notification permission dialog")
+        openSettings(app)
+        XCTAssertEqual(checked(app.switches["Bật thông báo nhắc nhở tu tập"].firstMatch), true)
+        let sound = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Âm thanh & rung thông báo Âm thanh:")).firstMatch
+        // Bấm summary thật sau khi đã cuộn nó vào viewport; không dựa vào exists của children mounted ẩn.
+        tap(sound, app: app)
+        let send = app.buttons["🔔 Gửi thử thông báo mẫu"].firstMatch
+        tap(send, app: app)
+        let systemAlert = springboard.alerts.firstMatch
+        let permission = systemAlert.waitForExistence(timeout: 10) ? systemAlert : app.alerts.firstMatch
+        XCTAssertTrue(permission.waitForExistence(timeout: 10), "Fresh installation must show a notification permission dialog")
         let dialog = permission.staticTexts.allElementsBoundByIndex.map { $0.label }.joined(separator: " ").lowercased()
         XCTAssertTrue(dialog.contains("notification") || dialog.contains("thông báo"), "Only notification authorization may be accepted")
         let allow = permission.buttons.matching(NSPredicate(format: "label IN %@", ["Allow", "Cho phép", "Cho Phép"] as NSArray)).firstMatch
         XCTAssertTrue(allow.exists, "Expected exact affirmative notification permission button")
         allow.tap()
-
-        // Permission-granting invocation itself schedules the immediate request.
-        // Do not send again: repeated ID/title would weaken the fresh-delivery proof.
-        // Existing status appears only after the native schedule promise resolves.
-        // Keep WebView foreground until acceptance; this is not OS receipt proof.
-        let accepted = app.webViews.staticTexts["Đã gửi thông báo kiểm tra!"].firstMatch
-        XCTAssertTrue(accepted.waitForExistence(timeout: 20), "Existing UI must confirm native scheduling acceptance before Home")
+        // Nút trở lại tên thường sau promise schedule. Toast chỉ tồn tại 2.8s; bằng chứng cuối vẫn phải là iOS nhận thông báo.
+        XCTAssertTrue(send.waitForExistence(timeout: 20), "Native test scheduling must finish before backgrounding")
+        evidence("notification-scheduled", app: app)
         XCUIDevice.shared.press(.home)
         XCTAssertTrue(springboard.wait(for: .runningForeground, timeout: 10))
-        // Near-left top avoids the centered camera cutout and right-side Control Center.
         let top = springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.12, dy: 0.01))
         let bottom = springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.12, dy: 0.80))
         top.press(forDuration: 0.1, thenDragTo: bottom)
-
-        // Query SpringBoard only; the application's success toast cannot satisfy this.
+        let title = "🔔 Kiểm tra thông báo Tu Tập"
+        let body = "Nhắc nhở tu tập hoạt động tốt!"
         let deliveredTitle = springboard.staticTexts[title].firstMatch
-        let deliveredBody = springboard.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", bodyPrefix)).firstMatch
-        let groupedNotification = springboard.descendants(matching: .any).matching(
-            NSPredicate(format: "label CONTAINS %@ AND label CONTAINS %@", title, bodyPrefix)
-        ).firstMatch
-        let delivered = XCTNSPredicateExpectation(
-            predicate: NSPredicate { _, _ in
-                (deliveredTitle.exists && deliveredBody.exists) || groupedNotification.exists
-            },
-            object: springboard
-        )
-        XCTAssertEqual(XCTWaiter.wait(for: [delivered], timeout: 20), .completed,
-                       "OS Notification Center must expose both the exact title and body, separately or grouped")
+        let deliveredBody = springboard.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", body)).firstMatch
+        let grouped = springboard.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@ AND label CONTAINS %@", title, body)).firstMatch
+        waitUntil("OS Notification Center must expose the exact test notification title and body", timeout: 25) {
+            (deliveredTitle.exists && deliveredBody.exists) || grouped.exists
+        }
         evidence("notification-system-received", app: springboard)
     }
-
 }
 
-final class NativeExtendedGuestTests: XCTestCase {
-    @MainActor
-    private func capture(_ name: String, app: XCUIApplication) {
-        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
-        screenshot.name = name
-        screenshot.lifetime = .keepAlways
-        add(screenshot)
-        let tree = XCTAttachment(string: app.debugDescription)
-        tree.name = name + "-accessibility"
-        tree.lifetime = .keepAlways
-        add(tree)
-    }
-
-    @MainActor
-    private func launch() -> XCUIApplication {
-        continueAfterFailure = false
-        let app = XCUIApplication()
-        app.launchArguments = ["-AppleLanguages", "(vi)", "-AppleLocale", "vi_VN"]
-        app.launch()
-        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 30))
-        return app
-    }
-
-    @MainActor
-    private func open(_ path: String, app: XCUIApplication) {
-        let later = app.webViews.buttons["Để sau"].firstMatch
-        if later.waitForExistence(timeout: 3) { later.tap() }
-        app.open(URL(string: "vn.quangtu.tutam:///" + path)!)
-        if later.waitForExistence(timeout: 3) { later.tap() }
-    }
-
-    @MainActor
-    private func reveal(_ element: XCUIElement, app: XCUIApplication) {
-        let exists = element.waitForExistence(timeout: 25)
-        if !exists { capture("missing-control", app: app) }
-        XCTAssertTrue(exists)
-        for _ in 0..<10 {
-            if element.isHittable { break }
-            let viewport = app.webViews.firstMatch
-            if element.frame.midY < viewport.frame.midY { viewport.swipeDown() }
-            else { viewport.swipeUp() }
-        }
-        XCTAssertTrue(element.isHittable, "Control must be reachable by touch")
-    }
-
-    @MainActor
-    private func librarySearch(_ app: XCUIApplication) -> XCUIElement {
-        let field = app.webViews.searchFields.firstMatch
-        if field.waitForExistence(timeout: 20) { return field }
-        let fallback = app.webViews.textFields["Tìm kiếm bài viết"].firstMatch
-        XCTAssertTrue(fallback.waitForExistence(timeout: 10))
-        return fallback
-    }
-
+final class NativeExtendedGuestTests: NativeGuestUITestCase {
     @MainActor
     func testOfflineLibrarySearchChapterReadingAndLargeTextRotation() {
-        let app = launch()
-        defer { capture("offline-reader-final", app: app); XCUIDevice.shared.orientation = .portrait }
-        open("kinh-sach", app: app)
+        let app = launchGuest()
+        navigate("Kinh sách", app: app)
         let search = librarySearch(app)
         search.tap()
         search.typeText("Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải")
-        let book = app.webViews.buttons["Đọc ngay Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải"].firstMatch
-        reveal(book, app: app)
-        capture("offline-library-search", app: app)
-        book.tap()
-        let chapter = app.webViews.buttons.matching(NSPredicate(format: "label CONTAINS[cd] %@", "Duyên Khởi Của Pháp Hội Giảng Kinh")).firstMatch
-        reveal(chapter, app: app)
-        chapter.tap()
-        let body = app.webViews.staticTexts.matching(NSPredicate(format: "label CONTAINS[cd] %@", "Tất cả mọi nơi đều là đạo tràng")).firstMatch
+        let book = app.buttons["Đọc ngay Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải"].firstMatch
+        tap(book, app: app)
+        let chapter = app.buttons.matching(NSPredicate(format: "label CONTAINS[cd] %@", "Duyên Khởi Của Pháp Hội Giảng Kinh")).firstMatch
+        tap(chapter, app: app)
+        let body = app.staticTexts.matching(NSPredicate(format: "label CONTAINS[cd] %@", "Tất cả mọi nơi đều là đạo tràng")).firstMatch
         XCTAssertTrue(body.waitForExistence(timeout: 30), "Bundled chapter body must render while production hosts are blocked")
-        let larger = app.webViews.buttons["Chữ lớn hơn"].firstMatch
+        let larger = app.buttons["Chữ lớn hơn"].firstMatch
         reveal(larger, app: app)
+        XCTAssertGreaterThanOrEqual(larger.frame.width, 44)
+        XCTAssertGreaterThanOrEqual(larger.frame.height, 44)
         for _ in 0..<3 { larger.tap() }
-        capture("offline-reader-large-text-portrait", app: app)
-        XCUIDevice.shared.orientation = .landscapeLeft
-        let close = app.webViews.buttons["Đóng"].firstMatch
-        reveal(close, app: app)
-        XCTAssertLessThanOrEqual(close.frame.maxX, app.frame.maxX + 2)
-        XCTAssertGreaterThanOrEqual(close.frame.minX, app.frame.minX - 2)
-        capture("offline-reader-large-text-landscape", app: app)
-        close.tap()
-        XCTAssertTrue(librarySearch(app).exists)
+        XCTAssertTrue(app.staticTexts["18px"].firstMatch.waitForExistence(timeout: 10), "Reader font control must reflect three real increments")
+        evidence("offline-reader-large-text-portrait", app: app)
+        rotate(.landscapeLeft, app: app)
+        let backToContents = app.buttons["Mục lục"].firstMatch
+        reveal(backToContents, app: app)
+        XCTAssertGreaterThanOrEqual(backToContents.frame.width, 44)
+        XCTAssertGreaterThanOrEqual(backToContents.frame.height, 44)
+        evidence("offline-reader-large-text-landscape", app: app)
+        backToContents.tap()
+        XCTAssertTrue(chapter.waitForExistence(timeout: 15), "Back from chapter must return to real table of contents")
+        tap(app.buttons["Quay lại"].firstMatch, app: app)
+        XCTAssertTrue(librarySearch(app).isHittable, "Closing table of contents must return to the searchable library")
     }
 
     @MainActor
     func testNativeCatalogExcludesWebOnlyBookAndSearchCanBeCleared() {
-        let app = launch()
-        defer { capture("native-web-only-policy-final", app: app) }
-        open("kinh-sach", app: app)
+        let app = launchGuest()
+        navigate("Kinh sách", app: app)
         let search = librarySearch(app)
         search.tap()
         search.typeText("Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải")
-        XCTAssertTrue(app.webViews.buttons["Đọc ngay Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải"].firstMatch.waitForExistence(timeout: 25))
-        let clear = app.webViews.buttons["Xóa tìm kiếm"].firstMatch
-        reveal(clear, app: app)
-        clear.tap()
+        let book = app.buttons["Đọc ngay Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải"].firstMatch
+        XCTAssertTrue(book.waitForExistence(timeout: 25))
+        let clear = app.buttons["Xóa tìm kiếm"].firstMatch
+        tap(clear, app: app)
         search.tap()
         search.typeText("Muôn Kiếp Nhân Sinh")
-        XCTAssertTrue(app.webViews.staticTexts["Không tìm thấy bài viết phù hợp."].firstMatch.waitForExistence(timeout: 20))
-        XCTAssertEqual(app.webViews.buttons.matching(NSPredicate(format: "label BEGINSWITH %@ AND label CONTAINS[cd] %@", "Đọc ngay", "Muôn Kiếp Nhân Sinh")).count, 0)
-        capture("native-web-only-search-empty", app: app)
-        reveal(clear, app: app)
-        clear.tap()
+        XCTAssertTrue(app.staticTexts["Không tìm thấy bài viết phù hợp."].firstMatch.waitForExistence(timeout: 20))
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@ AND label CONTAINS[cd] %@", "Đọc ngay", "Muôn Kiếp Nhân Sinh")).count, 0)
+        evidence("native-web-only-search-empty", app: app)
+        tap(clear, app: app)
         search.tap()
         search.typeText("Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải")
-        XCTAssertTrue(app.webViews.buttons["Đọc ngay Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải"].firstMatch.waitForExistence(timeout: 20))
+        XCTAssertTrue(book.waitForExistence(timeout: 20), "Normal offline catalog must recover after clearing the excluded title")
     }
 
     @MainActor
     func testLightDarkSettingsAndGuestDeepLinkNavigation() {
-        let app = launch()
-        defer { capture("guest-navigation-final", app: app); XCUIDevice.shared.orientation = .portrait }
-        for (theme, name) in [("🌙 Giao diện Tối", "dark"), ("☀️ Giao diện Sáng", "light")] {
-            open("ca-nhan?tab=settings", app: app)
-            let appearance = app.webViews.buttons["Giao diện & ngôn ngữ"].firstMatch
-            reveal(appearance, app: app)
-            let choice = app.webViews.switches[theme].firstMatch
-            if !choice.isHittable { appearance.tap() }
-            reveal(choice, app: app)
-            choice.tap()
-            XCTAssertEqual(choice.value as? String, "1", "Selected theme must become active")
-            capture("settings-" + name, app: app)
-            open("kinh-sach", app: app)
+        let app = launchGuest()
+        for (label, theme) in [("🌙 Giao diện Tối", "dark"), ("☀️ Giao diện Sáng", "light")] {
+            openSettings(app)
+            openAppearance(app)
+            let choice = app.switches[label].firstMatch
+            tap(choice, app: app)
+            waitUntil("Selected theme must become active") { self.checked(choice) == true }
+            let summary = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Giao diện & ngôn ngữ " + label)).firstMatch
+            XCTAssertTrue(summary.waitForExistence(timeout: 15), "Settings summary must render the selected theme before screenshot")
+            evidence("settings-" + theme, app: app)
+            navigate("Kinh sách", app: app)
             XCTAssertTrue(librarySearch(app).isHittable)
-            capture("library-" + name, app: app)
-            open("tu-tap", app: app)
-            XCTAssertTrue(app.webViews.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Lần tràng hạt")).firstMatch.waitForExistence(timeout: 20))
-            capture("practice-" + name, app: app)
+            evidence("library-" + theme, app: app)
+            navigate("Tu tập", app: app)
+            XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Lần tràng hạt")).firstMatch.waitForExistence(timeout: 20))
+            evidence("practice-" + theme, app: app)
         }
     }
 
     @MainActor
     func testMeditationPauseResumeSurvivesNativeBackgrounding() {
-        let app = launch()
-        defer { capture("meditation-lifecycle-final", app: app); app.terminate() }
-        open("tu-tap?action=meditation", app: app)
-        let start = app.webViews.buttons["Bắt đầu thiền"].firstMatch
-        reveal(start, app: app)
-        start.tap()
-        let pause = app.webViews.buttons["Tạm dừng"].firstMatch
-        reveal(pause, app: app)
-        pause.tap()
-        let resume = app.webViews.buttons["Tiếp tục"].firstMatch
+        let app = launchGuest()
+        navigate("Tu tập", app: app)
+        tap(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Thiền định")).firstMatch, app: app)
+        tap(app.buttons["Bắt đầu thiền"].firstMatch, app: app)
+        tap(app.buttons["Tạm dừng"].firstMatch, app: app)
+        let resume = app.buttons["Tiếp tục"].firstMatch
         XCTAssertTrue(resume.waitForExistence(timeout: 10))
-        capture("meditation-paused", app: app)
+        evidence("meditation-paused", app: app)
         XCUIDevice.shared.press(.home)
         app.activate()
-        XCTAssertTrue(resume.waitForExistence(timeout: 15), "Explicit pause must remain after returning from background")
-        resume.tap()
-        XCTAssertTrue(pause.waitForExistence(timeout: 10))
-        capture("meditation-resumed", app: app)
+        XCTAssertTrue(resume.waitForExistence(timeout: 15), "Explicit pause must remain after native background/foreground")
+        tap(resume, app: app)
+        XCTAssertTrue(app.buttons["Tạm dừng"].firstMatch.waitForExistence(timeout: 10))
+        evidence("meditation-resumed", app: app)
     }
 }

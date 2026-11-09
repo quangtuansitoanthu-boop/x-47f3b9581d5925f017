@@ -25,7 +25,6 @@
   import { selectAudioPlayerSession, refreshPracticePlayback } from '$lib/stores/audio-player.svelte';
   import { registerPwa, type PwaRegistrationHandle } from '$lib/browser/pwa-registration';
   import { announceOfflinePdfPrincipal } from '$lib/browser/offline-pdf-resolver';
-  import { notifyPresenceNavigation, startPresence } from '$lib/browser/presence';
   import { initializeNativeBackButton } from '$lib/browser/native-back-button';
   import { startNativeAppLinks } from '$lib/browser/native-app-links';
   import { initUrlFallback } from '$lib/browser/url-fallback';
@@ -121,9 +120,8 @@
     if (!pwaRegistration?.applyUpdate()) pwaUpdateApplying = false;
   }
 
-  afterNavigate(({ to }) => {
+  afterNavigate(() => {
     cancelAppDialogs();
-    if (mounted) notifyPresenceNavigation(to?.url.pathname ?? location.pathname);
   });
 
   onMount(() => {
@@ -260,7 +258,6 @@
       }
     };
     window.addEventListener(COMMUNITY_BLOCKS_CHANGED_EVENT, invalidateBlocks);
-    let stopPresence = () => {};
 
     // Hoãn các tác vụ mạng/ngầm sau khi giao diện đã vẽ xong (paint)
     const deferTimer = setTimeout(() => {
@@ -271,11 +268,6 @@
         }).catch(() => undefined);
       }
       void initUrlFallback().catch(() => undefined);
-      try {
-        stopPresence = startPresence(() => {}, sessionStore.value);
-      } catch {
-        // Presence chỉ là thống kê – app vẫn chạy khi presence lỗi.
-      }
       if (!native) {
         void registerPwa({
           onUpdateReady: () => {
@@ -355,7 +347,6 @@
       window.removeEventListener('online', handleOnline);
       window.removeEventListener(SESSION_CHANGE_EVENT, selectAudioSession);
       window.removeEventListener(COMMUNITY_BLOCKS_CHANGED_EVENT, invalidateBlocks);
-      stopPresence();
       unregisterSessionStore();
       pwaRegistration?.dispose();
     };

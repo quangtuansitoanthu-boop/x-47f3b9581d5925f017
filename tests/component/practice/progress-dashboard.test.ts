@@ -63,6 +63,14 @@ function table(html: string, label: string): string {
 beforeEach(() => { context.language = 'vi'; });
 
 describe('practice progress dashboard names and quantities', () => {
+  it('removes live presence controls while retaining actual practice totals and history', () => {
+    const html = dashboard(progress());
+    expect(html).not.toContain('practice-live');
+    expect(html).not.toContain('Chia sẻ hiện diện');
+    expect(html).not.toContain('Đang cùng tu tập');
+    expect(html).toContain('Tiến độ tu tập');
+    expect(html).toContain('Chi tiết');
+  });
   it.each([1, 2])('uses count-aware English labels without changing table headings (%s)', count => {
     context.language = 'en';
     const data = progress();

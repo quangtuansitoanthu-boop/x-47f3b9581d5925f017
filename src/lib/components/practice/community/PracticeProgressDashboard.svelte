@@ -11,7 +11,6 @@
   import './avatar-rings.css';
   import { createDedicationCardDownload } from '$lib/browser/dedication-card';
   import { isNativeApp, nativePlatform } from '$lib/browser/native-platform';
-  import { listenPresence, type PresenceSnapshot } from '$lib/browser/presence';
   import {
     fetchPracticeCampaigns,
     fetchPracticeLeaderboard,
@@ -58,9 +57,7 @@
   const localeStore = getLocaleContext();
   const isEn = $derived(localeStore.current === 'en');
   const numberFormat = $derived(new Intl.NumberFormat(isEn ? 'en-US' : 'vi-VN'));
-  let presence = $state<PresenceSnapshot | null>(null);
   let blockedAuthors = $state<string[]>([]);
-  const publicPresence = $derived(presence ? { ...presence, practitioners: presence.practitioners?.filter(member => !member.authorId || !blockedAuthors.includes(member.authorId)) } : null);
   let notice = $state('');
   let actionError = $state('');
   let errorCampaignId = $state<string | null>(null);
@@ -359,7 +356,6 @@
 
   onMount(() => {
     detectedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-    const stopPresence = listenPresence((snapshot) => presence = snapshot);
     const blocksChanged = (event: Event) => {
       const detail = (event as CustomEvent<CommunityBlocksChangedDetail>).detail;
       if (!detail?.blocked || !privateVisible || detail.principalId !== user.id || sessionStore.value.user?.id !== user.id) return;
@@ -374,7 +370,6 @@
       if (session.authenticated && session.user?.id === user.id) return;
       exportGeneration += 1;
       privateVisible = false;
-      presence = null;
       notice = '';
       actionError = '';
       exportBusy = false;
@@ -396,7 +391,6 @@
     window.addEventListener(COMMUNITY_BLOCKS_CHANGED_EVENT, blocksChanged);
     return () => {
       exportGeneration += 1;
-      stopPresence();
       window.removeEventListener(SESSION_CHANGE_EVENT, sessionChanged);
       window.removeEventListener(COMMUNITY_BLOCKS_CHANGED_EVENT, blocksChanged);
     };
@@ -548,10 +542,7 @@
           <span><strong>{isEn ? 'Join Leaderboard' : 'Tham gia bảng xếp hạng'}</strong><small>{isEn ? 'Display name, avatar, badge, and 30-day stats if in top 10.' : 'Công khai tên, ảnh, huy hiệu và số liệu 30 ngày trong top 10.'}</small></span>
           <input type="checkbox" checked={displayedProfile.leaderboardOptIn} disabled={profileMutation.isPending} onchange={(event) => saveProfile({ leaderboardOptIn: event.currentTarget.checked })} />
         </label>
-        <label>
-          <span><strong>{isEn ? 'Show live practice status' : 'Hiện khi đang tu tập'}</strong><small>{isEn ? 'Share name, practice type and start time for up to 120 seconds.' : 'Chia sẻ tên, loại công phu và giờ bắt đầu trong tối đa 120 giây.'}</small></span>
-          <input type="checkbox" checked={displayedProfile.presenceOptIn} disabled={profileMutation.isPending} onchange={(event) => saveProfile({ presenceOptIn: event.currentTarget.checked })} />
-        </label>
+
         <label class="practice-privacy__timezone" for="practice-time-zone">
           <span><strong>{isEn ? 'Calendar Timezone' : 'Múi giờ nhật lịch'}</strong><small>{isEn ? 'Each day is calculated based on this account timezone.' : 'Mỗi ngày được tính theo múi giờ tài khoản này.'}</small></span>
           <select id="practice-time-zone" value={progress.profile.timeZone} disabled={profileMutation.isPending} onchange={(event) => saveProfile({ timeZone: event.currentTarget.value })}>
@@ -571,7 +562,7 @@
       errorMessage={actionError}
     />
 
-    <PracticeLeaderboard {leaderboard} presence={publicPresence} principalId={user.id} />
+    <PracticeLeaderboard {leaderboard} principalId={user.id} />
   {:else}
     <p class="practice-community__notice" role="status">{isEn ? 'Community features are temporarily paused; your private progress continues to operate normally.' : 'Tính năng cộng đồng đang tạm dừng; tiến độ riêng tư của bạn vẫn hoạt động bình thường.'}</p>
   {/if}

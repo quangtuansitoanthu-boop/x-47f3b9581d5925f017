@@ -85,12 +85,13 @@ describe('library foundation', () => {
     expect(render(PresenceChip, { props: { count: 12 } }).body).toContain('12 đang xem');
   });
 
-  it('keeps search and live presence in the production catalog', () => {
+  it('keeps catalog search without restarting retired live presence', () => {
     const page = readFileSync('src/routes/kinh-sach/+page.svelte', 'utf8');
     const styles = readFileSync('src/lib/styles/library.css', 'utf8');
     expect(page).toContain('placeholder={t.library.searchPlaceholder}');
-    expect(page).toContain('<PresenceChip count={presenceCount}');
-    expect(styles).toContain('.search-wrap .presence-chip');
+    expect(page).not.toContain('<PresenceChip');
+    expect(page).not.toMatch(/\b(?:startPresence|listenPresence)\s*\(/u);
+    expect(page).not.toContain('presenceCount');
     expect(styles).toContain('position:absolute');
     expect(styles).toContain('.search-input');
   });

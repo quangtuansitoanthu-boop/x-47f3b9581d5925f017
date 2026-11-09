@@ -1,0 +1,61 @@
+.DS_Store
+node_modules/
+dist/
+dist*/
+build/
+build*/
+dist-sveltekit/
+dist-sveltekit*/
+.svelte-kit/
+.svelte-kit*/
+.wrangler/
+.migration-work/
+coverage/
+.artifacts/
+test-results/
+test-results-ui-green/
+test-results-ui-meditation-red/
+# Raw browser traces can contain authentication state; keep curated screenshots only.
+plans/260904-1259-web-feature-upgrade-facebook-import/reports/**/trace.zip
+plans/260904-1259-web-feature-upgrade-facebook-import/reports/**/error-context.md
+plans/260904-1259-web-feature-upgrade-facebook-import/reports/**/.last-run.json
+playwright-report/
+output/
+tmp/
+*.log
+supabase/
+repomix-output*.xml
+
+# Local-only credentials and environment overrides
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+!.env.example
+*.bat
+static/assets/
+.cache/
+__pycache__/
+
+# Temporary workspace files, scratch resources & book staging
+/scratch/
+/scratch*/
+ag-stop-probe*.json
+/BOOK*/
+QUANGTU_JSON_FACEBOOK/
+
+# Android local / build outputs (P1: tránh commit APK 192MB + path máy local)
+*.apk
+*.aab
+android/local.properties
+android/keystore.properties
+*.jks
+*.keystore
+android/app/build/
+android/app/src/main/assets/public/
+android/app/google-services.json
+
+# Claude Code personal overrides
+.claude/settings.local.json
+CLAUDE.local.md
+

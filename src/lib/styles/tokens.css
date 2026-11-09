@@ -61,6 +61,8 @@
   --library-popular-ink: #f97316;
   --library-popular-tint: rgba(249,115,22,.08);
   --nav-base-h: 62px;
+  --touch-target-size: 44px;
+  --meditation-surface: #171320;
   --nav-h: var(--nav-base-h);
   --radius: 10px;
   --radius-sm: 6px;
@@ -119,6 +121,10 @@
 }
 
 :root[data-theme='dark'] {
+  --calendar-bg: var(--bg2);
+  --calendar-ink: var(--text);
+  --calendar-accent: var(--gold2);
+  --calendar-muted: var(--text2);
   --library-popular-ink: #fb923c;
   --library-popular-tint: rgba(249,115,22,.15);
   --practice-meditation-tint:#30273d;

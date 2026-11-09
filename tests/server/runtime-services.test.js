@@ -810,7 +810,7 @@ describe('server runtime services', () => {
     ).first()).resolves.toMatchObject({ count: 1 });
   });
 
-  it('aggregates the admin dashboard across daily traffic, members, and live visitors', async () => {
+  it('aggregates dashboard history and members without exposing retired live visitors', async () => {
     const now = Date.UTC(2026, 7, 6, 12, 0, 0);
     const today = vietnamDateKey(now);
     const yesterday = vietnamDateKey(now - 24 * 60 * 60 * 1000);
@@ -921,7 +921,7 @@ describe('server runtime services', () => {
     expect(dashboard.system).toEqual({
       analyticsAvailable: true,
       mediaConfigured: true,
-      presenceEnabled: true,
+      presenceEnabled: false,
     });
     expect(dashboard.traffic.today).toBe(2);
     expect(dashboard.traffic.thisMonth).toBe(3);
@@ -934,44 +934,16 @@ describe('server runtime services', () => {
     expect(dashboard.traffic.daily.find((point) => point.date === pastDate)).toEqual({ date: pastDate, visitors: 1 });
     expect(olderDate).toMatch(/^\d{4}-\d{2}-\d{2}$/u);
     expect(dashboard.traffic.daily.some((point) => point.date === olderDate)).toBe(false);
-    expect(dashboard.onlineVisitorCount).toBe(3);
-    expect(dashboard.onlineVisitors).toHaveLength(3);
-    expect(dashboard.onlineVisitors[0]).toMatchObject({
-      accountType: 'guest',
-      accountLabel: 'Nhiều khách cùng mạng',
-      browserName: 'Nhiều trình duyệt',
-      currentPath: '/phap-thoai',
-      deviceType: 'Nhiều thiết bị',
-      isAuthenticated: false,
-      isOverflow: true,
-      operatingSystem: 'Nhiều hệ điều hành',
-      role: 'guest',
-    });
-    expect(dashboard.onlineVisitors[1]).toMatchObject({
-      accountType: 'internal',
-      accountLabel: 'Quản trị viên',
-      browserName: 'Google Chrome',
-      currentPath: '/admin/books?tab=traffic',
-      deviceType: 'Máy tính',
-      isAuthenticated: true,
-      isOverflow: false,
-      operatingSystem: 'Windows',
-      role: 'admin',
-    });
-    expect(dashboard.onlineVisitors[2]).toMatchObject({
-      accountType: 'internal',
-      accountLabel: 'Cộng tác viên',
-      browserName: 'Mozilla Firefox',
-      currentPath: '/tu-tap',
-      deviceType: 'Điện thoại',
-      isAuthenticated: true,
-      isOverflow: false,
-      operatingSystem: 'Android',
-      role: 'ctv',
-    });
+    // Các hàng presence cũ vẫn được seed, nhưng không được tái xuất hiện trên dashboard.
+    expect(dashboard.onlineVisitorCount).toBe(0);
+    expect(dashboard.onlineVisitors).toEqual([]);
+    const serialized = JSON.stringify(dashboard);
+    for (const identifier of ['dashboard-visitor-admin', 'network-admin', 'dashboard-visitor-overflow']) {
+      expect(serialized).not.toContain(identifier);
+    }
   });
 
-  it('classifies ordinary authenticated presence as a member without guessing its OAuth provider', async () => {
+  it('keeps authenticated presence private while preserving historical analytics', async () => {
     const now = Date.UTC(2026, 8, 4, 10, 0, 0);
     await createPresenceService(context({
       appUserId: 'user-1',
@@ -988,14 +960,9 @@ describe('server runtime services', () => {
     });
 
     const dashboard = await createAdminDashboardService(context()).getDashboard(now);
-    expect(dashboard.onlineVisitors).toEqual([
-      expect.objectContaining({
-        accountLabel: 'Thành viên Facebook',
-        accountType: 'member',
-        isAuthenticated: true,
-        role: 'user',
-      }),
-    ]);
+    expect(dashboard.onlineVisitors).toEqual([]);
+    expect(dashboard.onlineVisitorCount).toBe(0);
+    expect(dashboard.system.presenceEnabled).toBe(false);
     await expect(env.DB.prepare(
       "SELECT account_type FROM analytics_pageviews WHERE principal_id = 'facebook-subject'",
     ).first()).resolves.toMatchObject({ account_type: 'google' });
@@ -1270,13 +1237,7 @@ describe('server runtime services', () => {
     ]);
 
     const community = await createAdminCommunityService(context()).getCommunity('month', now);
-    expect(community.online).toMatchObject({
-      members: 1,
-      guests: 1,
-      internal: 1,
-      total: 3,
-    });
-    expect(community.online.visitors).toHaveLength(3);
+    expect(community.online).toEqual({ members: 0, guests: 0, internal: 0, total: 0, visitors: [] });
     expect(community.ranking.map((row) => row.displayName)).toEqual(['Người chăm', 'Bậc tu', 'Xếp sau']);
     expect(community.ranking[0]).toMatchObject({
       activeDays: 3,

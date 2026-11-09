@@ -20,7 +20,9 @@ describe('navigation and route payload performance contracts', () => {
     expect(layout).toContain('const initialSessionVerified = untrack(() => data?.sessionVerified === true && !isNativeApp()');
     expect(layout).toContain("!document.documentElement.hasAttribute('data-offline-shell')");
     expect(layout).toContain('if (native || !initialSessionVerified)');
-    expect(layout).toContain('startPresence(() => {}, sessionStore.value)');
+    expect(layout.match(/sessionStore\.refresh\(\)/gu)).toHaveLength(1);
+    expect(layout).not.toContain('startPresence(');
+    expect(layout).not.toContain("from '$lib/browser/presence'");
     expect(layout).not.toContain("fetch('/api/session'");
     expect(homepage).not.toContain("fetch('/api/session'");
     expect(practicePage).not.toContain("fetch('/api/session'");

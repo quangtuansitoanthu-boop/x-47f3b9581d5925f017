@@ -14,6 +14,30 @@ for (const dark of [false, true]) {
     await settleClient(page);
     const reader = page.getByRole('dialog', { name: 'Sách kiểm tra công cụ', exact: true });
     await expect(reader).toBeVisible();
+    for (const viewport of [{ width: 375, height: 812 }, { width: 812, height: 375 }]) {
+      await page.setViewportSize(viewport);
+      const back = reader.locator('.reader-back');
+      await expect(back).toBeVisible();
+      const box = await back.boundingBox();
+      expect(box?.width).toBeGreaterThanOrEqual(44);
+      expect(box?.height).toBeGreaterThanOrEqual(44);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+      expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+      if (viewport.width === 375) {
+        for (const control of ['.reader-top-font-btn', '.reader-top-font-select', '.reader-top-speak-btn', '.reader-top-bookmark-btn']) {
+          const items = reader.locator(control);
+          for (const item of await items.all()) {
+            await item.scrollIntoViewIfNeeded();
+            const hit = await item.boundingBox();
+            expect(hit?.width).toBeGreaterThanOrEqual(44);
+            expect(hit?.height).toBeGreaterThanOrEqual(44);
+            expect(hit!.x).toBeGreaterThanOrEqual(0);
+            expect(hit!.x + hit!.width).toBeLessThanOrEqual(viewport.width);
+          }
+        }
+      }
+    }
+    await page.setViewportSize({ width: 375, height: 812 });
     const toggle = reader.getByRole('button', { name: 'Công cụ', exact: true });
     await toggle.click();
     const tools = reader.getByRole('region', { name: 'Công cụ đọc', exact: true });

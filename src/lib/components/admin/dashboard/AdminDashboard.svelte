@@ -109,11 +109,6 @@
 
   <!-- 1. CHỈ SỐ NHANH -->
   <section class="admin-dashboard__overview-links" aria-label="Tóm tắt vận hành">
-    <a href="/admin/community" class="admin-glance-card">
-      <span class="admin-dashboard__live-label"><i class="admin-dashboard__live-dot" aria-hidden="true"></i>Đang online</span>
-      <strong>{numberFormat.format(dashboard.onlineVisitorCount)}</strong>
-      <small>phiên trực tuyến <b aria-hidden="true">→</b></small>
-    </a>
     <a href={`/admin/analytics?range=${dashboard.range}`} class="admin-glance-card">
       <span>Lượt truy cập</span>
       <strong>{numberFormat.format(dashboard.traffic.rangeVisitors)}</strong>
@@ -126,7 +121,7 @@
     </a>
     <a href="/admin/settings" class="admin-glance-card">
       <span>Hệ thống</span>
-      <strong>{dashboard.system.analyticsAvailable && dashboard.system.presenceEnabled ? 'Ổn định' : 'Cần kiểm tra'}</strong>
+      <strong>{dashboard.system.analyticsAvailable ? 'Ổn định' : 'Cần kiểm tra'}</strong>
       <small>D1 &amp; R2 đã kết nối <b aria-hidden="true">→</b></small>
     </a>
   </section>
@@ -243,6 +238,5 @@
   <footer class="admin-dashboard-footer-status">
     <span><i class="ok" aria-hidden="true"></i> D1 Database: Đang kết nối</span>
     <span><i class:ok={dashboard.system.mediaConfigured} aria-hidden="true"></i> Media R2: {dashboard.system.mediaConfigured ? 'Đã kết nối' : 'Chưa cấu hình'}</span>
-    <span><i class:ok={dashboard.system.presenceEnabled} aria-hidden="true"></i> Presence: {dashboard.system.presenceEnabled ? 'Đang hoạt động' : 'Đang tắt'}</span>
   </footer>
 </div>

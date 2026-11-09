@@ -14,13 +14,6 @@
       unavailable: 'Chưa sẵn sàng',
     },
     {
-      label: 'Theo dõi hiện diện',
-      detail: 'Ghi nhận khách đang trực tuyến theo cửa sổ thời gian ngắn.',
-      enabled: system.presenceEnabled,
-      ready: 'Đang hoạt động',
-      unavailable: 'Đang tắt',
-    },
-    {
       label: 'Kho media',
       detail: 'Lưu ảnh, PDF và tệp âm thanh do quản trị viên tải lên.',
       enabled: system.mediaConfigured,
