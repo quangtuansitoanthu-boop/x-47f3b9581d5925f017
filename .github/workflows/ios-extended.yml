@@ -1,0 +1,230 @@
+name: iOS Extended QA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: extended-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    runs-on: macos-15-intel
+    timeout-minutes: 70
+    env:
+      TUTAM_BUNDLE_SYNCED: '1'
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+      VITE_GOOGLE_IOS_CLIENT_ID: ${{ vars.GOOGLE_IOS_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - name: Verify Apple toolchain
+        run: |
+          xcodebuild -version
+          pod --version
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check TypeScript and native bridge contracts
+        run: |
+          npm run check
+          npx vitest run --config tests/unit/vitest.config.ts tests/unit/audio/native-platform-parity.test.ts tests/unit/audio/native-talk-audio.test.ts tests/unit/audio/native-player-controller.test.ts tests/unit/audio/audio-player-controller.test.ts
+          npx vitest run --config tests/unit/vitest.config.ts tests/unit/facebook-limited-token.test.ts tests/unit/facebook-limited-identity.test.ts tests/unit/native-auth-security.test.ts tests/unit/native-login-transport.test.ts
+      - name: Build iOS web assets and install native dependencies
+        run: npm run build:mobile -- --platform ios
+      - name: Isolate production hosts before native simulator UI tests
+        run: |
+          set -euo pipefail
+          mkdir -p build/release-evidence
+          python3 - <<'PY'
+          import json, os, pathlib, re, subprocess
+          proxy=subprocess.check_output(['scutil','--proxy'],text=True)
+          assert not re.search(r'(?:HTTPEnable|HTTPSEnable|SOCKSEnable|ProxyAutoConfigEnable|ProxyAutoDiscoveryEnable)\s*:\s*1\b',proxy), 'Proxy-enabled runner cannot prove production host isolation'
+          assert not any(value for key,value in os.environ.items() if key.lower() in ('http_proxy','https_proxy','all_proxy')), 'Proxy environment must be disabled for native UI isolation'
+          source=pathlib.Path('src/lib/browser/native-backend-origin.ts').read_text()
+          hosts=set(re.findall(r'https://([a-z0-9.-]+)',source))
+          navigation=pathlib.Path('capacitor.config.ts').read_text()
+          hosts.update(host for host in re.findall(r"'([a-z0-9.-]+)'",navigation) if host.endswith('.quangtu.vn'))
+          links=pathlib.Path('src/lib/browser/native-app-links.ts').read_text()
+          hosts.update(host for host in re.findall(r"'([a-z0-9.-]+)'",links) if host.endswith('.quangtu.vn'))
+          assert {'quangtu.vn','quangtu-web.quangtu-ansitoanthu.workers.dev','quangtu.vercel.app'}.issubset(hosts), 'Expected native origins and legacy alias are missing'
+          assert all(re.fullmatch(r'[a-z0-9.-]+',host) for host in hosts)
+          backup=pathlib.Path(os.environ['RUNNER_TEMP'])/'tutam-native-qa-hosts.backup'
+          assert not backup.exists(), 'Refusing to replace a previous hosts backup'
+          original=pathlib.Path('/etc/hosts').read_bytes()
+          backup.write_bytes(original)
+          lines=[]
+          for line in original.decode().splitlines():
+              address,separator,comment=line.partition('#')
+              parts=address.split()
+              if len(parts)>1 and any(host.lower() in hosts for host in parts[1:]):
+                  aliases=[host for host in parts[1:] if host.lower() not in hosts]
+                  if aliases:
+                      lines.append(parts[0]+'\t'+' '.join(aliases)+((' #'+comment) if separator else ''))
+                  elif separator:
+                      lines.append('#'+comment)
+              else:
+                  lines.append(line)
+          lines.append('# Tu Tap native CI: production-host isolation, not full offline mode')
+          for host in sorted(hosts):
+              lines.extend(['127.0.0.1\t'+host,'::1\t'+host])
+          subprocess.run(['sudo','tee','/etc/hosts'],input='\n'.join(lines)+'\n',text=True,check=True,stdout=subprocess.DEVNULL)
+          pathlib.Path('build/release-evidence/production-hosts.json').write_text(json.dumps(sorted(hosts),indent=2))
+          PY
+          sudo dscacheutil -flushcache
+          python3 - <<'PY'
+          import ipaddress, json, os, pathlib, socket
+          hosts=json.loads(pathlib.Path('build/release-evidence/production-hosts.json').read_text())
+          proof={}
+          for host in hosts:
+              proof[host]={}
+              for family,name in [(socket.AF_INET,'ipv4'),(socket.AF_INET6,'ipv6')]:
+                  addresses=sorted({entry[4][0] for entry in socket.getaddrinfo(host,443,family,socket.SOCK_STREAM)})
+                  assert addresses and all(ipaddress.ip_address(address).is_loopback for address in addresses), 'Production host still resolves externally: '+host
+                  proof[host][name]=addresses
+          pathlib.Path('build/release-evidence/production-host-isolation.json').write_text(json.dumps({'scope':'production hosts only; not full offline','addresses':proof},indent=2))
+          with open(os.environ['GITHUB_ENV'],'a') as output:
+              output.write('TUTAM_QA_HOSTS_ISOLATED=1\n')
+          PY
+      - name: Select and boot an available iPhone simulator
+        run: |
+          set -euo pipefail
+          test "$TUTAM_QA_HOSTS_ISOLATED" = 1
+          python3 - <<'PY'
+          import subprocess, pathlib
+          data=subprocess.check_output(['xcrun','simctl','list','devices','available','--json'],timeout=90)
+          pathlib.Path('build/release-evidence/simulator-devices.json').write_bytes(data)
+          PY
+          simulator_id=$(python3 - <<'PY'
+          import json
+          data=json.load(open('build/release-evidence/simulator-devices.json'))
+          for suffix in ['18-6','18-5']:
+              runtime='com.apple.CoreSimulator.SimRuntime.iOS-'+suffix
+              for device in data['devices'].get(runtime,[]):
+                  if device.get('isAvailable') and device['name']=='iPhone 16 Pro':
+                      pathlib=__import__('pathlib')
+                      pathlib.Path('build/release-evidence/simulator-selected.json').write_text(json.dumps({'name':device['name'],'runtime':runtime,'udid':device['udid']}))
+                      print(device['udid'])
+                      raise SystemExit(0)
+          raise SystemExit('Existing iPhone 16 Pro on iOS 18.6/18.5 is unavailable; no runtime will be installed')
+          PY
+          )
+          echo "TUTAM_QA_SIMULATOR=$simulator_id" >> "$GITHUB_ENV"
+          if ! xcrun simctl list devices booted | grep -Fq "$simulator_id"; then
+            python3 - "$simulator_id" <<'PY'
+          import subprocess, sys
+          subprocess.run(['xcrun','simctl','boot',sys.argv[1]],check=True,timeout=180)
+          PY
+          fi
+          cat build/release-evidence/simulator-selected.json
+          python3 - "$simulator_id" <<'PY'
+          import subprocess, sys
+          subprocess.run(['xcrun','simctl','bootstatus',sys.argv[1],'-b'],check=True,timeout=300)
+          PY
+      - name: Build iOS app, native plugins and UI tests once for the selected simulator
+        run: |
+          set -euo pipefail
+          test "$TUTAM_QA_HOSTS_ISOLATED" = 1
+          xcodebuild -quiet \
+            -workspace ios/App/App.xcworkspace -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination "platform=iOS Simulator,id=$TUTAM_QA_SIMULATOR" \
+            -derivedDataPath build/ios-simulator \
+            -only-testing:AppUITests/NativeGuestSmokeTests -only-testing:AppUITests/NativeExtendedGuestTests \
+            CODE_SIGNING_ALLOWED=NO build-for-testing
+      - name: Preserve simulator app
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent build/ios-simulator/Build/Products/Debug-iphonesimulator/App.app build/ios-simulator/App.app.zip
+      - name: Upload simulator app
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-app
+          path: build/ios-simulator/App.app.zip
+          retention-days: 7
+      - name: Verify packaged Google privacy manifests
+        run: |
+          app='build/ios-simulator/Build/Products/Debug-iphonesimulator/App.app'
+          for bundle in GoogleSignIn.bundle GTMAppAuth_Privacy.bundle GTMSessionFetcher_Core_Privacy.bundle AppAuthCore_Privacy.bundle; do
+            manifest="$(find "$app" -path "*/$bundle/PrivacyInfo.xcprivacy" -print -quit)"
+            test -n "$manifest" || { echo "::error::Missing privacy manifest for $bundle"; exit 1; }
+          done
+          while IFS= read -r manifest; do
+            plutil -lint "$manifest"
+          done < <(find "$app" -name PrivacyInfo.xcprivacy -print)
+          find "$app" -name PrivacyInfo.xcprivacy -print | sed "s|$app/||" > build/release-evidence/privacy-manifests.txt
+          grep -q 'GoogleSignIn (7.1.0)' ios/App/Podfile.lock
+          cp ios/App/Podfile.lock build/release-evidence/Podfile.lock
+      - name: Log release verification evidence
+        run: |
+          cat build/release-evidence/privacy-manifests.txt
+          cat build/release-evidence/Podfile.lock
+      - name: Test the native guest rosary and motion settings
+        timeout-minutes: 25
+        run: |
+          set -euo pipefail
+          test "$TUTAM_QA_HOSTS_ISOLATED" = 1
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination "platform=iOS Simulator,id=$TUTAM_QA_SIMULATOR" \
+            -derivedDataPath build/ios-simulator \
+            -resultBundlePath build/release-evidence/NativeGuestSmoke.xcresult \
+            -only-testing:AppUITests/NativeGuestSmokeTests -only-testing:AppUITests/NativeExtendedGuestTests \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 600 \
+            -maximum-test-execution-time-allowance 600 \
+            CODE_SIGNING_ALLOWED=NO test-without-building 2>&1 | tee build/release-evidence/native-ui-test.log
+      - name: Require executed native UI tests with no failures or skips
+        if: always()
+        run: |
+          set -euo pipefail
+          result=build/release-evidence/NativeGuestSmoke.xcresult
+          test -d "$result"
+          xcrun xcresulttool get test-results summary --path "$result" > build/release-evidence/native-ui-summary.json
+          python3 - <<'PY'
+          import json
+          data=json.load(open('build/release-evidence/native-ui-summary.json'))
+          assert data['passedTests'] >= 7, 'All seven native tests must execute and pass'
+          assert data['failedTests'] == 0, 'Native UI test failures'
+          assert data['skippedTests'] == 0, 'Native UI tests must not be skipped'
+          print('Verified native UI test execution:',data['passedTests'],'passed, 0 failed, 0 skipped')
+          PY
+      - name: Capture native simulator evidence
+        if: always()
+        run: |
+          mkdir -p build/release-evidence
+          if [ -n "${TUTAM_QA_SIMULATOR:-}" ]; then
+            xcrun simctl io "$TUTAM_QA_SIMULATOR" screenshot build/release-evidence/native-ui-final.png
+          fi
+          result=build/release-evidence/NativeGuestSmoke.xcresult
+          if [ -d "$result" ]; then
+            xcrun xcresulttool export attachments --path "$result" --output-path build/release-evidence/native-ui-attachments
+          fi
+      - name: Shut down the CI simulator before restoring network resolution
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ -n "${TUTAM_QA_SIMULATOR:-}" ]; then
+            xcrun simctl shutdown "$TUTAM_QA_SIMULATOR"
+          fi
+      - name: Restore ephemeral runner hosts
+        if: always()
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/tutam-native-qa-hosts.backup"
+          if [ -f "$backup" ]; then
+            sudo cp "$backup" /etc/hosts
+            sudo dscacheutil -flushcache
+            cmp "$backup" /etc/hosts
+          fi
+      - name: Upload native simulator evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-native-extended-${{ github.run_number }}
+          path: build/release-evidence/
+          if-no-files-found: error

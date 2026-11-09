@@ -263,3 +263,152 @@ final class NativeGuestSmokeTests: XCTestCase {
     }
 
 }
+
+final class NativeExtendedGuestTests: XCTestCase {
+    @MainActor
+    private func capture(_ name: String, app: XCUIApplication) {
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = name
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        let tree = XCTAttachment(string: app.debugDescription)
+        tree.name = name + "-accessibility"
+        tree.lifetime = .keepAlways
+        add(tree)
+    }
+
+    @MainActor
+    private func launch() -> XCUIApplication {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-AppleLanguages", "(vi)", "-AppleLocale", "vi_VN"]
+        app.launch()
+        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 30))
+        return app
+    }
+
+    @MainActor
+    private func open(_ path: String, app: XCUIApplication) {
+        app.open(URL(string: "vn.quangtu.tutam:///" + path)!)
+    }
+
+    @MainActor
+    private func reveal(_ element: XCUIElement, app: XCUIApplication) {
+        XCTAssertTrue(element.waitForExistence(timeout: 25))
+        for _ in 0..<10 {
+            if element.isHittable { break }
+            let viewport = app.webViews.firstMatch
+            if element.frame.midY < viewport.frame.midY { viewport.swipeDown() }
+            else { viewport.swipeUp() }
+        }
+        XCTAssertTrue(element.isHittable, "Control must be reachable by touch")
+    }
+
+    @MainActor
+    private func librarySearch(_ app: XCUIApplication) -> XCUIElement {
+        let field = app.webViews.searchFields.firstMatch
+        if field.waitForExistence(timeout: 20) { return field }
+        let fallback = app.webViews.textFields["Tìm kiếm bài viết"].firstMatch
+        XCTAssertTrue(fallback.waitForExistence(timeout: 10))
+        return fallback
+    }
+
+    @MainActor
+    func testOfflineLibrarySearchChapterReadingAndLargeTextRotation() {
+        let app = launch()
+        defer { capture("offline-reader-final", app: app); XCUIDevice.shared.orientation = .portrait }
+        open("kinh-sach", app: app)
+        let search = librarySearch(app)
+        search.tap()
+        search.typeText("KINH ĐỊA TẠNG BỒ TẤT BỔN NGUYỆN")
+        let book = app.webViews.buttons["Đọc ngay KINH ĐỊA TẠNG BỒ TẤT BỔN NGUYỆN"].firstMatch
+        reveal(book, app: app)
+        capture("offline-library-search", app: app)
+        book.tap()
+        let chapter = app.webViews.buttons.matching(NSPredicate(format: "label CONTAINS[cd] %@", "PHÂN THÂN TẬP HỘI")).firstMatch
+        reveal(chapter, app: app)
+        chapter.tap()
+        let body = app.webViews.staticTexts.matching(NSPredicate(format: "label CONTAINS[cd] %@", "Hóa Thân Cùng Quyến Thuộc")).firstMatch
+        XCTAssertTrue(body.waitForExistence(timeout: 30), "Bundled chapter body must render while production hosts are blocked")
+        let larger = app.webViews.buttons["Chữ lớn hơn"].firstMatch
+        reveal(larger, app: app)
+        for _ in 0..<3 { larger.tap() }
+        capture("offline-reader-large-text-portrait", app: app)
+        XCUIDevice.shared.orientation = .landscapeLeft
+        let close = app.webViews.buttons["Đóng"].firstMatch
+        reveal(close, app: app)
+        XCTAssertLessThanOrEqual(close.frame.maxX, app.frame.maxX + 2)
+        XCTAssertGreaterThanOrEqual(close.frame.minX, app.frame.minX - 2)
+        capture("offline-reader-large-text-landscape", app: app)
+        close.tap()
+        XCTAssertTrue(librarySearch(app).exists)
+    }
+
+    @MainActor
+    func testNativeCatalogExcludesWebOnlyBookAndSearchCanBeCleared() {
+        let app = launch()
+        defer { capture("native-web-only-policy-final", app: app) }
+        open("kinh-sach", app: app)
+        let search = librarySearch(app)
+        search.tap()
+        search.typeText("KINH ĐỊA TẠNG BỒ TẤT BỔN NGUYỆN")
+        XCTAssertTrue(app.webViews.buttons["Đọc ngay KINH ĐỊA TẠNG BỒ TẤT BỔN NGUYỆN"].firstMatch.waitForExistence(timeout: 25))
+        let clear = app.webViews.buttons["Xóa tìm kiếm"].firstMatch
+        reveal(clear, app: app)
+        clear.tap()
+        search.tap()
+        search.typeText("Muôn Kiếp Nhân Sinh")
+        XCTAssertTrue(app.webViews.staticTexts["Không tìm thấy bài viết phù hợp."].firstMatch.waitForExistence(timeout: 20))
+        XCTAssertEqual(app.webViews.buttons.matching(NSPredicate(format: "label BEGINSWITH %@ AND label CONTAINS[cd] %@", "Đọc ngay", "Muôn Kiếp Nhân Sinh")).count, 0)
+        capture("native-web-only-search-empty", app: app)
+        reveal(clear, app: app)
+        clear.tap()
+        search.tap()
+        search.typeText("KINH ĐỊA TẠNG BỒ TẤT BỔN NGUYỆN")
+        XCTAssertTrue(app.webViews.buttons["Đọc ngay KINH ĐỊA TẠNG BỒ TẤT BỔN NGUYỆN"].firstMatch.waitForExistence(timeout: 20))
+    }
+
+    @MainActor
+    func testLightDarkSettingsAndGuestDeepLinkNavigation() {
+        let app = launch()
+        defer { capture("guest-navigation-final", app: app); XCUIDevice.shared.orientation = .portrait }
+        for (theme, name) in [("🌙 Giao diện Tối", "dark"), ("☀️ Giao diện Sáng", "light")] {
+            open("ca-nhan?tab=settings", app: app)
+            let appearance = app.webViews.buttons["Giao diện & ngôn ngữ"].firstMatch
+            reveal(appearance, app: app)
+            let choice = app.webViews.buttons[theme].firstMatch
+            if !choice.isHittable { appearance.tap() }
+            reveal(choice, app: app)
+            choice.tap()
+            capture("settings-" + name, app: app)
+            open("kinh-sach", app: app)
+            XCTAssertTrue(librarySearch(app).isHittable)
+            capture("library-" + name, app: app)
+            open("tu-tap", app: app)
+            XCTAssertTrue(app.webViews.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Lần tràng hạt")).firstMatch.waitForExistence(timeout: 20))
+            capture("practice-" + name, app: app)
+        }
+    }
+
+    @MainActor
+    func testMeditationPauseResumeSurvivesNativeBackgrounding() {
+        let app = launch()
+        defer { capture("meditation-lifecycle-final", app: app); app.terminate() }
+        open("tu-tap?action=meditation", app: app)
+        let start = app.webViews.buttons["Bắt đầu thiền"].firstMatch
+        reveal(start, app: app)
+        start.tap()
+        let pause = app.webViews.buttons["Tạm dừng"].firstMatch
+        reveal(pause, app: app)
+        pause.tap()
+        let resume = app.webViews.buttons["Tiếp tục"].firstMatch
+        XCTAssertTrue(resume.waitForExistence(timeout: 10))
+        capture("meditation-paused", app: app)
+        XCUIDevice.shared.press(.home)
+        app.activate()
+        XCTAssertTrue(resume.waitForExistence(timeout: 15), "Explicit pause must remain after returning from background")
+        resume.tap()
+        XCTAssertTrue(pause.waitForExistence(timeout: 10))
+        capture("meditation-resumed", app: app)
+    }
+}
