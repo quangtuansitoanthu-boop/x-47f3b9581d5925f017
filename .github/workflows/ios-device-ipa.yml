@@ -17,7 +17,6 @@ jobs:
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
       VITE_GOOGLE_IOS_CLIENT_ID: ${{ vars.GOOGLE_IOS_CLIENT_ID }}
-      BUILD_NUMBER: ${{ github.run_number }}
       TUTAM_BUNDLE_SYNCED: '1'
     steps:
       - uses: actions/checkout@v6
@@ -25,31 +24,29 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - name: Set independent build number
+        run: echo "BUILD_NUMBER=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
       - name: Verify Apple toolchain
         run: |
           xcodebuild -version
           pod --version
-      - name: Install signing credentials and check Apple access
+      - name: Install and verify existing signing credentials
         env:
           CERT_BASE64: ${{ secrets.IOS_CERTIFICATE_P12_BASE64 }}
           CERT_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
           PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
           WIDGET_PROFILE_BASE64: ${{ secrets.IOS_WIDGET_PROVISION_PROFILE_BASE64 }}
-          API_KEY: ${{ secrets.ASC_API_PRIVATE_KEY }}
-          API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
-          API_ISSUER: ${{ secrets.ASC_API_ISSUER_ID }}
         run: |
           set -euo pipefail
           umask 077
           signing="$RUNNER_TEMP/tutap-signing"
-          mkdir -p "$signing/keys" "$HOME/Library/MobileDevice/Provisioning Profiles"
-          for value in "$CERT_BASE64" "$CERT_PASSWORD" "$PROFILE_BASE64" "$WIDGET_PROFILE_BASE64" "$API_KEY" "$API_KEY_ID" "$API_ISSUER"; do
+          mkdir -p "$signing" "$HOME/Library/MobileDevice/Provisioning Profiles"
+          for value in "$CERT_BASE64" "$CERT_PASSWORD" "$PROFILE_BASE64" "$WIDGET_PROFILE_BASE64"; do
             test -n "$value" || { echo '::error::Missing signing secret'; exit 1; }
           done
           printf '%s' "$CERT_BASE64" | base64 --decode > "$signing/certificate.p12"
           printf '%s' "$PROFILE_BASE64" | base64 --decode > "$signing/profile.mobileprovision"
           printf '%s' "$WIDGET_PROFILE_BASE64" | base64 --decode > "$signing/widget.mobileprovision"
-          printf '%s' "$API_KEY" > "$signing/keys/AuthKey_$API_KEY_ID.p8"
           security cms -D -i "$signing/profile.mobileprovision" > "$signing/profile.plist"
           security cms -D -i "$signing/widget.mobileprovision" > "$signing/widget.plist"
           python3 - <<'PY'
@@ -86,8 +83,6 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain" >/dev/null
           security list-keychains -d user -s "$keychain" "$HOME/Library/Keychains/login.keychain-db"
           security find-identity -v -p codesigning "$keychain" | grep 'Apple Distribution: SMOB JOINT STOCK COMPANY'
-          API_PRIVATE_KEYS_DIR="$signing/keys" xcrun altool --list-apps --apiKey "$API_KEY_ID" --apiIssuer "$API_ISSUER" --output-format json > "$signing/apps.json"
-          grep -q '6829182305' "$signing/apps.json"
       - name: Install locked dependencies
         run: npm ci
       - name: Check TypeScript and native bridge contracts

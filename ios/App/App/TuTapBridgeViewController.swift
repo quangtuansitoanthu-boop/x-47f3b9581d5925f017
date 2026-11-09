@@ -36,7 +36,7 @@ public class FacebookBrowserAuthPlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthen
                   parts.queryItems?.count == 1, parts.queryItems?.first?.name == "challenge",
                   let challenge = parts.queryItems?.first?.value,
                   challenge.range(of: "^[A-Za-z0-9_-]{43}$", options: .regularExpression) != nil,
-                  let anchor = self.bridge?.viewController.view.window else {
+                  let anchor = self.bridge?.viewController?.view.window else {
                 call.reject("Invalid login request", "INVALID_REQUEST"); return
             }
             self.pendingCall = call
