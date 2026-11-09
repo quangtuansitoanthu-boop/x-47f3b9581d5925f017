@@ -27,7 +27,10 @@ final class NativeGuestSmokeTests: XCTestCase {
     @MainActor
     private func open(_ path: String, app: XCUIApplication) {
         // XCUIApplication.open is available from iOS 16.4; this test target requires 17.
+        let later = app.webViews.buttons["Để sau"].firstMatch
+        if later.waitForExistence(timeout: 3) { later.tap() }
         app.open(URL(string: "vn.quangtu.tutam:///" + path)!)
+        if later.waitForExistence(timeout: 3) { later.tap() }
     }
 
     @MainActor
@@ -293,7 +296,10 @@ final class NativeExtendedGuestTests: XCTestCase {
 
     @MainActor
     private func open(_ path: String, app: XCUIApplication) {
+        let later = app.webViews.buttons["Để sau"].firstMatch
+        if later.waitForExistence(timeout: 3) { later.tap() }
         app.open(URL(string: "vn.quangtu.tutam:///" + path)!)
+        if later.waitForExistence(timeout: 3) { later.tap() }
     }
 
     @MainActor
