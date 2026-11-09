@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ios-qa-${{ github.ref }}
+  group: simulator-qa-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
