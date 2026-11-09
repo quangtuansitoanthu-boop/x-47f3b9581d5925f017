@@ -46,6 +46,8 @@ final class NativeGuestSmokeTests: XCTestCase {
 
     @MainActor
     private func reopenRosary(_ app: XCUIApplication) {
+        let later = app.webViews.buttons["Để sau"].firstMatch
+        if later.waitForExistence(timeout: 3) { later.tap() }
         // PracticeCatalog's real tool card preserves a warm app; URL opening starts another automation session.
         let card = app.webViews.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Lần tràng hạt")).firstMatch
         XCTAssertTrue(card.waitForExistence(timeout: 20))
@@ -203,7 +205,7 @@ final class NativeGuestSmokeTests: XCTestCase {
         let master = app.webViews.switches["Bật thông báo nhắc nhở tu tập"].firstMatch
         XCTAssertTrue(master.waitForExistence(timeout: 20))
         XCTAssertEqual(master.value as? String, "1", "Fresh installation must enable reminder controls")
-        let section = app.webViews.buttons["Âm thanh & rung thông báo"].firstMatch
+        let section = app.webViews.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Âm thanh & rung thông báo Âm thanh:")).firstMatch
         for _ in 0..<10 {
             if section.isHittable { break }
             app.webViews.firstMatch.swipeUp()
@@ -212,11 +214,13 @@ final class NativeGuestSmokeTests: XCTestCase {
         let send = app.webViews.buttons["🔔 Gửi thử thông báo mẫu"].firstMatch
         // SettingsSection renders <details>; its children remain mounted while closed.
         // The fresh-install activeSection is empty, so open its summary exactly once.
-        section.tap()
+        if !send.exists { section.tap() }
+        evidence("notification-section-open", app: app)
         for _ in 0..<6 {
             if send.isHittable { break }
             app.webViews.firstMatch.swipeUp()
         }
+        if !send.isHittable { evidence("notification-send-unreachable", app: app) }
         XCTAssertTrue(send.isHittable)
         send.tap()
 
@@ -294,7 +298,9 @@ final class NativeExtendedGuestTests: XCTestCase {
 
     @MainActor
     private func reveal(_ element: XCUIElement, app: XCUIApplication) {
-        XCTAssertTrue(element.waitForExistence(timeout: 25))
+        let exists = element.waitForExistence(timeout: 25)
+        if !exists { capture("missing-control", app: app) }
+        XCTAssertTrue(exists)
         for _ in 0..<10 {
             if element.isHittable { break }
             let viewport = app.webViews.firstMatch
@@ -320,15 +326,15 @@ final class NativeExtendedGuestTests: XCTestCase {
         open("kinh-sach", app: app)
         let search = librarySearch(app)
         search.tap()
-        search.typeText("KINH ĐỊA TẠNG BỒ TẤT BỔN NGUYỆN")
-        let book = app.webViews.buttons["Đọc ngay KINH ĐỊA TẠNG BỒ TẤT BỔN NGUYỆN"].firstMatch
+        search.typeText("Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải")
+        let book = app.webViews.buttons["Đọc ngay Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải"].firstMatch
         reveal(book, app: app)
         capture("offline-library-search", app: app)
         book.tap()
-        let chapter = app.webViews.buttons.matching(NSPredicate(format: "label CONTAINS[cd] %@", "PHÂN THÂN TẬP HỘI")).firstMatch
+        let chapter = app.webViews.buttons.matching(NSPredicate(format: "label CONTAINS[cd] %@", "Duyên Khởi Của Pháp Hội Giảng Kinh")).firstMatch
         reveal(chapter, app: app)
         chapter.tap()
-        let body = app.webViews.staticTexts.matching(NSPredicate(format: "label CONTAINS[cd] %@", "Hóa Thân Cùng Quyến Thuộc")).firstMatch
+        let body = app.webViews.staticTexts.matching(NSPredicate(format: "label CONTAINS[cd] %@", "Tất cả mọi nơi đều là đạo tràng")).firstMatch
         XCTAssertTrue(body.waitForExistence(timeout: 30), "Bundled chapter body must render while production hosts are blocked")
         let larger = app.webViews.buttons["Chữ lớn hơn"].firstMatch
         reveal(larger, app: app)
@@ -351,8 +357,8 @@ final class NativeExtendedGuestTests: XCTestCase {
         open("kinh-sach", app: app)
         let search = librarySearch(app)
         search.tap()
-        search.typeText("KINH ĐỊA TẠNG BỒ TẤT BỔN NGUYỆN")
-        XCTAssertTrue(app.webViews.buttons["Đọc ngay KINH ĐỊA TẠNG BỒ TẤT BỔN NGUYỆN"].firstMatch.waitForExistence(timeout: 25))
+        search.typeText("Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải")
+        XCTAssertTrue(app.webViews.buttons["Đọc ngay Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải"].firstMatch.waitForExistence(timeout: 25))
         let clear = app.webViews.buttons["Xóa tìm kiếm"].firstMatch
         reveal(clear, app: app)
         clear.tap()
@@ -364,8 +370,8 @@ final class NativeExtendedGuestTests: XCTestCase {
         reveal(clear, app: app)
         clear.tap()
         search.tap()
-        search.typeText("KINH ĐỊA TẠNG BỒ TẤT BỔN NGUYỆN")
-        XCTAssertTrue(app.webViews.buttons["Đọc ngay KINH ĐỊA TẠNG BỒ TẤT BỔN NGUYỆN"].firstMatch.waitForExistence(timeout: 20))
+        search.typeText("Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải")
+        XCTAssertTrue(app.webViews.buttons["Đọc ngay Kinh Địa Tạng Bồ Tát Bổn Nguyện Giảng Giải"].firstMatch.waitForExistence(timeout: 20))
     }
 
     @MainActor
@@ -376,10 +382,11 @@ final class NativeExtendedGuestTests: XCTestCase {
             open("ca-nhan?tab=settings", app: app)
             let appearance = app.webViews.buttons["Giao diện & ngôn ngữ"].firstMatch
             reveal(appearance, app: app)
-            let choice = app.webViews.buttons[theme].firstMatch
+            let choice = app.webViews.switches[theme].firstMatch
             if !choice.isHittable { appearance.tap() }
             reveal(choice, app: app)
             choice.tap()
+            XCTAssertEqual(choice.value as? String, "1", "Selected theme must become active")
             capture("settings-" + name, app: app)
             open("kinh-sach", app: app)
             XCTAssertTrue(librarySearch(app).isHittable)
