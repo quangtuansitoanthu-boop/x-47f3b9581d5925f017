@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   ios:
-    runs-on: macos-15-intel
+    runs-on: macos-26
     timeout-minutes: 70
     env:
       TUTAM_BUNDLE_SYNCED: '1'
@@ -28,6 +28,17 @@ jobs:
         run: |
           xcodebuild -version
           pod --version
+      - name: Initialize existing CoreSimulator before building
+        timeout-minutes: 6
+        run: |
+          mkdir -p build/release-evidence
+          python3 - <<'PY'
+          import subprocess, pathlib, time
+          started=time.monotonic()
+          data=subprocess.check_output(['xcrun','simctl','list','devices','available','--json'],timeout=240)
+          pathlib.Path('build/release-evidence/simulator-initialized.json').write_bytes(data)
+          print('CoreSimulator initialized in',round(time.monotonic()-started,1),'seconds')
+          PY
       - name: Install locked dependencies
         run: npm ci
       - name: Check TypeScript and native bridge contracts
@@ -103,15 +114,15 @@ jobs:
           simulator_id=$(python3 - <<'PY'
           import json
           data=json.load(open('build/release-evidence/simulator-devices.json'))
-          for suffix in ['18-6','18-5']:
+          for suffix in ['26-2']:
               runtime='com.apple.CoreSimulator.SimRuntime.iOS-'+suffix
               for device in data['devices'].get(runtime,[]):
-                  if device.get('isAvailable') and device['name']=='iPhone 16 Pro':
+                  if device.get('isAvailable') and device['name']=='iPhone 17 Pro':
                       pathlib=__import__('pathlib')
                       pathlib.Path('build/release-evidence/simulator-selected.json').write_text(json.dumps({'name':device['name'],'runtime':runtime,'udid':device['udid']}))
                       print(device['udid'])
                       raise SystemExit(0)
-          raise SystemExit('Existing iPhone 16 Pro on iOS 18.6/18.5 is unavailable; no runtime will be installed')
+          raise SystemExit('Existing iPhone 17 Pro on iOS 26.2 is unavailable; no runtime will be installed')
           PY
           )
           echo "TUTAM_QA_SIMULATOR=$simulator_id" >> "$GITHUB_ENV"
