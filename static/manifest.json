@@ -1,0 +1,24 @@
+{
+  "name": "Tu tập Phật pháp",
+  "short_name": "Tu tập",
+  "description": "Kho bài viết Phật giáo, nhân quả, sám hối, kinh Phật và nghi thức",
+  "id": "/",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#d98d26",
+  "icons": [
+    {
+      "src": "assets/branding/tu-tap-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/branding/tu-tap-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

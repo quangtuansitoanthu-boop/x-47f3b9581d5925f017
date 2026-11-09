@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Ánh xạ tokens.css: gold-light, text, text2, brown-dark, gold-muted, border. -->
+  <color name="calendar_v2_background">#FBF4E6</color>
+  <color name="calendar_v2_text">#1C1A15</color>
+  <color name="calendar_v2_secondary">#4A4033</color>
+  <color name="calendar_v2_day">#3E2C1A</color>
+  <color name="calendar_v2_notice">#F5E9CC</color>
+  <color name="calendar_v2_border">#DDD8CC</color>
+  <!-- Màu nhóm đã duyệt trong mockup lịch cá nhân, chỉ dùng cho widget. -->
+  <color name="calendar_dot_fasting">#FF9800</color>
+  <color name="calendar_dot_tho">#C05050</color>
+  <color name="calendar_dot_holiday">#FFD700</color>
+  <color name="calendar_dot_personal">#AB47BC</color>
+  <string name="calendar_widget_personal_count">Cá nhân · %1$d</string>
+  <string name="calendar_widget_personal_more_short">+%1$d</string>
+  <string name="calendar_widget_personal_more">+%1$d mục cá nhân khác</string>
+  <string name="calendar_widget_open_count">Xem đủ %1$d mục hôm nay ›</string>
+  <string name="calendar_widget_lunar_suffix">\u0020âm lịch</string>
+  <string name="calendar_widget_open_today">Xem lịch hôm nay ›</string>
+  <string name="calendar_widget_upcoming_heading">SẮP TỚI</string>
+  <string name="calendar_widget_no_upcoming">Chưa có sự kiện sắp tới trong lịch đã lưu.</string>
+  <string name="calendar_widget_chevron">›</string>
+  <color name="calendar_widget_background">#F6F1E3</color>
+  <color name="calendar_widget_card">#FAF7F0</color>
+  <color name="calendar_widget_border">#EAE2D3</color>
+  <color name="calendar_widget_text">#1E1B18</color>
+  <color name="calendar_widget_secondary">#5A524C</color>
+  <color name="calendar_widget_fasting_bg">#D8E8C8</color>
+  <color name="calendar_widget_fasting_text">#2E5A1C</color>
+  <color name="calendar_widget_holiday_bg">#F2C6C2</color>
+  <color name="calendar_widget_holiday_text">#7A2822</color>
+  <string name="calendar_widget_title">Lịch Phật Giáo 🪷</string>
+  <string name="calendar_widget_small">Lịch Phật Giáo · Nhỏ</string>
+  <string name="calendar_widget_medium">Lịch Phật Giáo · Vừa</string>
+  <string name="calendar_widget_large">Lịch Phật Giáo · Lớn</string>
+  <string name="calendar_widget_description">Ngày âm dương, ngày Thập Trai, ngày Vía và Thọ Khang Bảo Giám</string>
+  <string name="calendar_widget_open_to_update">Mở app để cập nhật lịch</string>
+  <string name="calendar_widget_fasting">Thập Trai</string>
+  <string name="calendar_widget_holiday">Ngày Vía</string>
+  <string name="calendar_widget_tho_badge">Thọ Khang</string>
+  <string name="calendar_widget_holiday_title">Ngày Vía &amp; Đại Lễ</string>
+  <string name="calendar_widget_fasting_title">Trai Kỳ</string>
+  <string name="calendar_widget_tho_title">Thọ Khang Bảo Giám</string>
+  <string name="calendar_widget_no_events">Hôm nay không có ngày trai hoặc ngày vía.</string>
+<color name="calendar_widget_day">#4D371D</color>
+<string name="calendar_widget_title_plain">Lịch Phật Giáo</string><string name="calendar_widget_tho_short">Thọ Khang Bảo Giám
+Kiêng hành dâm</string><string name="calendar_widget_fasting_short">Ngày Thập Trai</string>
+  <color name="calendar_widget_banner_text">#3E2C1A</color>
+</resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Ánh xạ dark tokens.css: card, text, text2, brown-dark, gold-muted, border. -->
+  <color name="calendar_v2_background">#1C1812</color>
+  <color name="calendar_v2_text">#EDE8DF</color>
+  <color name="calendar_v2_secondary">#C8BFB0</color>
+  <color name="calendar_v2_day">#E8D0A8</color>
+  <color name="calendar_v2_notice">#2E2415</color>
+  <color name="calendar_v2_border">#3A3226</color>
+  <color name="calendar_dot_tho">#E06060</color>
+  <color name="calendar_widget_background">#1C1A17</color>
+  <color name="calendar_widget_card">#25221D</color>
+  <color name="calendar_widget_border">#40382D</color>
+  <color name="calendar_widget_text">#F5EEE1</color>
+  <color name="calendar_widget_secondary">#C9BEAD</color>
+  <color name="calendar_widget_fasting_bg">#293821</color>
+  <color name="calendar_widget_fasting_text">#CEE3BA</color>
+  <color name="calendar_widget_holiday_bg">#452A28</color>
+  <color name="calendar_widget_holiday_text">#F4C7C2</color>
+<color name="calendar_widget_day">#E8D0A8</color>  <color name="calendar_widget_banner_text">#3E2C1A</color>
+</resources>

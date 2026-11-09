@@ -1,0 +1,165 @@
+Chapter 0 (id=1782):
+  VI Title: LỜI NGƯỜI DỊCH
+  EN Title: TRANSLATOR'S PREFACE
+  VI Summary: Khi các cuốn sách nhân quả vừa phát hành, tôi vô cùng cảm động khi được chư độc giả Phật tử khắp nơi...
+  EN Summary: When the cause-and-effect books were first published, I was deeply moved to receive sincere feedback...
+  VI Content len: 127752
+  EN Content len: 119249
+
+Chapter 1 (id=1783):
+  VI Title: LỜI NGƯỜI DỊCH: BÀI VIẾT NÀY THỰC CẢM ĐỘNG, TRONG ĐÂY TRÀN ĐẦY LÒNG TỪ BI PHẬT D
+  EN Title: TRANSLATOR'S NOTE: A TRULY MOVING ARTICLE, OVERFLOWING WITH THE BUDDHA'S COMPASS
+  VI Summary: Nếu bạn muốn nói là Phật từ bi, vì sao đợi chúng sinh kêu cầu, niệm danh mới cứu? Cũng giống như mặt...
+  EN Summary: If you say the Buddha is compassionate, why does He wait until sentient beings cry out and invoke Hi...
+  VI Content len: 1949
+  EN Content len: 2383
+
+Chapter 2 (id=1784):
+  VI Title: 01. ÁC BÁO CỦA TÔI
+  EN Title: 01. MY OWN KARMIC RETRIBUTION
+  VI Summary: Trước khi tôi biết đến Phật pháp, tính rất tàn nhẫn, đối với loài vật không có lòng từ bi, không biế...
+  EN Summary: Before I came to know the Buddha's teachings, I was very cruel by nature. Toward animals I felt no c...
+  VI Content len: 2455
+  EN Content len: 2842
+
+Chapter 3 (id=1785):
+  VI Title: 02. TRẦN LÃO GIA
+  EN Title: 02. OLD MASTER TRAN
+  VI Summary: Tôi có một nữ đồng nghiệp họ Trần, trong lúc họp mặt, vị tiểu thư này kể, cha cô là Trần lão gia có ...
+  EN Summary: I have a female colleague named Tran. At a gathering, she told us that her father, Old Master Tran, ...
+  VI Content len: 726
+  EN Content len: 845
+
+Chapter 4 (id=1786):
+  VI Title: 03. ÁC BÁO CỦA ANH EM HỌ TRẦN
+  EN Title: 03. THE KARMIC RETRIBUTION OF THE TRAN BROTHERS
+  VI Summary: Tôi có một bạn học họ Trần, anh là quân nhân, mỗi lần nghỉ phép về nhà, anh và em trai thường đi câu...
+  EN Summary: I have a schoolmate named Tran, a soldier. Every time he came home on leave, he and his younger brot...
+  VI Content len: 744
+  EN Content len: 816
+
+Chapter 5 (id=1787):
+  VI Title: 04. ANH BẠN XẠ THỦ
+  EN Title: 04. THE MARKSMAN COLLEAGUE
+  VI Summary: Nơi chỗ làm của tôi có một đồng nghiệp rất ưa dùng ná bắn chim. Tài xạ thủ vô cùng chuẩn xác, hầu nh...
+  EN Summary: At my workplace there was a colleague very fond of shooting birds with a slingshot. His aim was rema...
+  VI Content len: 755
+  EN Content len: 815
+
+Chapter 6 (id=1788):
+  VI Title: 05. KHI OAN GIA BÁO
+  EN Title: 05. WHEN KARMIC CREDITORS STRIKE
+  VI Summary: Tôi có một vị trưởng bối, rất ưa ăn thịt, thích nhất là giò heo, cánh và chân gà. Không những ngày ă...
+  EN Summary: I have an elder relative who loved meat, most of all pig's trotters, chicken wings and chicken feet....
+  VI Content len: 824
+  EN Content len: 894
+
+Chapter 7 (id=1789):
+  VI Title: 06. CẨN THÂN KHI THỀ THỐT
+  EN Title: 06. BE CAREFUL WHEN YOU SWEAR AN OATH
+  VI Summary: Ở quê tôi các bô lão thường kể cho đám thanh niên trẻ chúng tôi nghe một câu chuyện để cảnh giác:
+Ba...
+  EN Summary: In my home village the old folks often told us young people a story as a warning: Thirty years ago i...
+  VI Content len: 3735
+  EN Content len: 3912
+
+Chapter 8 (id=1790):
+  VI Title: 01. CẶP VỢ CHỒNG CHẾT THẢM
+  EN Title: 01. THE COUPLE WHO DIED TRAGICALLY
+  VI Summary: Năm 2002, một chàng trai 28 tuổi nửa khuya ra tay giết chết hai đấng sinh thành hơn sáu mươi tuổi củ...
+  EN Summary: In 2002, a 28-year-old man rose in the middle of the night and killed his parents, both over sixty. ...
+  VI Content len: 4233
+  EN Content len: 4461
+
+Chapter 9 (id=1791):
+  VI Title: LỜI NGƯỜI DỊCH:
+  EN Title: TRANSLATOR'S NOTE:
+  VI Summary: Dịch tới đây tôi sực nhớ tới câu chuyện kể của một pháp lữ quê ở Hà Nội: gần nhà cô có một đôi vợ ch...
+  EN Summary: Translating this far, I suddenly recalled a story told by a Dharma friend from Hanoi: near her home ...
+  VI Content len: 642
+  EN Content len: 730
+
+Chapter 10 (id=1792):
+  VI Title: 02. KẾT CỤC BI THẢM CỦA GIÁM ĐỐC TRIỆU
+  EN Title: 02. THE TRAGIC END OF DIRECTOR ZHAO
+  VI Summary: Chúng ta thường quan niệm chết là xấu, là đáng sợ, nhưng có trường hợp “không được chết” mới càng kh...
+  EN Summary: We usually think of death as bad and frightening, but there are cases where "being unable to die" is...
+  VI Content len: 6907
+  EN Content len: 6983
+
+Chapter 11 (id=1793):
+  VI Title: 03. NGƯỜI CÓ MIỆNG LƯỠI ĐỘC
+  EN Title: 03. THE ONE WITH A VENOMOUS TONGUE
+  VI Summary: Nửa đêm, tôi nhận được lệnh cấp trên:
+– Phải tức tốc tới hiện trường làm việc ngay!
+Số là nơi ngoại ...
+  EN Summary: At midnight, I received an urgent order from above: "Report to the scene and get to work at once!" I...
+  VI Content len: 53531
+  EN Content len: 54786
+
+Chapter 12 (id=1794):
+  VI Title: 01. THỜI CÒN TRONG QUÂN NGŨ
+  EN Title: 01. BACK IN MY ARMY DAYS
+  VI Summary: Hồi đó tôi gia nhập đội quân Đo Lường 5802. Khi ấy Phó đoàn trưởng là Ngụy Thanh Bình, tay cầm một x...
+  EN Summary: Back then I joined Survey Unit 5802. At the time the deputy regiment commander, Wei Qingping, held a...
+  VI Content len: 1694
+  EN Content len: 1697
+
+Chapter 13 (id=1795):
+  VI Title: 02. TIÊN TRI LÀ BỊP BỌM
+  EN Title: 02. PROPHECY IS A SCAM
+  VI Summary: Có một thanh niên trẻ không tin việc tiên đoán, bị người nhà lôi đến chỗ tôi, anh ngồi thu lu trong ...
+  EN Summary: A young man who did not believe in predictions was dragged to my place by his family. He sat huddled...
+  VI Content len: 1335
+  EN Content len: 1308
+
+Chapter 14 (id=1796):
+  VI Title: 03. QUAN LỚN HỌ ĐẶNG
+  EN Title: 03. THE HIGH OFFICIAL NAMED DANG
+  VI Summary: Có một quan lớn họ Đặng muốn ra ứng cử Bộ trưởng. Còn có ba người nữa (họ Triệu, Trần, Lương) cùng t...
+  EN Summary: A high official named Dang wished to run for Minister. Three others (named Zhao, Tran, and Luong) we...
+  VI Content len: 4015
+  EN Content len: 4436
+
+Chapter 15 (id=1797):
+  VI Title: 04. NGÀI TRUNG TƯỚNG
+  EN Title: 04. THE LIEUTENANT GENERAL
+  VI Summary: Lần nọ, Trung tướng Lữ cố10 đến tìm tôi, nói:
+– Liên Sư phụ, nghe thầy tiên đoán rất tài, nên hôm na...
+  EN Summary: Once, Lieutenant General Lu Co came to see me and said: "Master Lien, I hear your predictions are br...
+  VI Content len: 6238
+  EN Content len: 6949
+
+Chapter 16 (id=1798):
+  VI Title: 05. GIÁM ĐỐC VIÊN MẬU
+  EN Title: 05. DIRECTOR VIEN MAU
+  VI Summary: Viên Mậu là giám đốc một xưởng kim loại, hồi xưa khi ông đến hỏi số mệnh, Thần Phúc Lộc đáp:
+– Mười ...
+  EN Summary: Vien Mau was the director of a metal workshop. Long ago, when he came to ask about his destiny, the ...
+  VI Content len: 40439
+  EN Content len: 41912
+
+Chapter 17 (id=1799):
+  VI Title: LỜI NGƯỜI DỊCH:
+  EN Title: TRANSLATOR'S NOTE:
+  VI Summary: Nếu bạn đọc thắc mắc: Bà Trương tạo tội thọ khổ đã đành, tại sao thân quyến cũng rước họa lây? Nếu t...
+  EN Summary: Should readers wonder: Mrs. Truong created offenses and bore suffering—that is settled—but why did h...
+  VI Content len: 56098
+  EN Content len: 52587
+
+Chapter 18 (id=1800):
+  VI Title: 01. TRƯỚC TIÊN LÀ CẦU CHO OAN GIA TRÁI CHỦ CỦA MẪU THÂN. (HỌC PHẬT HƠN 20 NĂM, T
+  EN Title: 01. FIRST, PRAY FOR MY MOTHER'S KARMIC CREDITORS. (HAVING LEARNED BUDDHISM FOR O
+  VI Summary: “Tôi xin hồi hướng công đức tụng ‘kinh Kim Cang’ này cho tất cả oan gia trái chủ của mẫu thân, xin c...
+  EN Summary: "I dedicate the merit of reciting this 'Diamond Sutra' to all of my mother's karmic creditors. I beg...
+  VI Content len: 535
+  EN Content len: 636
+
+Chapter 19 (id=1801):
+  VI Title: 02. SAU ĐÓ TÔI HÒI HƯỚNG CHO MẪU THÂN NHƯ SAU:
+  EN Title: 02. THEN I DEDICATED MERIT TO MY MOTHER AS FOLLOWS:
+  VI Summary: “Nguyện mẹ con nghiệp chướng tiêu trừ, phúc huệ tăng trưởng, khang kiện trường thọ, phát tâm tin và ...
+  EN Summary: "May my mother's karmic obstructions dissolve, her blessings and wisdom grow, may she enjoy health a...
+  VI Content len: 8978
+  EN Content len: 10029
+

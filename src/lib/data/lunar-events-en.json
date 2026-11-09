@@ -1,0 +1,910 @@
+{
+  "viaDays": {
+    "1-1": "Maitreya Buddha's Birthday",
+    "2-8": "Shakyamuni Buddha's Renunciation",
+    "2-15": "Shakyamuni Buddha's Parinirvana",
+    "2-19": "Avalokiteshvara Bodhisattva's Birthday",
+    "2-21": "Samantabhadra Bodhisattva Day",
+    "3-6": "Venerable Mahakasyapa Day",
+    "3-16": "Cundi Bodhisattva's Birthday",
+    "4-4": "Manjushri Bodhisattva's Birthday",
+    "4-8": "Shakyamuni Buddha's Birthday",
+    "4-15": "Vesak Festival (Buddha Day)",
+    "4-20": "Bodhisattva Thich Quang Duc Memorial Day",
+    "4-23": "Samantabhadra Bodhisattva's Enlightenment",
+    "4-28": "Medicine Buddha's Birthday",
+    "5-13": "Sangharama Holy Assembly Day",
+    "6-3": "Dharmapala Skanda Bodhisattva Day",
+    "6-15": "First Turning of the Dharma Wheel",
+    "6-19": "Avalokiteshvara Bodhisattva's Enlightenment",
+    "7-13": "Mahasthamaprapta Bodhisattva's Birthday",
+    "7-15": "Ullambana Festival (Filial Piety Day)",
+    "7-30": "Ksitigarbha Bodhisattva's Enlightenment",
+    "8-8": "Venerable Ananda Day",
+    "8-22": "Dipankara Buddha's Birthday",
+    "9-19": "Avalokiteshvara Bodhisattva's Renunciation",
+    "9-30": "Medicine Buddha's Enlightenment",
+    "10-5": "Patriarch Bodhidharma Day",
+    "11-11": "King Tran Nhan Tong Parinirvana",
+    "11-17": "Amitabha Buddha's Birthday",
+    "12-8": "Shakyamuni Buddha's Enlightenment"
+  },
+  "abstinenceDays": {
+    "1-1": {
+      "reason": "Lunar New Year; Jade Emperor inspects human vitality; fortune; and lifespan. New Moon (1st of Lunar Month)",
+      "harm": "Loss of fortune, lifespan shortened by twelve years"
+    },
+    "1-3": {
+      "reason": "All deities assemble — Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "1-5": {
+      "reason": "Five Void Inauspicious Day",
+      "harm": ""
+    },
+    "1-6": {
+      "reason": "Six Depletions Inauspicious Day; Thunder Fasting Day",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "1-7": {
+      "reason": "Upper Assembly Day",
+      "harm": "Loss of lifespan"
+    },
+    "1-8": {
+      "reason": "Feast of King Yama (Fifth Court of Underworld) — Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "1-9": {
+      "reason": "Feast of the Jade Emperor",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "1-13": {
+      "reason": "Master Yang's Inauspicious Day",
+      "harm": ""
+    },
+    "1-14": {
+      "reason": "Descent of the Three Primordials — Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "1-15": {
+      "reason": "Descent of the Three Primordials — Upper Primordial Assembly of Deities — Full Moon — Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "1-16": {
+      "reason": "Descent of the Three Primordials",
+      "harm": "Shortened lifespan"
+    },
+    "1-19": {
+      "reason": "Feast of Perfected Changchun (Qiu Chuji)",
+      "harm": ""
+    },
+    "1-23": {
+      "reason": "Three Corpse Spirits submit report — Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "1-25": {
+      "reason": "End of Lunar Month. Heavenly and Earthly Treasuries opened",
+      "harm": "Shortened lifespan, loss of health; offspring afflicted with illnesses"
+    },
+    "1-27": {
+      "reason": "Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "1-28": {
+      "reason": "Human spirits reside in the netherworld",
+      "harm": "Afflicted with illness"
+    },
+    "1-29": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "1-30": {
+      "reason": "End of Lunar Month — Stove God reports to Heaven — Four Heavenly Kings on patrol",
+      "harm": "Shortened lifespan"
+    },
+    "2-1": {
+      "reason": "New Moon (1st of Lunar Month) — Feast of King Qin Guang (First Court of Underworld)",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "2-2": {
+      "reason": "All deities assemble; Feast of Earth God of Blessings and Virtue",
+      "harm": "Lifespan shortened by twelve years, severe misfortune"
+    },
+    "2-3": {
+      "reason": "Descent of the Big Dipper; Feast of Lord Wenchang",
+      "harm": "Loss of fortune, lifespan shortened by twelve years"
+    },
+    "2-6": {
+      "reason": "Thunder Fasting Day; Feast of the Eastern Peak Emperor",
+      "harm": "Shortened lifespan"
+    },
+    "2-8": {
+      "reason": "Shakyamuni Buddha's Renunciation; Feast of King Song Di (Third Court of Underworld); Feast of Great Emperor Zhang; Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "2-11": {
+      "reason": "Master Yang's Inauspicious Day",
+      "harm": ""
+    },
+    "2-14": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "2-15": {
+      "reason": "Shakyamuni Buddha's Parinirvana; Full Moon (15th of Lunar Month); Feast of Taishang Laojun; Four Heavenly Kings on patrol",
+      "harm": "Loss of fortune, lifespan shortened by twelve years"
+    },
+    "2-17": {
+      "reason": "Feast of Eastern General Du",
+      "harm": ""
+    },
+    "2-18": {
+      "reason": "Feast of King Wu Guan (Fourth Court of Underworld); Birthday of Confucius (Supreme Teacher)",
+      "harm": "Loss of fortune, lifespan shortened by twelve years"
+    },
+    "2-19": {
+      "reason": "Holy Birthday of Avalokiteshvara Bodhisattva",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "2-21": {
+      "reason": "Holy Birthday of Samantabhadra Bodhisattva",
+      "harm": ""
+    },
+    "2-23": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "2-25": {
+      "reason": "End of Lunar Month",
+      "harm": "Shortened lifespan"
+    },
+    "2-27": {
+      "reason": "Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "2-28": {
+      "reason": "Human spirits assemble in the netherworld",
+      "harm": "Afflicted with illness"
+    },
+    "2-29": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "2-30": {
+      "reason": "End of Lunar Month — Stove God reports to Heaven",
+      "harm": "Shortened lifespan"
+    },
+    "3-1": {
+      "reason": "New Moon (1st of Lunar Month) — Feast of King Chu Jiang (Second Court of Underworld)",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "3-3": {
+      "reason": "Descent of the Big Dipper — Feast of Xuan Tian Shang Di (Dark Heavenly Emperor)",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "3-6": {
+      "reason": "Thunder Fasting Day",
+      "harm": "Shortened lifespan"
+    },
+    "3-8": {
+      "reason": "Feast of King Bian Cheng (Sixth Court of Underworld) — Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "3-9": {
+      "reason": "Ox-headed and demonic spirits emerge — Master Yang's Inauspicious Day",
+      "harm": "Deformed or ill-omened birth"
+    },
+    "3-12": {
+      "reason": "Feast of Five Paths of the Center",
+      "harm": ""
+    },
+    "3-14": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "3-15": {
+      "reason": "Full Moon (15th of Lunar Month) — Feast of Lord Zhao Xuantan (God of Wealth); Feast of Haotian Supreme Emperor; Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "3-16": {
+      "reason": "Holy Birthday of Cundi Bodhisattva",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "3-18": {
+      "reason": "Feast of Central Peak Emperor; Feast of Lady Houtu (Earth Sovereign); Three Mao Lords descend",
+      "harm": ""
+    },
+    "3-20": {
+      "reason": "Heavenly and Earthly Treasuries opened; Feast of the Goddess of Descendants",
+      "harm": "Loss of lifespan"
+    },
+    "3-23": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "3-25": {
+      "reason": "End of Lunar Month",
+      "harm": "Shortened lifespan"
+    },
+    "3-27": {
+      "reason": "Descent of the Big Dipper; Feast of King Mount Tai (Seventh Court of Underworld)",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "3-28": {
+      "reason": "Human spirits assemble in the netherworld; Feast of Sage Cangjie",
+      "harm": "Afflicted with illness, loss of fortune, lifespan shortened by twelve years"
+    },
+    "3-29": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "3-30": {
+      "reason": "End of Lunar Month — Stove God reports to Heaven; Four Heavenly Kings on patrol",
+      "harm": "Shortened lifespan"
+    },
+    "4-1": {
+      "reason": "New Moon (1st of Lunar Month); Feast of King Du Shi (Eighth Court of Underworld)",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "4-3": {
+      "reason": "Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "4-4": {
+      "reason": "All deities bestow transformations of goodness; Holy Birthday of Manjushri Bodhisattva",
+      "harm": "Miscarriage and stillbirth"
+    },
+    "4-6": {
+      "reason": "Thunder Fasting Day",
+      "harm": "Shortened lifespan"
+    },
+    "4-7": {
+      "reason": "Southern; Northern; and Western Dippers descend together. Master Yang's Inauspicious Day.",
+      "harm": "Shortened lifespan"
+    },
+    "4-8": {
+      "reason": "Holy Birthday of Shakyamuni Buddha; All deities bestow transformations of goodness. Attendants of Good and Evil descend. Feast of King Ping Deng (Ninth Court of Underworld); Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years, stillbirth, death from blood illness"
+    },
+    "4-14": {
+      "reason": "Feast of Patriarch Chunyang (Lu Dongbin); Four Heavenly Kings on patrol",
+      "harm": "Shortened lifespan"
+    },
+    "4-15": {
+      "reason": "Full Moon (15th of Lunar Month); Feast of Patriarch Zhongli Quan; Four Heavenly Kings on patrol",
+      "harm": "Shortened lifespan"
+    },
+    "4-16": {
+      "reason": "Heavenly and Earthly Treasuries opened",
+      "harm": "Loss of lifespan"
+    },
+    "4-17": {
+      "reason": "Feast of King of the Wheel of Rebirth (Tenth Court)",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "4-18": {
+      "reason": "Heavenly and Earthly Treasuries opened; Descent of Emperor Ziwei of the North Star",
+      "harm": "Shortened lifespan"
+    },
+    "4-20": {
+      "reason": "Feast of the Holy Mother of Eyesight",
+      "harm": ""
+    },
+    "4-23": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "4-25": {
+      "reason": "End of Lunar Month",
+      "harm": "Shortened lifespan"
+    },
+    "4-27": {
+      "reason": "Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "4-28": {
+      "reason": "Human spirits assemble in the netherworld",
+      "harm": "Afflicted with illness"
+    },
+    "4-29": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "4-30": {
+      "reason": "End of Lunar Month; Stove God reports to Heaven; Four Heavenly Kings on patrol",
+      "harm": "Shortened lifespan"
+    },
+    "5-1": {
+      "reason": "New Moon (1st of Lunar Month); Feast of Southern Pole Longevity Emperor",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "5-3": {
+      "reason": "Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "5-5": {
+      "reason": "Earthly Festival (Di La); Five Emperors verify worldly rank and fortunes; Nine Poisons Day; Master Yang's Inauspicious Day",
+      "harm": "Loss of fortune, lifespan shortened by twelve years, untimely death, sudden disaster"
+    },
+    "5-6": {
+      "reason": "Nine Poisons Day; Thunder Fasting Day",
+      "harm": "Untimely death and unexpected calamities"
+    },
+    "5-7": {
+      "reason": "Nine Poisons Day",
+      "harm": "Untimely death and unexpected calamities"
+    },
+    "5-8": {
+      "reason": "Feast of Five Paths of the South; Four Heavenly Kings on patrol",
+      "harm": "Loss of lifespan"
+    },
+    "5-11": {
+      "reason": "Heavenly and Earthly Treasuries opened; Feast of the City God of All Lands",
+      "harm": "Loss of lifespan"
+    },
+    "5-12": {
+      "reason": "Feast of Lord Bingling",
+      "harm": "Loss of lifespan"
+    },
+    "5-13": {
+      "reason": "Holy Manifestation of Lord Guan (Guan Yu)",
+      "harm": "Loss of fortune, lifespan shortened by twelve years"
+    },
+    "5-14": {
+      "reason": "Four Heavenly Kings on patrol; Midnight (Zi hour) when Heaven and Earth harmonize",
+      "harm": "Both husband and wife perish within three years"
+    },
+    "5-15": {
+      "reason": "Full Moon (15th of Lunar Month); Nine Poisons Day; Four Heavenly Kings on patrol",
+      "harm": "Untimely death and unexpected calamities"
+    },
+    "5-16": {
+      "reason": "Nine Poisons Day; Day of primordial creation of all beings",
+      "harm": "Both husband and wife perish within three years"
+    },
+    "5-17": {
+      "reason": "Nine Poisons Day",
+      "harm": "Untimely death and unexpected calamities"
+    },
+    "5-18": {
+      "reason": "Feast of Celestial Master Zhang",
+      "harm": ""
+    },
+    "5-22": {
+      "reason": "Feast of Filial Deities",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "5-23": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "5-25": {
+      "reason": "Nine Poisons Day; End of Lunar Month",
+      "harm": "Untimely death and unexpected calamities"
+    },
+    "5-26": {
+      "reason": "Nine Poisons Day",
+      "harm": "Untimely death and unexpected calamities"
+    },
+    "5-27": {
+      "reason": "Nine Poisons Day; Descent of the Big Dipper",
+      "harm": "Untimely death and unexpected calamities"
+    },
+    "5-28": {
+      "reason": "Human spirits assemble in the netherworld",
+      "harm": "Afflicted with illness"
+    },
+    "5-29": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "5-30": {
+      "reason": "End of Lunar Month — Stove God reports to Heaven; Four Heavenly Kings on patrol",
+      "harm": "Shortened lifespan"
+    },
+    "6-1": {
+      "reason": "New Moon (1st of Lunar Month)",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "6-3": {
+      "reason": "Descent of the Big Dipper; Master Yang's Inauspicious Day",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "6-4": {
+      "reason": "Great Dharma Wheel turned in Jambudvipa",
+      "harm": "Loss of lifespan"
+    },
+    "6-6": {
+      "reason": "Heavenly and Earthly Treasuries opened; Thunder Fasting Day",
+      "harm": "Loss of lifespan"
+    },
+    "6-8": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "6-10": {
+      "reason": "Holy Birthday of Vimalakirti (Gold-Grain Tathagata)",
+      "harm": ""
+    },
+    "6-13": {
+      "reason": "Feast of Dragon King of Wells and Springs",
+      "harm": ""
+    },
+    "6-14": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "6-15": {
+      "reason": "Full Moon (15th of Lunar Month); Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "6-19": {
+      "reason": "Avalokiteshvara Bodhisattva's Parinirvana",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "6-23": {
+      "reason": "Feast of Southern God of Fire; Four Heavenly Kings on patrol",
+      "harm": "Successive bereavements in family"
+    },
+    "6-24": {
+      "reason": "Feast of Ancestor of Thunder (Leizu); Holy Manifestation of Lord Guan (Guan Yu)",
+      "harm": "Loss of fortune, lifespan shortened by twelve years"
+    },
+    "6-25": {
+      "reason": "End of Lunar Month",
+      "harm": "Shortened lifespan"
+    },
+    "6-27": {
+      "reason": "Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "6-28": {
+      "reason": "Human spirits assemble in the netherworld",
+      "harm": "Afflicted with illness"
+    },
+    "6-29": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "6-30": {
+      "reason": "End of Lunar Month — Stove God reports to Heaven; Four Heavenly Kings on patrol",
+      "harm": "Shortened lifespan"
+    },
+    "7-1": {
+      "reason": "New Moon (1st of Lunar Month); Master Yang's Inauspicious Day",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "7-3": {
+      "reason": "Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "7-5": {
+      "reason": "Middle Assembly Day",
+      "harm": "Loss of lifespan"
+    },
+    "7-6": {
+      "reason": "Thunder Fasting Day",
+      "harm": "Shortened lifespan"
+    },
+    "7-7": {
+      "reason": "Moral Festival (Daode La); Five Emperors weigh good and evil of humans; Feast of Star Lord Kui (Patron of Scholars)",
+      "harm": "Loss of fortune, lifespan shortened by twelve years"
+    },
+    "7-8": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "7-10": {
+      "reason": "Severe Yin poison day; strongly prohibited",
+      "harm": ""
+    },
+    "7-12": {
+      "reason": "Feast of Perfected Changzhen (Tan Chuduan)",
+      "harm": ""
+    },
+    "7-13": {
+      "reason": "Holy Birthday of Mahasthamaprapta Bodhisattva",
+      "harm": "Shortened lifespan"
+    },
+    "7-14": {
+      "reason": "Descent of the Three Primordials; Four Heavenly Kings on patrol",
+      "harm": "Shortened lifespan"
+    },
+    "7-15": {
+      "reason": "Full Moon (15th of Lunar Month); Descent of the Three Primordials; Earth Official audits karmic registers; Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "7-16": {
+      "reason": "Descent of the Three Primordials",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "7-18": {
+      "reason": "Feast of Queen Mother of the West (Xi Wangmu)",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "7-19": {
+      "reason": "Feast of Tai Sui (Grand Duke Jupiter)",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "7-22": {
+      "reason": "Feast of God of Increasing Wealth and Blessings",
+      "harm": "Loss of fortune, lifespan shortened by twelve years"
+    },
+    "7-23": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "7-25": {
+      "reason": "End of Lunar Month",
+      "harm": "Shortened lifespan"
+    },
+    "7-27": {
+      "reason": "Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "7-28": {
+      "reason": "Human spirits assemble in the netherworld",
+      "harm": "Afflicted with illness"
+    },
+    "7-29": {
+      "reason": "Master Yang's Inauspicious Day; Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "7-30": {
+      "reason": "Holy Birthday of Ksitigarbha Bodhisattva; End of Lunar Month — Stove God reports to Heaven; Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "8-1": {
+      "reason": "New Moon (1st of Lunar Month); Feast of True Lord Xu",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "8-3": {
+      "reason": "Descent of the Big Dipper; Feast of the Northern Dipper; Feast of the Stove God (Lord of Destiny)",
+      "harm": "Loss of fortune, lifespan shortened by twelve years, peril of fire"
+    },
+    "8-5": {
+      "reason": "Feast of Emperor of Thunderous Sound",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "8-6": {
+      "reason": "Thunder Fasting Day",
+      "harm": "Shortened lifespan"
+    },
+    "8-8": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "8-10": {
+      "reason": "Feast of the Northern Dipper Emperor",
+      "harm": ""
+    },
+    "8-12": {
+      "reason": "Feast of Five Paths of the West",
+      "harm": ""
+    },
+    "8-14": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "8-15": {
+      "reason": "Full Moon (15th of Lunar Month); Great Yin returns to the Primordial; Four Heavenly Kings on patrol",
+      "harm": "Sudden death"
+    },
+    "8-16": {
+      "reason": "True Lord Examiner of the Heavenly Court descends",
+      "harm": "Poverty and untimely death"
+    },
+    "8-18": {
+      "reason": "Day of blessings bestowed upon devas and humans",
+      "harm": ""
+    },
+    "8-23": {
+      "reason": "Four Heavenly Kings on patrol; Feast of Lord Zhang Fei (Marquis Huan of Han)",
+      "harm": ""
+    },
+    "8-24": {
+      "reason": "Feast of the Stove God's Consort",
+      "harm": ""
+    },
+    "8-25": {
+      "reason": "End of Lunar Month",
+      "harm": "Shortened lifespan"
+    },
+    "8-27": {
+      "reason": "Descent of the Big Dipper; Birthday of Confucius (Supreme Teacher); Master Yang's Inauspicious Day",
+      "harm": "Loss of fortune, lifespan shortened by twelve years"
+    },
+    "8-28": {
+      "reason": "Human spirits assemble in the netherworld; Four Heavens convene in conference",
+      "harm": "Afflicted with illness"
+    },
+    "8-29": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "8-30": {
+      "reason": "End of Lunar Month — Stove God reports to Heaven; Four Heavenly Kings on patrol; deities conduct inspection",
+      "harm": "Shortened lifespan"
+    },
+    "9-1": {
+      "reason": "New Moon (1st of Lunar Month); Feast of the Southern Dipper; Nine Stellar Sovereigns of the Northern Dipper descend",
+      "harm": "Loss of fortune, lifespan shortened by twelve years"
+    },
+    "9-3": {
+      "reason": "Feast of the Five Plague Spirits",
+      "harm": ""
+    },
+    "9-8": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "9-9": {
+      "reason": "Feast of Doumu; Feast of Emperor of Fengdu (Netherworld Sovereign); Ascension of Xuan Tian Shang Di",
+      "harm": "Loss of fortune, lifespan shortened by twelve years"
+    },
+    "9-10": {
+      "reason": "Descent of Doumu (Mother of the Big Dipper)",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "9-11": {
+      "reason": "Abstinence from sensual desire strongly advised",
+      "harm": ""
+    },
+    "9-13": {
+      "reason": "Feast of Venerable Lady Meng (Meng Po)",
+      "harm": ""
+    },
+    "9-14": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "9-15": {
+      "reason": "Full Moon (15th of Lunar Month); Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "9-17": {
+      "reason": "Feast of Four Great Golden Dragon Kings",
+      "harm": "Peril of water and drowning accidents"
+    },
+    "9-19": {
+      "reason": "Conjunction of the Solar and Lunar Palaces; Avalokiteshvara Bodhisattva's Renunciation",
+      "harm": "Shortened lifespan"
+    },
+    "9-23": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "9-25": {
+      "reason": "End of Lunar Month; Master Yang's Inauspicious Day",
+      "harm": "Shortened lifespan"
+    },
+    "9-27": {
+      "reason": "Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "9-28": {
+      "reason": "Human spirits assemble in the netherworld",
+      "harm": "Afflicted with illness"
+    },
+    "9-29": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "9-30": {
+      "reason": "Holy Birthday of Medicine Buddha (Bhaisajyaguru); End of Lunar Month — Stove God reports to Heaven; Four Heavenly Kings on patrol",
+      "harm": "Critical illness, shortened lifespan"
+    },
+    "10-1": {
+      "reason": "End of Lunar Month; Annual People's Festival (Min Sui La); Four Heavenly Kings descend",
+      "harm": "Shortened lifespan, death within one year"
+    },
+    "10-3": {
+      "reason": "Descent of the Big Dipper; Three Mao Lords descend",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "10-5": {
+      "reason": "Lower Assembly Day; Holy Birthday of Patriarch Bodhidharma",
+      "harm": "Loss of lifespan"
+    },
+    "10-6": {
+      "reason": "Heavenly Court conducts inspection",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "10-8": {
+      "reason": "Buddha's Parinirvana Day; sensual desire strictly prohibited; Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "10-10": {
+      "reason": "Four Heavenly Kings descend",
+      "harm": "Death occurs within one year"
+    },
+    "10-11": {
+      "reason": "Abstinence from sensual desire strongly advised",
+      "harm": ""
+    },
+    "10-14": {
+      "reason": "Descent of the Three Primordials; Four Heavenly Kings on patrol",
+      "harm": "Shortened lifespan"
+    },
+    "10-15": {
+      "reason": "Full Moon (15th of Lunar Month); Descent of the Three Primordials; Lower Primordial Water Realm audits records; Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "10-16": {
+      "reason": "Descent of the Three Primordials",
+      "harm": ""
+    },
+    "10-23": {
+      "reason": "Master Yang's Inauspicious Day; Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "10-25": {
+      "reason": "End of Lunar Month",
+      "harm": "Shortened lifespan"
+    },
+    "10-27": {
+      "reason": "Descent of the Big Dipper; Descent of Emperor Ziwei of the North Star",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "10-28": {
+      "reason": "Human spirits assemble in the netherworld",
+      "harm": "Afflicted with illness"
+    },
+    "10-29": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "10-30": {
+      "reason": "End of Lunar Month — Stove God reports to Heaven; Four Heavenly Kings on patrol",
+      "harm": "Shortened lifespan"
+    },
+    "11-1": {
+      "reason": "New Moon (1st of Lunar Month)",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "11-3": {
+      "reason": "Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "11-4": {
+      "reason": "Birthday of Confucius (Supreme Teacher)",
+      "harm": "Loss of fortune, lifespan shortened by twelve years"
+    },
+    "11-6": {
+      "reason": "Feast of Western Peak Emperor",
+      "harm": "Loss of fortune, lifespan shortened by twelve years"
+    },
+    "11-8": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "11-11": {
+      "reason": "Heavenly and Earthly Treasuries opened; Feast of Heavenly Venerable Taiyi Savior from Suffering",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "11-14": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "11-15": {
+      "reason": "Full Moon (15th of Lunar Month); Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "11-17": {
+      "reason": "Holy Birthday of Amitabha Buddha",
+      "harm": ""
+    },
+    "11-19": {
+      "reason": "Feast of the Solar Palace Sovereign",
+      "harm": "Bizarre and grievous misfortunes"
+    },
+    "11-21": {
+      "reason": "Master Yang's Inauspicious Day",
+      "harm": "Severing of family lineage"
+    },
+    "11-23": {
+      "reason": "Feast of Immortal Zhang (Protector of Children); Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "11-25": {
+      "reason": "Auditor Minister of Heaven descends; End of Lunar Month",
+      "harm": "Extreme misfortune"
+    },
+    "11-26": {
+      "reason": "Feast of Five Paths of the North",
+      "harm": ""
+    },
+    "11-27": {
+      "reason": "Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "11-28": {
+      "reason": "Human spirits assemble in the netherworld",
+      "harm": "Afflicted with illness"
+    },
+    "11-29": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "11-30": {
+      "reason": "End of Lunar Month — Stove God reports to Heaven; Four Heavenly Kings on patrol",
+      "harm": "Shortened lifespan"
+    },
+    "12-1": {
+      "reason": "New Moon (1st of Lunar Month)",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "12-3": {
+      "reason": "Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "12-6": {
+      "reason": "Heavenly and Earthly Treasuries opened; Thunder Fasting Day",
+      "harm": "Shortened lifespan"
+    },
+    "12-7": {
+      "reason": "Auditor Minister of Heaven descends",
+      "harm": "Grievous illness"
+    },
+    "12-8": {
+      "reason": "Royal Festival (Wang Hou La); Shakyamuni Buddha's Enlightenment; Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "12-12": {
+      "reason": "Three Primordial Sovereigns of Supreme Simplicity pay homage",
+      "harm": ""
+    },
+    "12-14": {
+      "reason": "Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "12-15": {
+      "reason": "Full Moon (15th of Lunar Month); Four Heavenly Kings on patrol",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "12-16": {
+      "reason": "Feast of Southern Peak Emperor",
+      "harm": ""
+    },
+    "12-19": {
+      "reason": "Master Yang's Inauspicious Day",
+      "harm": ""
+    },
+    "12-20": {
+      "reason": "Heaven and Earth enter harmonic conjunction",
+      "harm": "Shortened lifespan"
+    },
+    "12-21": {
+      "reason": "Feast of Supreme Emperor Tianyou",
+      "harm": ""
+    },
+    "12-23": {
+      "reason": "Deities of the Five Sacred Peaks descend; Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "12-24": {
+      "reason": "Stove God ascends to Heaven reporting good and evil deeds of mankind",
+      "harm": "Great calamity"
+    },
+    "12-25": {
+      "reason": "Three Pure Ones and Jade Emperor descend to inspect good and evil.",
+      "harm": ""
+    },
+    "12-27": {
+      "reason": "Descent of the Big Dipper",
+      "harm": "Lifespan shortened by twelve years"
+    },
+    "12-28": {
+      "reason": "Human spirits assemble in the netherworld",
+      "harm": "Afflicted with illness"
+    },
+    "12-29": {
+      "reason": "Holy Birthday of Avatamsaka Bodhisattva; Four Heavenly Kings on patrol",
+      "harm": ""
+    },
+    "12-30": {
+      "reason": "Deities descend to examine good and evil",
+      "harm": "Both man and woman perish if transgressed"
+    }
+  }
+}

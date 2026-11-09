@@ -1,0 +1,95 @@
+apply plugin: 'com.android.application'
+
+// Release cần tối ưu mã và tài nguyên; vẫn cho phép tắt rõ ràng khi điều tra QA.
+def releaseR8Enabled = (project.findProperty('enableReleaseR8') ?: 'true').toString().toBoolean()
+
+def localSigning = new Properties()
+def localSigningFile = rootProject.file('keystore.properties')
+if (localSigningFile.exists()) {
+    localSigningFile.withInputStream { localSigning.load(it) }
+}
+def releaseStorePassword = System.getenv('KEYSTORE_PASSWORD') ?: localSigning.getProperty('storePassword')
+def releaseKeyPassword = System.getenv('KEY_PASSWORD') ?: localSigning.getProperty('keyPassword') ?: releaseStorePassword
+def releaseKeyAlias = System.getenv('KEY_ALIAS') ?: localSigning.getProperty('keyAlias', 'tutam')
+def releaseStoreFile = System.getenv('KEYSTORE_FILE') ?: localSigning.getProperty('storeFile', 'tutam-release-key.jks')
+
+gradle.taskGraph.whenReady { graph ->
+    if (graph.allTasks.any { it.name.toLowerCase().contains('release') } && (!releaseStorePassword || !releaseKeyPassword)) {
+        throw new GradleException('Release signing is missing. Configure KEYSTORE_PASSWORD/KEY_PASSWORD or android/keystore.properties.')
+    }
+}
+
+android {
+    namespace "vn.quangtu.tutam"
+    compileSdk rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "vn.quangtu.tutam"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 29
+        versionName "1.2.26"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    signingConfigs {
+        release {
+            storeFile file(releaseStoreFile)
+            storePassword releaseStorePassword
+            keyAlias releaseKeyAlias
+            keyPassword releaseKeyPassword
+        }
+    }
+    buildTypes {
+        debug {
+            // Isolated emulator QA can run alongside the normal app without replacing its data.
+            if (project.hasProperty('qaApplicationIdSuffix')) {
+                applicationIdSuffix project.property('qaApplicationIdSuffix')
+            }
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled releaseR8Enabled
+            shrinkResources releaseR8Enabled
+            proguardFiles getDefaultProguardFile(releaseR8Enabled ? 'proguard-android-optimize.txt' : 'proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation "androidx.media3:media3-exoplayer:1.9.3"
+    implementation "androidx.media3:media3-session:1.9.3"
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

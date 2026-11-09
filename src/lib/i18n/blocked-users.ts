@@ -1,0 +1,26 @@
+export const blockedUsersCopy = {
+  vi: {
+    title: 'Người đã chặn', description: 'Quản lý những người bạn đã chặn trong cộng đồng.',
+    scope: 'Bạn không thấy bình luận, trả lời và hồ sơ công khai của những người trong danh sách này.',
+    loading: 'Đang tải…', empty: 'Bạn chưa chặn ai', more: 'Xem thêm', retry: 'Thử lại',
+    unblock: 'Bỏ chặn', confirm: 'Xác nhận bỏ chặn', cancel: 'Hủy', busy: 'Đang bỏ chặn…',
+    confirmTitle: 'Bỏ chặn người dùng này?',
+    confirmDescription: 'Bạn có thể nhìn thấy lại nội dung công khai của người này. Nội dung đã bị quản trị gỡ vẫn được ẩn.',
+    loadFailed: 'Chưa tải được danh sách. Vui lòng thử lại.',
+    failed: 'Chưa bỏ chặn được. Vui lòng thử lại.',
+    offline: 'Đang ngoại tuyến. Kết nối mạng để cập nhật danh sách hoặc bỏ chặn.',
+    success: 'Đã bỏ chặn người dùng.', login: 'Vui lòng đăng nhập lại để tiếp tục.',
+    unknown: 'Thành viên',
+  },
+  en: {
+    title: 'Blocked users', description: 'Manage people you have blocked in the community.',
+    scope: 'Comments, replies and public profiles from these people are hidden from you.',
+    loading: 'Loading…', empty: 'You have not blocked anyone', more: 'Load more', retry: 'Try again',
+    unblock: 'Unblock', confirm: 'Confirm unblock', cancel: 'Cancel', busy: 'Unblocking…',
+    confirmTitle: 'Unblock this user?',
+    confirmDescription: 'You may see this person’s public content again. Content removed by moderators stays hidden.',
+    loadFailed: 'Could not load the list. Please try again.', failed: 'Could not unblock this user. Please try again.',
+    offline: 'You are offline. Connect to update the list or unblock someone.',
+    success: 'User unblocked.', login: 'Please sign in again to continue.', unknown: 'Member',
+  },
+};

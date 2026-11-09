@@ -1,0 +1,100 @@
+[
+  {
+    "id": "thich-ca-mau-ni",
+    "name": "Đức Phật Thích Ca Mâu Ni",
+    "danhHieu": "Nam Mô Bổn Sư Thích Ca Mâu Ni Phật",
+    "moTa": "Bậc Đạo Sư giác ngộ, chỉ dạy con đường chuyển hóa khổ đau bằng giới, định và tuệ.",
+    "image": "/images/le-phat/thich-ca-mau-ni-portrait.webp"
+  },
+  {
+    "id": "a-di-da",
+    "name": "Đức Phật A Di Đà",
+    "danhHieu": "Nam Mô A Di Đà Phật",
+    "moTa": "Giáo chủ cõi Tây Phương Cực Lạc, 48 đại nguyện tiếp dẫn chúng sinh vãng sinh Tịnh Độ.",
+    "image": "/images/le-phat/a-di-da-approved.webp"
+  },
+  {
+    "id": "ty-lo-gia-na",
+    "name": "Đức Phật Tỳ Lô Giá Na",
+    "danhHieu": "Nam Mô Thanh Tịnh Pháp Thân Tỳ Lô Giá Na Phật",
+    "moTa": "Bậc Pháp Thân thanh tịnh thường trụ, biến chiếu khắp mười phương pháp giới, cội nguồn giác ngộ vô lượng.",
+    "image": "/images/le-phat/ty-lo-gia-na.webp"
+  },
+  {
+    "id": "duoc-su",
+    "name": "Đức Phật Dược Sư",
+    "danhHieu": "Nam Mô Dược Sư Lưu Ly Quang Vương Phật",
+    "moTa": "Giáo chủ cõi Tịnh Lưu Ly phương Đông, 12 đại nguyện tiêu trừ tật bệnh, thân tâm thường an lạc.",
+    "image": "/images/le-phat/duoc-su-approved.webp"
+  },
+  {
+    "id": "quan-the-am",
+    "name": "Quán Thế Âm Bồ Tát",
+    "danhHieu": "Nam Mô Đại Bi Quán Thế Âm Bồ Tát",
+    "moTa": "Hiện thân của lòng Từ Bi vô lượng vô biên, tầm thanh cứu khổ cứu nạn muôn loài.",
+    "image": "/images/le-phat/quan-the-am-approved.webp"
+  },
+  {
+    "id": "dai-the-chi",
+    "name": "Đại Thế Chí Bồ Tát",
+    "danhHieu": "Nam Mô Đại Thế Chí Bồ Tát",
+    "moTa": "Hiện thân của Trí Tuệ viên mãn, dùng ánh sáng trí huệ soi chiếu mười phương dứt trừ tam đồ u ám.",
+    "image": "/images/le-phat/dai-the-chi-approved.webp"
+  },
+  {
+    "id": "dia-tang-vuong",
+    "name": "Địa Tạng Vương Bồ Tát",
+    "danhHieu": "Nam Mô Đại Nguyện Địa Tạng Vương Bồ Tát",
+    "moTa": "Đại nguyện sâu dày cứu độ chúng sinh cõi u minh: Địa ngục vị không, thệ bất thành Phật.",
+    "image": "/images/le-phat/dia-tang-vuong-v9.webp"
+  },
+  {
+    "id": "van-thu-su-loi",
+    "name": "Văn Thù Sư Lợi Bồ Tát",
+    "danhHieu": "Nam Mô Đại Trí Văn Thù Sư Lợi Bồ Tát",
+    "moTa": "Bậc đại trí tuệ siêu việt, tay cầm kiếm huệ đoạn trừ tất cả cội rễ vô minh phiền não.",
+    "image": "/images/le-phat/van-thu-su-loi.webp"
+  },
+  {
+    "id": "pho-hien",
+    "name": "Phổ Hiền Bồ Tát",
+    "danhHieu": "Nam Mô Đại Hạnh Phổ Hiền Bồ Tát",
+    "moTa": "Hiện thân của Đại Hạnh và Mười Đại Nguyện Vương thanh tịnh, hóa thân vô cùng tận độ hóa quần sinh.",
+    "image": "/images/le-phat/pho-hien.webp"
+  },
+  {
+    "id": "di-lac",
+    "name": "Di Lặc Tôn Phật",
+    "danhHieu": "Nam Mô Đương Lai Hạ Sanh Di Lặc Tôn Phật",
+    "moTa": "Vị Phật tương lai của cõi Ta Bà, hiện thân của niềm hoan hỷ, từ ái, bao dung và an lạc thanh tịnh.",
+    "image": "/images/le-phat/di-lac-approved.webp"
+  },
+  {
+    "id": "duoc-vuong",
+    "name": "Dược Vương Bồ Tát",
+    "danhHieu": "Nam Mô Dược Vương Bồ Tát",
+    "moTa": "Đại Bồ Tát phát nguyện ban bố thần dược trị lành mọi thân bệnh và tâm bệnh cho tất cả chúng sinh.",
+    "image": "/images/le-phat/duoc-vuong-approved.webp"
+  },
+  {
+    "id": "hu-khong-tang",
+    "name": "Hư Không Tạng Bồ Tát",
+    "danhHieu": "Nam Mô Hư Không Tạng Bồ Tát",
+    "moTa": "Phúc đức và trí huệ bao la như hư không vô tận, thỏa mãn mọi tâm nguyện thanh tịnh của chúng sinh.",
+    "image": "/images/le-phat/hu-khong-tang-approved.webp"
+  },
+  {
+    "id": "nhat-quang",
+    "name": "Nhật Quang Biến Chiếu Bồ Tát",
+    "danhHieu": "Nam Mô Nhật Quang Biến Chiếu Bồ Tát",
+    "moTa": "Thượng thủ bên tả Đức Phật Dược Sư, phóng ánh sáng mặt trời trí tuệ xua tan bóng tối u ám muôn loài.",
+    "image": "/images/le-phat/nhat-quang.webp"
+  },
+  {
+    "id": "nguyet-quang",
+    "name": "Nguyệt Quang Biến Chiếu Bồ Tát",
+    "danhHieu": "Nam Mô Nguyệt Quang Biến Chiếu Bồ Tát",
+    "moTa": "Thượng thủ bên hữu Đức Phật Dược Sư, ban ánh trăng rằm từ bi dịu mát xoa dịu khổ đau nhiệt não.",
+    "image": "/images/le-phat/nguyet-quang.webp"
+  }
+]

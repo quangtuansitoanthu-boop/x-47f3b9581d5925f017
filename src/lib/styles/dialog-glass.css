@@ -1,0 +1,44 @@
+[data-dialog-glass] {
+  --dialog-surface-background: var(--card);
+  --dialog-surface-border: var(--border);
+  --dialog-surface-shadow: var(--shadow-xl);
+  --dialog-surface-filter: none;
+  -webkit-backdrop-filter: var(--dialog-surface-filter);
+  backdrop-filter: var(--dialog-surface-filter);
+}
+
+@supports (((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) and (background: color-mix(in srgb, currentColor, transparent))) {
+  [data-dialog-glass] {
+    --dialog-surface-background: var(--dialog-glass-background);
+    --dialog-surface-border: var(--dialog-glass-border);
+    --dialog-surface-shadow: var(--dialog-glass-shadow);
+    --dialog-surface-filter: var(--dialog-glass-filter);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-dialog-glass] {
+    --dialog-surface-background: var(--card);
+    --dialog-surface-border: var(--border);
+    --dialog-surface-shadow: var(--shadow-xl);
+    --dialog-surface-filter: none;
+  }
+}
+
+@media (max-width: 600px) {
+  :root body .dialog-actions-balanced {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  :root body .dialog-actions-balanced > button {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 44px;
+    min-height: 44px;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}

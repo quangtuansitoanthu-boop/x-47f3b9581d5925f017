@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ánh xạ tokens.css: gold-light, text, text2, card, border, gold, on-gold. -->
+    <color name="practice_widget_background">#FBF4E6</color>
+    <color name="practice_widget_text">#1C1A15</color>
+    <color name="practice_widget_secondary">#4A4033</color>
+    <color name="practice_widget_card">#FFFFFF</color>
+    <color name="practice_widget_border">#DDD8CC</color>
+    <color name="practice_widget_accent">#C8963E</color>
+    <color name="practice_widget_on_accent">#24180C</color>
+    <color name="practice_widget_track">#E2D9C8</color>
+    <color name="practice_widget_streak_bg">#F5E6C8</color>
+    <color name="practice_widget_streak_text">#8C5811</color>
+    <string name="practice_widget_name">Tu Tập Hằng Ngày</string>
+    <string name="practice_widget_small">Tu Tập Hằng Ngày · Nhỏ</string>
+    <string name="practice_widget_medium">Tu Tập Hằng Ngày · Vừa</string>
+    <string name="practice_widget_large">Tu Tập Hằng Ngày · Lớn</string>
+    <string name="practice_widget_description">Mở công cụ tu tập và xem tiến độ được xác nhận trong app</string>
+    <string name="practice_widget_header">Tu tập mỗi ngày</string>
+    <string name="practice_widget_kicker">TU TẬP</string>
+    <string name="practice_widget_peace">Một chút\nbình an</string>
+    <string name="practice_widget_start">Bắt đầu tu tập ›</string>
+    <string name="practice_widget_footer">Mở công cụ để bắt đầu thực hành.</string>
+    <string name="practice_widget_meditation_open">Mở công cụ thiền</string>
+    <string name="practice_widget_rosary_open">Mở chuỗi hạt</string>
+    <string name="practice_widget_sutra_open">Chọn bài kinh</string>
+    <string name="practice_widget_mantra_open">Chọn bài chú</string>
+    <string name="practice_widget_large_header">Công Phu Tu Tập 🪷</string>
+    <string name="practice_widget_open">Mở công cụ để thực hành</string>
+    <string name="practice_widget_unknown">Chưa có dữ liệu</string>
+    <string name="practice_widget_missing_progress">Chưa có dữ liệu hôm nay</string>
+    <string name="practice_widget_completion">%1$d/%2$d hoàn thành</string>
+    <string name="practice_widget_streak">Chuỗi: %1$d ngày</string>
+    <string name="practice_widget_streak_unknown">Chuỗi: —</string>
+    <string name="practice_widget_meditation">Thiền định</string>
+    <string name="practice_widget_rosary">Lần tràng hạt</string>
+    <string name="practice_widget_sutra">Tụng kinh</string>
+    <string name="practice_widget_mantra">Trì chú</string>
+    <string name="practice_widget_confirmed">Đã xác nhận</string>
+    <string name="practice_widget_complete_label">Hoàn thành</string>
+    <string name="practice_widget_progress_label">Tiến độ</string>
+    <string name="practice_widget_in_progress">Đang thực hành</string>
+</resources>

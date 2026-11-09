@@ -1,0 +1,117 @@
+[
+  {
+    "key": "bao-ung-hien-doi-tap-1",
+    "title": "BÁO ỨNG HIỆN ĐỜI",
+    "volume": "TẬP 1",
+    "scene": "A golden lotus rising above a tranquil village river at dawn",
+    "color": "deep jade"
+  },
+  {
+    "key": "bao-ung-hien-doi-tap-2",
+    "title": "BÁO ỨNG HIỆN ĐỜI",
+    "volume": "TẬP 2",
+    "scene": "A compassionate traveler releasing birds near an ancient temple",
+    "color": "midnight blue"
+  },
+  {
+    "key": "bao-ung-hien-doi-tap-3",
+    "title": "BÁO ỨNG HIỆN ĐỜI",
+    "volume": "TẬP 3",
+    "scene": "A winding path through misty mountains toward warm temple lights",
+    "color": "burgundy"
+  },
+  {
+    "key": "bao-ung-hien-doi-tap-4",
+    "title": "BÁO ỨNG HIỆN ĐỜI",
+    "volume": "TẬP 4",
+    "scene": "A family lighting a lotus lantern beside a tranquil pond",
+    "color": "peacock teal"
+  },
+  {
+    "key": "bao-ung-hien-doi-tap-5",
+    "title": "BÁO ỨNG HIỆN ĐỜI",
+    "volume": "TẬP 5",
+    "scene": "A luminous dharma wheel above a lotus pond",
+    "color": "royal violet"
+  },
+  {
+    "key": "bao-ung-hien-doi-tap-6",
+    "title": "BÁO ỨNG HIỆN ĐỜI",
+    "volume": "TẬP 6",
+    "scene": "A small boat crossing a misty river toward a golden shore",
+    "color": "burnt sienna"
+  },
+  {
+    "key": "bao-ung-hien-doi-tap-7",
+    "title": "BÁO ỨNG HIỆN ĐỜI",
+    "volume": "TẬP 7",
+    "scene": "An old bodhi tree with sun rays and floating lotus petals",
+    "color": "forest green"
+  },
+  {
+    "key": "bao-ung-hien-doi-tap-8",
+    "title": "BÁO ỨNG HIỆN ĐỜI",
+    "volume": "TẬP 8",
+    "scene": "A radiant lotus garden with temple pagoda at sunrise",
+    "color": "warm vermilion"
+  },
+  {
+    "key": "an-sy-toan-thu-quyen-thuong",
+    "title": "AN SỸ TOÀN THƯ",
+    "volume": "QUYỂN THƯỢNG",
+    "scene": "An ancient scholar reading beside a bodhi tree overlooking a tranquil mountain temple",
+    "color": "deep bronze and jade"
+  },
+  {
+    "key": "an-sy-toan-thu-quyen-ha",
+    "title": "AN SỸ TOÀN THƯ",
+    "volume": "QUYỂN HẠ",
+    "scene": "Ancient scholarly scrolls beside a blooming lotus and distant mountain temple",
+    "color": "deep bronze and jade"
+  },
+  {
+    "key": "dia-nguc-du-ky",
+    "title": "ĐỊA NGỤC DU KÝ",
+    "volume": "",
+    "scene": "A compassionate monk holding a glowing lantern guiding a traveler across a shadowy stone bridge toward a distant radiant gateway, dignified mystical atmosphere without violence",
+    "color": "dark indigo and copper"
+  },
+  {
+    "key": "luan-hoi-du-ky",
+    "title": "LUÂN HỒI DU KÝ",
+    "volume": "",
+    "scene": "A luminous wheel of rebirth suspended above layered mountain landscapes and a river, lotus blossoms and a traveling monk",
+    "color": "deep turquoise and gold"
+  },
+  {
+    "key": "truyen-tranh-kinh-dia-tang-phan-1",
+    "title": "KINH ĐỊA TẠNG",
+    "kicker": "TRUYỆN TRANH",
+    "volume": "PHẦN 1",
+    "scene": "Ksitigarbha Bodhisattva with monastic shaved head wearing dignified robes holding a six-ring staff and luminous wish-fulfilling jewel, standing on a lotus",
+    "color": "saffron and burgundy"
+  },
+  {
+    "key": "truyen-tranh-kinh-dia-tang-phan-2",
+    "title": "KINH ĐỊA TẠNG",
+    "kicker": "TRUYỆN TRANH",
+    "volume": "PHẦN 2",
+    "scene": "Ksitigarbha Bodhisattva compassionately guiding people along a lotus path, holding a six-ring staff and glowing jewel",
+    "color": "jade and gold"
+  },
+  {
+    "key": "truyen-tranh-kinh-dia-tang-phan-3",
+    "title": "KINH ĐỊA TẠNG",
+    "kicker": "TRUYỆN TRANH",
+    "volume": "PHẦN 3",
+    "scene": "Ksitigarbha Bodhisattva seated on a radiant lotus before a celestial Buddhist assembly",
+    "color": "indigo and gold"
+  },
+  {
+    "key": "chuyen-hoa-thanh-phuc",
+    "title": "CHUYỂN HOẠ THÀNH PHÚC",
+    "volume": "",
+    "scene": "Dark storm clouds opening into golden sunlight above a blooming lotus and a winding path toward a peaceful temple, hopeful transformation",
+    "color": "deep emerald and warm gold"
+  }
+]

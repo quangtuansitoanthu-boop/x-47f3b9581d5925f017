@@ -1,0 +1,59 @@
+@import './tokens.css';
+@import './master-shell.css';
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+img { max-width: 100%; }
+
+/* The shell and authoring UI use system fonts; only the actual reading
+   columns keep the book-like Bookerly face. */
+.reader-content,
+.ttp-content,
+.profile-dialog .reader {
+  font-family: var(--font-reader);
+}
+
+.tt-practice .ttp-content {
+  font-family: var(--font-reader) !important;
+}
+
+.pdf-document-header h1 {
+  font-family: var(--font-reader);
+}
+
+.import-json-header h2 {
+  font-family: var(--font-app) !important;
+}
+
+/* Tối ưu hiệu năng vuốt chạm và cuộn mượt */
+html, body {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tắt backdrop-filter nặng nề trong chế độ app native để đảm bảo 60fps mượt mà */
+:root[data-native-app='true'] .qts-bottom-nav,
+:root[data-native-app='true'] .qts-nav,
+:root[data-native-app='true'] .tt-topbar,
+:root[data-native-app='true'] .pt-mp {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--bg) !important;
+}
+
+:root[data-native-app='true'][data-theme='dark'] .qts-bottom-nav,
+:root[data-native-app='true'][data-theme='dark'] .qts-nav,
+:root[data-native-app='true'][data-theme='dark'] .tt-topbar,
+:root[data-native-app='true'][data-theme='dark'] .pt-mp {
+  background: var(--bg) !important;
+}

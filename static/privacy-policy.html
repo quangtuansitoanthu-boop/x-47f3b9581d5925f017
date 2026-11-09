@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chính Sách Bảo Mật / Privacy Policy - Tu Tập</title>
+  <meta name="description" content="Chính sách bảo mật thông tin và quyền riêng tư của ứng dụng Tu Tập / Privacy policy and terms for Tu Tap app.">
+  <meta name="robots" content="index, follow">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 2.5rem 1rem;
+      background: linear-gradient(180deg, #fdfbf7 0%, #f4eee1 100%);
+      display: flex;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #2d3748;
+    }
+    .privacy-card {
+      min-width: 0;
+      overflow-wrap: break-word;
+      max-width: 780px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 10px 30px rgba(74, 53, 23, 0.08);
+      border: 1px solid rgba(220, 205, 175, 0.4);
+    }
+    .lang-switcher {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 1rem;
+    }
+    .lang-btn {
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid #d6bca2;
+      background: #faf6ef;
+      color: #6d4715;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .lang-btn.active {
+      background: #e28743;
+      color: #fff;
+      border-color: #e28743;
+    }
+    .header {
+      border-bottom: 2px solid #f0e6d6;
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: #e28743;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #5c3c10;
+      margin: 0 0 0.5rem 0;
+    }
+    .subtitle {
+      font-size: 1.05rem;
+      color: #7d6b53;
+      margin: 0 0 0.5rem 0;
+    }
+    .meta-date {
+      font-size: 0.85rem;
+      color: #9c8a70;
+      font-style: italic;
+    }
+    section {
+      margin-bottom: 1.75rem;
+    }
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #6d4715;
+      margin-bottom: 0.75rem;
+      border-left: 4px solid #e28743;
+      padding-left: 0.65rem;
+    }
+    p {
+      line-height: 1.7;
+      margin: 0 0 0.75rem 0;
+      font-size: 0.975rem;
+      color: #4a453e;
+    }
+    ul {
+      margin: 0 0 0.75rem 1.25rem;
+      padding: 0;
+      line-height: 1.65;
+    }
+    li {
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      color: #4a453e;
+    }
+    .contact-box {
+      background: #faf6ef;
+      padding: 1.25rem;
+      border-radius: 10px;
+      border: 1px dashed #d6bca2;
+      margin-top: 2rem;
+    }
+    .contact-box h2 {
+      border-left: none;
+      padding-left: 0;
+      margin-top: 0;
+    }
+    a {
+      color: #b85d19;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .privacy-card [lang="en"] { display: none; }
+    body.show-en [lang="vi"] { display: none; }
+    body.show-en [lang="en"] { display: block; }
+    body.show-en h1[lang="en"], body.show-en h2[lang="en"], body.show-en p[lang="en"], body.show-en div[lang="en"] { display: block; }
+    body.show-en span[lang="en"] { display: inline; }
+  </style>
+</head>
+<body>
+  <div class="privacy-card">
+    <div class="lang-switcher">
+      <button type="button" class="lang-btn active" id="btn-vi" onclick="setLang('vi')">Tiếng Việt</button>
+      <button type="button" class="lang-btn" id="btn-en" onclick="setLang('en')">English</button>
+    </div>
+
+    <header class="header">
+      <div class="badge" lang="vi">CHÍNH THỨC</div>
+      <div class="badge" lang="en">OFFICIAL</div>
+      <h1 lang="vi">Chính Sách Quyền Riêng Tư</h1>
+      <h1 lang="en">Privacy Policy & Terms</h1>
+      <p class="subtitle" lang="vi">Ứng dụng Tu tập - Phật pháp</p>
+      <p class="subtitle" lang="en">Tu tập - Phật pháp — Privacy Policy</p>
+      <div class="meta-date" lang="vi">Cập nhật lần cuối: Ngày 4 tháng 11 năm 2026</div>
+      <div class="meta-date" lang="en">Last updated: November 4, 2026</div>
+    </header>
+
+    <div class="content">
+      <!-- VIETNAMESE CONTENT -->
+      <div lang="vi">
+        <section>
+          <h2>1. Giới thiệu</h2>
+          <p>
+            Chào mừng bạn đến với ứng dụng <strong>Tu Tập</strong>. Chúng tôi luôn tôn trọng và cam kết bảo vệ quyền riêng tư cá nhân của bạn. Chính sách quyền riêng tư này giải thích cách chúng tôi xử lý thông tin cá nhân và dữ liệu khi bạn sử dụng ứng dụng di động cũng như các dịch vụ liên quan trên hệ thống của chúng tôi.
+          </p>
+        </section>
+
+        <section>
+          <h2>2. Thông tin chúng tôi thu thập</h2>
+          <p>
+            Ứng dụng <strong>Tu Tập</strong> được thiết kế theo tôn chỉ tối giản, phục vụ trải nghiệm tu tập, thiền định và đọc sách an lạc. Vì vậy:
+          </p>
+          <ul>
+            <li>
+              <strong>Dữ liệu cục bộ và đồng bộ tài khoản:</strong> Tiến trình đọc, tu tập, đánh dấu trang và nội dung tải về có thể được lưu trên thiết bị để sử dụng ngoại tuyến. Khi bạn đăng nhập và sử dụng đồng bộ tài khoản, dữ liệu được tính năng đó hỗ trợ được gửi tới máy chủ, gắn với tài khoản để khôi phục tiến trình trên các thiết bị. Nội dung bạn gửi trong tính năng cộng đồng được xử lý theo phạm vi hiển thị bạn chọn.
+            </li>
+            <li>
+              <strong>Tài khoản người dùng (Tùy chọn):</strong> Google, Facebook hoặc Đăng nhập bằng Apple có thể cung cấp mã người dùng, tên, email và ảnh đại diện tùy nhà cung cấp và quyền bạn cho phép. Apple có thể cung cấp email chuyển tiếp riêng tư. Chúng tôi dùng thông tin này để xác minh danh tính, quản lý tài khoản, phiên đăng nhập và cung cấp tính năng tài khoản. Chúng tôi không nhận mật khẩu của nhà cung cấp. Bạn có thể đọc, nghe và thực hành mà không đăng nhập.
+            </li>
+            <li>
+              <strong>Định danh, hoạt động và vận hành:</strong> Các tính năng trực tuyến có thể gửi mã tài khoản hoặc mã thiết bị, tiến trình đọc/nghe, lượt sử dụng, ghi chú và nội dung bạn chủ động lưu hoặc chia sẻ. Dữ liệu tu tập có thể phản ánh niềm tin tôn giáo. Khi dùng Thanh Tịnh trực tuyến, số ngày giữ giới và số lần vượt qua thôi thúc được gửi cùng mã định danh để duy trì tiến trình; nhật ký riêng trên máy không nằm trong dữ liệu đồng bộ này. Chúng tôi dùng dữ liệu để cung cấp, đồng bộ và bảo vệ tính năng, cùng thống kê sử dụng nội dung. Máy chủ ghi nhận mã yêu cầu và lỗi kỹ thuật để vận hành dịch vụ.
+            </li>
+          </ul>
+          <p>Khi bạn gửi bình luận, trả lời hoặc hồ sơ cộng đồng, chúng tôi xử lý nội dung, danh tính tài khoản và trạng thái kiểm duyệt để vận hành cộng đồng. Bình luận và trả lời mới chỉ công khai sau khi được duyệt; bản đang chờ duyệt và lý do từ chối chỉ được hiển thị cho người gửi và quản trị viên có quyền. Tên và ảnh hiển thị công khai dùng phiên bản hồ sơ đã được duyệt; việc cập nhật thông tin tài khoản riêng không đồng nghĩa thông tin mới được công khai ngay. Báo cáo gồm nội dung được báo cáo, lý do và chi tiết bạn tự nhập; danh sách chặn được gắn với tài khoản để ẩn người bị chặn trên các bề mặt cộng đồng của bạn. Người bị báo cáo không nhận danh tính người báo cáo qua tính năng này.</p>
+      </section>
+
+        <section>
+          <h2>3. Quyền truy cập thiết bị (Permissions)</h2>
+          <p>Ứng dụng Tu Tập chỉ yêu cầu các quyền tối thiểu cần thiết để vận hành:</p>
+          <ul>
+            <li><strong>Quyền kết nối mạng (INTERNET):</strong> Dùng để tải nội dung sách mới, cập nhật danh mục pháp thoại và đồng bộ khi bạn trực tuyến.</li>
+            <li><strong>Phát âm thanh nền:</strong> Cho phép bạn tiếp tục nghe nhạc thiền, tiếng chuông hoặc âm thanh thiên nhiên ngay cả khi tắt màn hình hoặc chuyển sang ứng dụng khác.</li>
+            <li><strong>Không yêu cầu quyền nhạy cảm:</strong> Ứng dụng tuyệt đối <em>KHÔNG</em> yêu cầu quyền truy cập Danh bạ, Vị trí chính xác (GPS), Máy ảnh (Camera) hay Micro ghi âm của bạn.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>4. Dịch vụ của bên thứ ba</h2>
+          <p>Chúng tôi có thể sử dụng một số dịch vụ hạ tầng đám mây uy tín để duy trì hoạt động ổn định:</p>
+          <ul>
+            <li><strong>Cloudflare:</strong> Hạ tầng phân phối nội dung, API, lưu trữ tài khoản và dữ liệu đồng bộ.</li>
+            <li><strong>Google, Meta và Apple:</strong> Dịch vụ xác thực khi bạn chọn đăng nhập; Google Play hoặc App Store/TestFlight phân phối và cập nhật ứng dụng theo chính sách riêng của từng nền tảng.</li>
+            <li><strong>Liên kết ngoài:</strong> Trong mục "Thỉnh Pháp Bảo", ứng dụng có thể cung cấp liên kết dẫn tới các nền tảng thương mại để thỉnh ấn phẩm/pháp bảo. Khi nhấp vào các liên kết này, bạn sẽ chịu sự điều chỉnh bởi chính sách quyền riêng tư của nền tảng đích.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>5. Bảo mật dữ liệu & Quyền yêu cầu xóa thông tin</h2>
+          <p>
+            Chúng tôi áp dụng các biện pháp bảo mật hiện đại (mã hóa SSL/TLS cho mọi kết nối internet) nhằm ngăn chặn truy cập trái phép.
+          </p>
+          <p>
+            <strong>Quyền của bạn:</strong> Để xóa tài khoản, đăng nhập, mở Cá nhân → Xóa tài khoản và làm theo bước xác nhận. Tài khoản liên kết Apple có thể cần xác thực lại bằng Apple trước khi hoàn tất. Sau khi xóa thành công, tài khoản, phiên đăng nhập và dữ liệu riêng có quan hệ sở hữu với tài khoản được xóa; hồ sơ cộng đồng, quan hệ chặn và báo cáo do tài khoản đó gửi cũng được xóa. Phần chữ và thông tin liên hệ trong bình luận của bạn được xóa/ẩn; hàng cấu trúc có thể còn lại để không xóa trả lời của người khác. Chiến dịch bạn đã tạo có thể tiếp tục tồn tại nhưng bỏ liên kết người tạo; công phu, thành viên và đóng góp của người khác không bị xóa cùng tài khoản của bạn. Việc xóa tài khoản máy chủ không thay cho việc xóa các tệp đã tải về, bản xuất hoặc dữ liệu nằm trên thiết bị khác. Nếu không truy cập được tài khoản, liên hệ email hỗ trợ để được xác minh quyền sở hữu; không gửi mật khẩu hoặc mã xác minh.
+          </p>
+          <p>Bạn có thể báo cáo bình luận hoặc hồ sơ và chặn người dùng tại phần cộng đồng; quản lý danh sách chặn trong Cá nhân. Quản trị viên có quyền xem xét nội dung chờ duyệt và báo cáo, từ chối hoặc ẩn nội dung, và áp dụng hạn chế tài khoản theo quy tắc cộng đồng. Liên hệ tutap.phatphap26@gmail.com nếu cần hỗ trợ hoặc phản ánh nội dung. Chúng tôi xem xét và phản hồi theo khả năng xử lý; chính sách này không cam kết thời hạn cố định cho mọi báo cáo.</p>
+      </section>
+
+        <section>
+          <h2>6. Quyền riêng tư của trẻ em</h2>
+          <p>
+            Ứng dụng có nội dung văn hóa, triết học và tâm linh Phật giáo. Một số tác phẩm mô tả địa ngục hoặc hình phạt theo tín ngưỡng, có thể gây sợ hãi hoặc không phù hợp với trẻ em. Vui lòng xem phân loại độ tuổi trên cửa hàng ứng dụng và cân nhắc nội dung trước khi cho trẻ sử dụng. Chúng tôi không cố ý thu thập thông tin nhận dạng cá nhân từ trẻ em dưới 13 tuổi. Nếu có lo ngại về dữ liệu của trẻ em, vui lòng liên hệ tutap.phatphap26@gmail.com để được xem xét và hỗ trợ.
+          </p>
+        </section>
+
+        <section>
+          <h2>7. Thay đổi chính sách</h2>
+          <p>
+            Chúng tôi có thể cập nhật Chính Sách Quyền Riêng Tư và Điều Khoản Bản Quyền này theo thời gian. Mọi thay đổi sẽ được công bố công khai trên trang này kèm ngày cập nhật mới nhất.
+          </p>
+        </section>
+
+        <section>
+          <h2>8. Tuyên bố Bản quyền & Tôn chỉ Phi thương mại</h2>
+          <p>
+            Ứng dụng <strong>Tu Tập</strong> được xây dựng hoàn toàn với tâm nguyện phụng sự đạo pháp, hoằng dương giáo lý nhân quả và hỗ trợ đại chúng tu tập tại gia:
+          </p>
+          <ul>
+            <li><strong>Hoạt động phi thương mại:</strong> Ứng dụng hoàn toàn miễn phí, không thu phí người dùng, không tích hợp quảng cáo kiếm tiền của bên thứ ba (AdMob / Facebook Ads).</li>
+            <li><strong>Nguồn tư liệu & Kinh điển:</strong> Các bộ kinh điển Phật giáo, nghi thức tụng niệm và sách giáo hóa cổ đức thuộc về kho tàng di sản văn hóa tâm linh công cộng (Public Domain) hoặc được các bậc tiền bối phát tâm ấn tống lưu hành phổ thông.</li>
+            <li><strong>Âm thanh & Truyền thông:</strong> Toàn bộ âm thanh chuông mõ, tiếng thiền tự nhiên là âm thanh mô phỏng môi trường hoặc được tạo bằng thuật toán Web Audio. Các bài giảng Pháp thoại được phát trực tuyến từ các kho lưu trữ công cộng (Archive.org) nhằm mục đích học tập phi lợi nhuận.</li>
+            <li><strong>Tôn trọng quyền tác giả & Quy trình gỡ bỏ (Notice & Takedown):</strong> Chúng tôi luôn nỗ lực ghi rõ danh xưng tác giả, dịch giả, soạn giả trên từng tác phẩm. Việc có thể đọc trực tuyến hoặc tải ngoại tuyến không tự xác lập quyền sử dụng tác phẩm; bản dịch, bản thu âm và hình minh họa có thể có quyền riêng. Nếu bạn là chủ sở hữu quyền tác giả hợp pháp của bất kỳ nội dung nào và có mong muốn điều chỉnh trích dẫn hoặc yêu cầu gỡ bỏ khỏi ứng dụng, xin vui lòng gửi thông báo đến email <em>tutap.phatphap26@gmail.com</em>. Chúng tôi tôn trọng tuyệt đối và sẽ xem xét yêu cầu, phản hồi hướng xử lý phù hợp.</li>
+          </ul>
+        </section>
+
+        <section class="contact-box">
+          <h2>9. Thông tin liên hệ</h2>
+          <p>Nếu bạn có bất kỳ thắc mắc, phản ánh hoặc yêu cầu hỗ trợ nào về chính sách này, an toàn cộng đồng hoặc bản quyền nội dung, xin vui lòng liên hệ với chúng tôi qua:</p>
+          <ul>
+            <li><strong>Đơn vị phát triển:</strong> Quang Từ</li>
+            <li><strong>Website chính thức:</strong> <a href="https://quangtu.vn" target="_blank" rel="noreferrer">https://quangtu.vn</a></li>
+            <li><strong>Email hỗ trợ:</strong> <a href="mailto:tutap.phatphap26@gmail.com">tutap.phatphap26@gmail.com</a></li>
+          </ul>
+        </section>
+      </div>
+
+      <!-- ENGLISH CONTENT -->
+      <div lang="en">
+        <section>
+          <h2>1. Introduction</h2>
+          <p>
+            Welcome to the <strong>Tu Tap</strong> application. We always respect and are committed to protecting your personal privacy. This Privacy Policy explains how we handle personal information and data when you use our mobile application and related services on our system.
+          </p>
+        </section>
+
+        <section>
+          <h2>2. Information We Collect</h2>
+          <p>
+            The <strong>Tu Tap</strong> application is designed with a philosophy of minimalism, serving a peaceful practice, meditation, and reading experience. Therefore:
+          </p>
+          <ul>
+            <li>
+              <strong>Local data and account synchronization:</strong> Reading and practice progress, bookmarks and downloaded content may be stored on your device for offline use. When you sign in and use account synchronization, the supported data is sent to our servers and linked to your account to restore progress across devices. Community content is processed according to the visibility you choose.
+            </li>
+            <li>
+              <strong>Optional sign-in:</strong> Google, Facebook or Sign in with Apple may provide a user ID, name, email and profile picture depending on the provider and permissions you grant. Apple may provide a private relay email. We use this information to verify identity, manage accounts and sessions, and provide account features. We do not receive your provider password. Reading, listening and practice are available without signing in.
+            </li>
+            <li>
+              <strong>Identifiers, activity and operations:</strong> Online features may send an account or device identifier, reading/listening progress, usage events, notes and content you explicitly save or share. Practice data may reveal religious beliefs. When using Thanh Tinh online, abstinence streak days and resisted-urge counts are sent with an identifier to maintain progress; the private local journal is not part of this synchronization payload. We use this data to provide, synchronize and protect features, and for content usage statistics. Servers record request identifiers and technical errors to operate the service.
+            </li>
+          </ul>
+          <p>When you submit comments, replies or a community profile, we process the content, account identity and moderation status to operate the community. New comments and replies become public after approval; pending submissions and rejection reasons are visible only to their author and authorized administrators. Public names and pictures use an approved profile snapshot; changing private account information does not immediately publish the new information. Reports contain the reported target, reason and any details you enter. Account-linked block settings hide blocked members from your community views. The reporting feature does not disclose the reporter's identity to the reported member.</p>
+      </section>
+
+        <section>
+          <h2>3. Device Permissions</h2>
+          <p>The Tu Tap application requests only the minimum permissions necessary for its operation:</p>
+          <ul>
+            <li><strong>Network access (INTERNET):</strong> Used to download new books, update Dharma talk catalogs, and sync data when you are online.</li>
+            <li><strong>Background audio playback:</strong> Allows you to continue listening to meditation audio, bell chimes, or Dharma talks even when the screen is turned off or when switching to another app.</li>
+            <li><strong>No sensitive permissions requested:</strong> The application strictly <em>DOES NOT</em> request access to your Contacts, Precise GPS Location, Camera, or Audio Microphone.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>4. Third-Party Services</h2>
+          <p>We may utilize reputable cloud infrastructure providers to maintain stable and reliable operations:</p>
+          <ul>
+            <li><strong>Cloudflare:</strong> Content delivery, APIs, account storage and synchronized data.</li>
+            <li><strong>Google, Meta and Apple:</strong> Authentication when you choose to sign in; Google Play or App Store/TestFlight distribute and update the app under their own policies.</li>
+            <li><strong>External links:</strong> In the "Dharma Items" or publication sections, the app may provide links to external platforms to acquire printed editions or Dharma items. When clicking these links, you will be subject to the destination platform's privacy policy.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>5. Data Security & Deletion Rights</h2>
+          <p>
+            We implement modern security standards (SSL/TLS encryption for all internet connections) to protect against unauthorized access.
+          </p>
+          <p>
+            <strong>Your Rights:</strong> To delete an account, sign in and open Account → Delete account, then follow the confirmation steps. An Apple-linked account may require Apple reauthentication before deletion can finish. After successful deletion, the account, sessions and account-owned private records are removed, along with its community profile, block relationships and reports it submitted. Text and contact details in your comments are removed or hidden; structural rows may remain so that other people's replies are preserved. Campaigns you created may remain without the creator-account link; other members' practice records, memberships and contributions are not deleted with your account. Server account deletion does not replace removal of downloads, exports or data held on other devices. If you cannot access your account, contact support for ownership verification; do not send passwords or verification codes.
+          </p>
+          <p>You can report comments or profiles and block members from community views; blocked members can be managed in Account. Authorized administrators can review submissions and reports, reject or hide content, and restrict accounts under the community rules. Contact tutap.phatphap26@gmail.com for support or content concerns. We review and respond to requests without promising a fixed response time for every report.</p>
+      </section>
+
+        <section>
+          <h2>6. Children's Privacy</h2>
+          <p>
+            The app contains Buddhist cultural, philosophical and spiritual material. Some works describe religious hells or punishments that may be frightening or unsuitable for children. Please follow the age rating shown by your app store and consider the content before allowing a child to use the app. We do not knowingly collect personally identifiable information from children under 13. If you have concerns about a child's data, contact tutap.phatphap26@gmail.com for review and assistance.
+          </p>
+        </section>
+
+        <section>
+          <h2>7. Policy Changes</h2>
+          <p>
+            We may update this Privacy Policy and Copyright Terms from time to time. Any changes will be published publicly on this page along with the latest update date.
+          </p>
+        </section>
+
+        <section>
+          <h2>8. Copyright & Non-Profit Disclaimer</h2>
+          <p>
+            The <strong>Tu Tap</strong> application is built entirely with the aspiration to serve the Dharma, propagate the teachings of karma, and support practitioners at home:
+          </p>
+          <ul>
+            <li><strong>Non-commercial operation:</strong> The application is completely free, does not charge users, and contains no third-party monetization advertisements (AdMob / Facebook Ads).</li>
+            <li><strong>Sources & Sacred texts:</strong> Buddhist scriptures, chanting rituals, and ancient moral texts belong to the public cultural and spiritual heritage (Public Domain) or have been freely printed and distributed by monastic and lay predecessors.</li>
+            <li><strong>Audio & Media:</strong> All bell and wooden fish chimes and natural meditation sounds are environmental simulations or synthesized via Web Audio algorithms. Dharma talk lectures are streamed from public archives (Archive.org / public cloud) for non-profit learning purposes.</li>
+            <li><strong>Respect for Copyright & Takedown Procedure (Notice & Takedown):</strong> We always strive to clearly cite authors, translators, and compilers for every work. Availability online or offline does not establish permission to use a work; translations, recordings and illustrations may have separate rights. If you are the lawful copyright owner of any material and wish to amend citations or request removal from the app, please email <em>tutap.phatphap26@gmail.com</em>. We fully respect your rights and will review the request and communicate the appropriate action.</li>
+          </ul>
+        </section>
+
+        <section class="contact-box">
+          <h2>9. Contact Information</h2>
+          <p>If you have any questions, feedback, or support requests regarding our privacy policy, community safety or content copyright, please contact us at:</p>
+          <ul>
+            <li><strong>Developer:</strong> Quang Tu</li>
+            <li><strong>Official Website:</strong> <a href="https://quangtu.vn" target="_blank" rel="noreferrer">https://quangtu.vn</a></li>
+            <li><strong>Support Email:</strong> <a href="mailto:tutap.phatphap26@gmail.com">tutap.phatphap26@gmail.com</a></li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setLang(lang) {
+      document.body.classList.toggle('show-en', lang === 'en');
+      document.getElementById('btn-vi').classList.toggle('active', lang === 'vi');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      document.documentElement.lang = lang;
+    }
+    // Auto-detect browser language
+    if (navigator.language && !navigator.language.startsWith('vi')) {
+      setLang('en');
+    }
+  </script>
+</body>
+</html>

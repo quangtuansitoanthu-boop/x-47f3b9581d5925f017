@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ánh xạ dark tokens.css: card, text, text2, bg3, border, gold. -->
+    <color name="practice_widget_background">#1C1812</color>
+    <color name="practice_widget_text">#EDE8DF</color>
+    <color name="practice_widget_secondary">#C8BFB0</color>
+    <color name="practice_widget_card">#231E16</color>
+    <color name="practice_widget_border">#3A3226</color>
+    <color name="practice_widget_accent">#D4A84B</color>
+    <color name="practice_widget_track">#40382D</color>
+    <color name="practice_widget_streak_bg">#3B2E19</color>
+    <color name="practice_widget_streak_text">#E7C28D</color>
+</resources>

@@ -1,0 +1,205 @@
+/* Presentation only: palette and layout share the existing feature owners. */
+:root .tt-mode-card--thien { --mode-tint:var(--practice-meditation-tint); --mode-end:var(--practice-meditation-tint); --mode-ink:var(--practice-meditation-ink); }
+:root .tt-mode-card--chuoi { --mode-tint:var(--practice-scripture-copy-card-start); --mode-end:var(--practice-scripture-copy-card-end); --mode-ink:var(--practice-card-ink-strong); }
+:root .tt-mode-card--le-phat { --mode-tint:var(--practice-scripture-copy-card-start); --mode-end:var(--practice-scripture-copy-card-end); --mode-ink:var(--practice-scripture-copy-card-ink); }
+:root .tt-mode-card--precepts { --mode-tint:var(--practice-card-blue-start); --mode-end:var(--practice-card-blue-end); --mode-ink:color-mix(in srgb,var(--practice-card-blue-ink) 65%,var(--on-gold)); }
+:root .tt-mode-card--eight-precepts { --mode-tint:var(--practice-name-copy-start); --mode-end:var(--practice-name-copy-end); --mode-ink:var(--practice-name-copy-ink); }
+:root .tt-mode-card--thanh-tinh { --mode-tint:var(--practice-card-mint-start); --mode-end:var(--practice-card-mint-end); --mode-ink:var(--practice-card-mint-ink); }
+:root .tt-mode-card--kinh { --mode-tint:color-mix(in srgb,var(--practice-flower-icon) 65%,var(--card)); --mode-end:color-mix(in srgb,var(--practice-flower-icon) 25%,var(--card)); --mode-ink:var(--practice-card-ink-strong); }
+:root .tt-mode-card--tri-chu { --mode-tint:var(--practice-card-blue-start); --mode-end:var(--practice-card-blue-end); --mode-ink:var(--practice-card-blue-ink); }
+:root .tt-mode-card--name-copying { --mode-tint:var(--practice-name-copy-start); --mode-end:var(--practice-name-copy-end); --mode-ink:var(--practice-name-copy-ink); }
+:root .tt-mode-card--copying { --mode-tint:var(--practice-card-mint-start); --mode-end:var(--practice-card-mint-end); --mode-ink:color-mix(in srgb,var(--practice-card-mint-ink) 75%,var(--on-gold)); }
+:root .tt-mode-card--continue { --mode-tint:var(--practice-meditation-tint); --mode-end:var(--practice-mantra-tint); --mode-ink:var(--text); }
+:root .tt-mode-card--nghi-thuc { --mode-tint:var(--practice-scripture-copy-card-end); --mode-end:var(--practice-scripture-copy-card-start); --mode-ink:var(--practice-card-ink-strong); }
+:root .tt-mode-card--rec { --mode-tint:color-mix(in srgb,var(--practice-flower-icon) 65%,var(--card)); --mode-end:color-mix(in srgb,var(--practice-flower-icon) 25%,var(--card)); --mode-ink:var(--practice-card-ink-strong); }
+:root .tt-mode-card--tracker { --mode-tint:var(--practice-card-blue-start); --mode-end:var(--practice-card-blue-end); --mode-ink:var(--practice-card-blue-ink); }
+:root .tt-mode-card--community { --mode-tint:var(--practice-name-copy-card-start); --mode-end:var(--practice-name-copy-card-end); --mode-ink:var(--practice-name-copy-card-ink); }
+:root .tt-mode-card { background:linear-gradient(120deg,var(--mode-tint,var(--card)),var(--mode-end,var(--mode-tint,var(--card)))); color:var(--mode-ink,var(--text)); border:1px solid color-mix(in srgb,var(--mode-ink,var(--border)) 16%,transparent); border-radius:var(--radius-card); box-shadow:none; min-height:100px; }
+:root .tt-mode-card:hover { box-shadow:var(--shadow); transform:translateY(-2px); }
+:root .tt-mode-card .tt-mode-title { color:inherit; font-size:var(--font-size-card-title); }
+:root .tt-mode-card .tt-mode-desc { color:inherit; opacity:1; font-size:var(--font-size-body); line-height:1.5; }
+:root .tt-mode-card .tt-mode-icon-wrap,:root .tt-mode-card .tt-mode-arrow { background:color-mix(in srgb,var(--card) 65%,transparent); color:inherit; }
+:root .tt-mode-card--continue :is(.tt-mode-icon-wrap,.tt-mode-arrow) { background:color-mix(in srgb,currentColor 12%,transparent); }
+:root .tt-mode-card .tt-mode-icon-wrap { width:50px; height:50px; border-radius:15px; }
+:root .tt-hub-section--companion .tt-mode-card { min-height:96px; }
+:root .tt-hub-section--companion .tt-mode-icon-wrap { width:48px; height:48px; border-radius:14px; }
+:root .tt-hub-section--companion .tt-mode-desc { font-size:var(--font-size-body); line-height:1.35; }
+:root .tt-hub-header { text-align:left; }
+:root .tt-hub-title { font-family:var(--font-app); font-size:var(--font-size-section-title); }
+:root .tt-hero { padding:24px 16px 8px; }
+:root .tt-hero-icon { display:none; }
+:root .tt-hub-section--companion { margin-bottom:24px; }
+:root .tt-beginner-guide-wrap { margin-top:28px; }
+:root .tt-event-banner { margin-top:16px; }
+:root[data-theme='dark'] .tt-mode-card--thien { --mode-tint:#231a30; --mode-end:#35264a; --mode-ink:#e2d5f7; }
+:root[data-theme='dark'] .tt-mode-card--chuoi { --mode-tint:#2d1f14; --mode-end:#3d2817; --mode-ink:#f5d5b5; }
+:root[data-theme='dark'] .tt-mode-card--le-phat { --mode-tint:#292110; --mode-end:#3b2e12; --mode-ink:#fae8a7; }
+:root[data-theme='dark'] .tt-mode-card--precepts { --mode-tint:#112338; --mode-end:#18314e; --mode-ink:#c5e1ff; }
+:root[data-theme='dark'] .tt-mode-card--eight-precepts { --mode-tint:#2d1d28; --mode-end:#3d2536; --mode-ink:#f5d3eb; }
+:root[data-theme='dark'] .tt-mode-card--thanh-tinh { --mode-tint:#0d2826; --mode-end:#133835; --mode-ink:#c0eee9; }
+:root[data-theme='dark'] .tt-mode-card--kinh { --mode-tint:#2e1418; --mode-end:#3e1920; --mode-ink:#fcd2d8; }
+:root[data-theme='dark'] .tt-mode-card--copying { --mode-tint:#122b28; --mode-end:#193a36; --mode-ink:#c3f0ea; }
+:root[data-theme='dark'] .tt-mode-card--tri-chu { --mode-tint:#112238; --mode-end:#172d4a; --mode-ink:#c2ddfa; }
+:root[data-theme='dark'] .tt-mode-card--nghi-thuc { --mode-tint:#25211b; --mode-end:#332d24; --mode-ink:#e8ded0; }
+:root[data-theme='dark'] .tt-mode-card--name-copying { --mode-tint:#112730; --mode-end:#183742; --mode-ink:#c4eef5; }
+:root[data-theme='dark'] .tt-mode-card--tracker { --mode-tint:#1c2538; --mode-end:#26344d; --mode-ink:#cadcff; }
+:root[data-theme='dark'] .tt-mode-card--rec { --mode-tint:#331d24; --mode-end:#452530; --mode-ink:#ffd2dc; }
+:root[data-theme='dark'] .tt-mode-card--community { --mode-tint:#1a2b16; --mode-end:#243d1f; --mode-ink:#ccebc4; }
+:root[data-theme='dark'] .tt-mode-card :is(.tt-mode-icon-wrap,.tt-mode-arrow) { background:rgba(255,255,255,.12); color:inherit; }
+.qts-bottom-nav__item[data-nav='personal'] { --nav-accent:#725b91; }
+.inline-account-notice:empty { display:none; }
+.inline-account-notice > * + * { margin-top:14px; }
+.inline-account-notice button { min-height:44px; }
+.filter-toggle,.filter-reset { min-height:44px; padding:8px 14px; border:1px solid var(--border); border-radius:var(--radius-control); background:var(--card); color:var(--text); font:inherit; font-size:13px; cursor:pointer; }
+.filter-toggle { display:none; }
+.filter-reset { color:var(--brown); }
+.filter-summary { display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:10px 0;color:var(--text2);font-size:13px; }
+:root .meditation-chooser header { padding:18px; border-radius:16px; background:var(--practice-meditation-tint); }
+:root .meditation-chooser header h2 { color:var(--practice-meditation-ink); }
+@media(max-width:760px) {
+  .filter-toggle { display:inline-flex; align-items:center; }
+  :root .pt-filter-chips:not(.filters-open) { display:none; }
+  :root .pt-filter-chips.filters-open { display:flex; flex-wrap:wrap; }
+  :root .pt-toolbar-main { flex-wrap:wrap; }
+  :root .pt-search-wrap { flex-basis:100%; }
+  :root .pt-toolbar-end { width:100%; justify-content:space-between; }
+  :root .pt-search { min-height:44px; font-size:16px; }
+  :root .pt-chip-select { max-width:100%; min-height:44px; }
+  :root .tt-hub-section { margin-top:24px; }
+}
+@media(max-width:600px) {
+  :root .tt-hero { padding:16px 14px 4px; }
+  :root .tt-beginner-guide-wrap { margin-top:14px; margin-bottom:12px; }
+  :root .tt-beginner-guide { padding:12px 14px; gap:12px; }
+  :root .dharma-giving-banner-wrap { margin-bottom:10px; }
+  :root .tt-event-banner { margin-top:10px; margin-bottom:12px; }
+  :root .tt-hub-section { margin-top:16px; }
+  :root .tt-hub-section--companion { margin-bottom:16px; }
+}
+@media(prefers-reduced-motion:reduce) { :root .tt-mode-card { transition:none; } :root .tt-mode-card:hover { transform:none; } }
+
+/* Chỉ phủ chất liệu lên nút hành động; giữ nền/ngữ nghĩa và không tạo lớp blur native. */
+:root body :is(button, a:where(.btn)):is(
+  .btn, .btn-primary, .btn-secondary, .btn-cancel, .btn-confirm,
+  .guide-btn-cancel, .guide-btn-confirm, .pb-btn,
+  .guide-install-button, .btn-view-guide, .btn-dismiss, .btn-view-dharma, .btn-dismiss-dharma,
+  .tt-back-btn, .tt-theme-btn, .nav-theme-btn,
+  .tt-rosary__count-button, .tt-rosary__back, .tt-rosary__reset,
+  .tt-rosary__custom-add-btn, .tt-rosary__custom-del-btn,
+  .rosary-select__close, .rosary-select__add,
+  .rosary-select__trigger, :where(.tt-rosary__header-actions, .tt-rosary__options-bar) > button,
+  .pt-mp-btn, .pt-mp-circle-action-btn, .pt-restore-ctrl-btn, .pt-fp-ctrl-btn, .pt-fp-play-btn,
+  .pt-fp-collapse-btn, .pt-fp-close-btn, .pt-background-settings,
+  .quote-btn, .quote-card-close-btn, .sheet-close-btn,
+  .cn-btn, .cn-subpage-back-btn, .cn-channel-btn-primary, .cn-channel-btn-copy,
+  .cn-back-btn, .cn-author-btn,
+  .article-admin-close, :where(.article-admin-footer) > button,
+  .row-action-btn, .admin-refresh-button, .filter-toggle, .filter-reset
+):not([role='tab'], [role='switch'], [role='checkbox'], [role='slider'], [aria-pressed]) {
+  box-shadow: var(--glass-button-shadow);
+  transition: box-shadow var(--motion-press) var(--ease-standard), background-color var(--motion-press) var(--ease-standard), border-color var(--motion-press) var(--ease-standard);
+}
+
+/* Biến chỉ được tiêu thụ bởi allowlist trên, không đổi kiểu của tab/slider/nút ngoài phạm vi. */
+:root body :is(button, a:where(.btn)):active:not(:disabled, [aria-disabled='true'], [aria-busy='true']) {
+  --glass-button-shadow: var(--glass-button-pressed-shadow);
+}
+:root body :is(button, a:where(.btn)):is(:disabled, [aria-disabled='true'], [aria-busy='true']) {
+  --glass-button-shadow: inset 0 1px 0 var(--glass-button-edge);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root body :is(button, a:where(.btn)):is(
+    .btn, .btn-primary, .btn-secondary, .btn-cancel, .btn-confirm,
+    .guide-btn-cancel, .guide-btn-confirm, .pb-btn,
+    .guide-install-button, .btn-view-guide, .btn-dismiss, .btn-view-dharma, .btn-dismiss-dharma,
+    .tt-back-btn, .tt-theme-btn, .nav-theme-btn,
+    .tt-rosary__count-button, .tt-rosary__back, .tt-rosary__reset,
+    .tt-rosary__custom-add-btn, .tt-rosary__custom-del-btn,
+    .rosary-select__close, .rosary-select__add,
+    .rosary-select__trigger, :where(.tt-rosary__header-actions, .tt-rosary__options-bar) > button,
+    .pt-mp-btn, .pt-mp-circle-action-btn, .pt-restore-ctrl-btn, .pt-fp-ctrl-btn, .pt-fp-play-btn,
+    .pt-fp-collapse-btn, .pt-fp-close-btn, .pt-background-settings,
+    .quote-btn, .quote-card-close-btn, .sheet-close-btn,
+    .cn-btn, .cn-subpage-back-btn, .cn-channel-btn-primary, .cn-channel-btn-copy,
+    .cn-back-btn, .cn-author-btn,
+    .article-admin-close, :where(.article-admin-footer) > button,
+    .row-action-btn, .admin-refresh-button, .filter-toggle, .filter-reset
+  ):not([role='tab'], [role='switch'], [role='checkbox'], [role='slider'], [aria-pressed]) {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Cùng vật liệu/nhịp lựa chọn RosarySelect; menu audio/ngày giữ owner và hành vi riêng. */
+:root body :is(.pt-fp-dropdown, .timer-menu, .tt-music-menu, .admin-date-range__menu) {
+  box-sizing: border-box;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-app);
+  font-size: var(--font-size-body);
+}
+:root body :is(.pt-fp-dropdown, .timer-menu, .tt-music-menu, .admin-date-range__menu) :is(button, a[role='menuitem']) {
+  min-height: 44px;
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: var(--font-size-body);
+  line-height: 1.6;
+  font-weight: 700;
+}
+:root body :is(.pt-fp-dropdown, .timer-menu, .tt-music-menu, .admin-date-range__menu) :is(.active, [aria-current='page'], [aria-pressed='true']) {
+  background: var(--gold-light);
+  color: var(--brown);
+}
+
+:root body .rosary-select__panel :is(.pt-fp-dropdown, .timer-menu, .tt-music-menu, .admin-date-range__menu) {
+  position: static;
+  inset: auto;
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  transform: none;
+  animation: none;
+}
+:root body select:not([multiple]) {
+  box-sizing: border-box;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background-color: var(--card);
+  color: var(--text);
+  font-family: var(--font-app);
+  font-size: var(--font-size-label);
+  font-weight: 700;
+}
+
+@supports (((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) and (background: color-mix(in srgb, currentColor, transparent))) {
+  :root body select:not([multiple]) {
+    background-color: var(--dialog-glass-background);
+    -webkit-backdrop-filter: var(--dialog-glass-filter);
+    backdrop-filter: var(--dialog-glass-filter);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root body select:not([multiple]) {
+    background-color: var(--card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Shell đã chừa chỗ cho thanh điều hướng; màn chọn kinh không cộng lại lần nữa. */
+:root body .copy-page:not(.copy-writing) {
+  padding-bottom: var(--space-page);
+}

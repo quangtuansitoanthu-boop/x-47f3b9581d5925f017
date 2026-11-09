@@ -1,0 +1,16 @@
+{
+  "extends": "../../../tsconfig.json",
+  "include": [
+    "../../../src/routes/tu-tap/**/*.ts",
+    "../../../src/routes/tu-tap/**/*.svelte",
+    "../../../src/lib/components/practice/**/*.ts",
+    "../../../src/lib/components/practice/**/*.svelte",
+    "../../../src/lib/domain/practice/**/*.ts",
+    "../../../src/lib/browser/practice-storage.ts",
+    "../../../src/lib/browser/wake-lock.ts",
+    "../../../src/lib/browser/practice-audio.ts",
+    "../../../src/lib/browser/gestures.ts",
+    "./**/*.ts"
+  ],
+  "exclude": []
+}

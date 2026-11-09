@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Preview riêng: dữ liệu mẫu từ renderer native, không đọc snapshot/tài khoản khi mở picker. -->
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:src="@drawable/widget_preview_practice_medium" android:scaleType="fitCenter"
+    android:adjustViewBounds="true" android:contentDescription="@string/practice_widget_description" />

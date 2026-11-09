@@ -1,0 +1,29 @@
+ID=1765 STT=40
+TIEU_DE: 31. CHỦ VÀ TỚ
+TOM_TAT: Bà Trương là Tổng giám đốc một đại xí nghiệp bề thế, quản lý hơn mười ngàn công nhân. Sự nghiệp thành đạt vẻ vang này đã khiến bao người ngưỡng mộ. Thế nhưng trong gia đình, mặc dù vợ chồng bà sống hế...
+NOI_DUNG:
+{align:justify|Bà Trương là Tổng giám đốc một đại xí nghiệp bề thế, quản lý hơn mười ngàn công nhân. Sự nghiệp thành đạt vẻ vang này đã khiến bao người ngưỡng mộ. Thế nhưng trong gia đình, mặc dù vợ chồng bà sống hết sức ấm êm hạnh phúc, nhưng đối với cậu quý tử tên Cường thì họ bó tay hết cách.}
+{align:justify|Cường rất thông minh, từ nhỏ chăm học, ít nói. Trong lòng cha mẹ nó là đứa con ngoan, là bảo bối vô giá. Nhưng kể từ lúc cháu lên trung học rồi, thì nó ghiền chơi game online, từ đó phát sinh nhiều điều không hay. Suốt ngày suốt đêm Cường cứ lên mạng chơi game, vì vậy mà học hành sa sút… Cha mẹ, giáo sư, bạn bè, có khuyên can dạy bảo chi, thảy đều như nước đổ đầu vịt, Cường chẳng mảy may đếm xỉa tới, càng ngày nó càng hư đốn đến nỗi sau đó còn đánh cha mắng mẹ…}
+{align:justify|Ngày nọ bà Trương thiết tha khuyên con đừng chơi game nữa, thằng Cường liền nổi quạu, không những nó nói năng hỗn láo mà còn ra tay đánh cha khiến ông bị thương mắt phải. Bà Trương giận quá, cùng chồng bỏ nhà đi đến chỗ bạn bè ngụ tạm.}
+{align:justify|Lúc tôi gặp bà Trương, thấy mặt mày bà tiều tụy, mắt đỏ hoe, buồn rầu than:}
+{align:justify|– Rốt cuộc là nguyên nhân gì đã khiến thằng Cường nhà chúng tôi biến thành tác tệ như thế chứ? Người lớn có lòng, có ý tốt khuyên nó, đem thức ngon đồ bổ đến cho… mà nó cũng không màng đón nhận, lại còn ra tay đánh cha nữa…}
+{align:justify|Ngừng một lúc bà tiếp:}
+{align:justify|– Nó mê chơi game đến nỗi bỏ học, tính đến nay đã hơn nửa năm rồi! Vì vậy mà giáo sư thường đến nhà hỏi thăm, thậm chí còn dắt cảnh sát đến khuyên giúp, nhưng tất cả đều vô dụng. Úi chao! Hu Hu…}
+{align:justify|Nhìn bà Trương đau khổ tuyệt vọng, tôi rất cảm thông, liền an ủi, giải thích:}
+{align:justify|– Phải ôm lấy thống khổ, chịu não phiền nung nấu như hôm nay, tất cả đều do ác nhân đời trước của bà mà ra!}
+{align:justify|“Nguyên bà Trương và chồng, đời trước cũng là phu thê, nhưng bây giờ vị trí đã đổi. Bà Trương thuở đó mang thân nam, là một ông địa chủ nổi danh. Tuy giàu nhưng thuộc loại “giàu mà bất nhân”, ông tự thị mình giàu nên rất khinh người.}
+{align:justify|Lúc đó trong nhà họ có một thằng bé giúp việc chừng 12 tuổi. Cha mẹ nó do thiếu nợ họ vô phương đền trả nên bất đắc dĩ phải cho con đến nhà họ làm nô bộc trừ nợ. Hai vợ chồng rất phiền bực cha mẹ thằng bé, nên đã dùng nó để trút giận, họ thường đánh đập, mắng chửi, đối xử với nó rất tệ…}
+{align:justify|Ngày nọ, thằng bé vô ý làm vỡ cái bình hoa quý khiến cặp vợ chồng giàu phẫn nộ, họ đánh nó một trận rồi trói tay chân nó lại, đem bỏ ngoài đồng.}
+{align:justify|May là có một người hảo tâm đi ngang, kịp cứu thằng bé khi nó còn thoi thóp thở, nhờ vậy mà bào tồn được mạng nó. Kể từ đó trong lòng thằng bé đã ôm mầm hận oán, nó thề: “Sau này có cơ hội, nhất định sẽ báo thù, đòi lại nợ máu”…}
+{align:justify|Đời này nhân duyên tụ hội, thằng bé thời quá khứ từng bị khinh khi, lăng nhục thậm tệ, nay đã đầu thai vào làm đứa con cưng của hai vợ chồng họ Trương. Nó đến là để đòi nợ! Một ngày không xa trong tương lai, đôi phu phụ này sẽ bị nó làm cho tức chết”…}
+{align:justify|Hiểu rõ uẩn khúc nhân quả này rồi, bà Trương bật khóc thống thiết, chồng bà ngồi bên, vội an ủi:}
+{align:justify|- Đừng khóc, đừng khóc nữa bà nó ơi! Hèn gì mà thằng Cường từ 12 tuổi trở đi thì bắt đầu học hành sa sút, chỉ mê chơi game trên mạng, còn phát tệ đánh cha mắng mẹ… Té ra do thời quá khứ chúng tôi đã tạo ác, bất nhân với nó. Thế thì bây giờ chúng tôi phải làm sao đây?}
+{align:justify|– Cách tốt nhất là bắt đầu từ nay hai vị phải ăn chay, trước Phật thành tâm sám hối các ác nghiệp đã tạo thuở xưa và quỳ tụng 49 bộ “Kinh Địa Tạng”, hồi hướng cho Cường, như thế may ra nó có thể tha thứ cho hai vị, đoạn trừ lưới nghiệp buộc ràng và tất cả đều được hưởng lợi ích…}
+{align:justify|– Vâng ạ, sau khi về chúng tôi sẽ thực hành ngay.}
+{align:justify|Ba tháng sau, bà Trương gọi điện tới, xúc động nói:}
+{align:justify|– Vô cùng cảm tạ ngài, Phật pháp thực quá thần kỳ! Sau khi chúng tôi ăn chay, sám hối, tụng kinh, hồi hướng cho thằng Cường rồi… thì bây giờ nó đã bắt đầu đi học lại, hơn nữa cư xử với chúng tôi ngoan ngoãn và thay đổi rất nhiều, có hôm nó còn tự động vào bếp nấu cho chúng tôi ăn nữa… Đúng là hóa giải oán kết oan gia chỉ có hành theo Phật pháp mới là tốt và hiệu quả nhất!…}
+{align:justify|Giải thích thêm: Những câu chuyện kể rõ ác duyên giữa cha mẹ và con cái là để mọi người cảnh giác. Đa số thường than: “Thật khó mà dạy dỗ con cái”… (Vì đời trước đa số chúng là kẻ bị hại, đời này đến làm con để báo oán)…Là phụ mẫu cần tin sâu nhân quả, không nên nhắm mắt đánh đập con, mà phải sám hối những điều đã làm, đã tạo trong đời trước (thậm chí từ vô thỉ kiếp đến nay) của mình. Phải vì con ăn chay, tụng kinh hồi hướng… cầu Phật lực nhiếp thọ, hóa giải… biến ác duyên giữa cha mẹ và con cái thành thiện duyên.}
+{align:justify|Tiếp theo còn phải giáo dục con cái hiếu dưỡng cha mẹ, hành tròn đạo lý làm người. Thời gian lâu dần, con cái tự nhiên sẽ thay đổi mạnh, chuyển biến tốt.}
+{align:justify|Muốn con cái chuyển thành người tốt, trước tiên cha mẹ phải sửa đổi bản thân, chính họ phải đoạn ác tu thiện, thân cận Phật pháp, tụng kinh hồi hướng phước lành đến cho con…}
+{align:justify|Làm như thế mới chiêu cảm được Phật lực gia trì, khiến công đức tăng gấp bội. Thế thì dù bị nghịch tử đến ở kề bên nhưng nếu có phúc duyên, khéo thân cận Phật pháp, thì nghịch tử kia chính là chìa khóa vàng giúp mẹ cha mở ra cánh cửa hạnh phúc (nhờ vào sự học Phật, tu trì… khiến đôi bên cùng được lợi), toàn gia đồng hưởng pháp lạc, biến phiền não thành bồ đề.}
+{align:justify|Riêng những người làm con, nếu gặp cha mẹ đối xử với mình chằng nhân từ, thì phải hiểu là cũng đồng nguyên nhân tương tự…}

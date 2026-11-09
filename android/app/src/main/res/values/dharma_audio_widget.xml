@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ánh xạ token: gold-light, card, border, text, text2, gold, on-gold. -->
+    <color name="dharma_audio_bg">#FBF4E6</color>
+    <color name="dharma_audio_card">#FFFFFF</color>
+    <color name="dharma_audio_border">#DDD8CC</color>
+    <color name="dharma_audio_text">#1C1A15</color>
+    <color name="dharma_audio_secondary">#4A4033</color>
+    <color name="dharma_audio_accent">#C8963E</color>
+    <color name="dharma_audio_track">#DDD8CC</color>
+    <color name="dharma_audio_on_accent">#24180C</color>
+    <string name="dharma_audio_name">Pháp thoại</string>
+    <string name="dharma_audio_large_name">Pháp Thoại &amp; Kinh Sách 🎧</string>
+    <string name="dharma_audio_tagline">Học lời Phật dạy • Thực hành mỗi ngày</string>
+    <string name="dharma_audio_choose">Chọn bài nghe trong app</string>
+    <string name="dharma_audio_open">Mở Pháp thoại để chọn bài</string>
+    <string name="dharma_audio_play">Phát tiếp</string>
+    <string name="dharma_audio_pause">Tạm dừng</string>
+    <string name="dharma_audio_playing">Đang phát</string>
+    <string name="dharma_audio_ended">Đã phát xong</string>
+    <string name="dharma_audio_unselected">Chưa chọn bài</string>
+    <string name="dharma_audio_loading">Mở app để cập nhật</string>
+    <string name="dharma_audio_waiting">Chờ cập nhật</string>
+    <string name="dharma_audio_back">Tua lùi 15 giây</string>
+    <string name="dharma_audio_forward">Tua tới 15 giây</string>
+    <string name="dharma_audio_queue">NGHE TIẾP</string>
+    <string name="dharma_audio_queue_empty">Chưa có bài tiếp theo trong danh sách</string>
+    <string name="dharma_audio_queue_open">Xem danh sách trong app</string>
+    <string name="dharma_audio_repeat_off">Lặp: Tắt</string>
+    <string name="dharma_audio_repeat_one">Lặp: Một bài</string>
+    <string name="dharma_audio_repeat_all">Lặp: Tất cả</string>
+    <string name="dharma_audio_sleep">Hẹn giờ tắt</string>
+    <string name="dharma_audio_sleep_minutes">Hẹn tắt: %1$d phút</string>
+    <string name="dharma_audio_sleep_short">%1$d phút</string>
+    <string name="dharma_audio_sleep_off">Hẹn giờ</string>
+    <string name="dharma_audio_sleep_end">Hết bài</string>
+    <string name="dharma_audio_widget_label_small">Pháp thoại · Nhỏ</string>
+    <string name="dharma_audio_widget_label_medium">Pháp thoại · Vừa</string>
+    <string name="dharma_audio_widget_label_large">Pháp thoại · Lớn</string>
+    <string name="dharma_audio_widget_description">Tiếp tục nghe và điều khiển trình phát pháp thoại</string>
+</resources>

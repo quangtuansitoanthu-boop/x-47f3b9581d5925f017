@@ -1,0 +1,26 @@
+export const reminderPlatformText = {
+  vi: {
+    nativeSchedule: 'Lịch nhắc hoạt động khi đóng app và tắt màn hình. Sau khi cài hoặc cập nhật, hãy mở app một lần để lưu lịch.',
+    androidGranted: 'Đã bật quyền Báo thức và lời nhắc.',
+    androidDenied: 'Bật quyền Báo thức và lời nhắc để nhắc đúng giờ khi máy ngủ. Nếu chưa bật, Android có thể báo trễ.',
+    androidButton: 'Cho phép nhắc đúng giờ',
+    androidHelp: 'Nếu Buộc dừng trong cài đặt Android, cần mở lại app để khôi phục lịch. Nếu máy hạn chế chạy nền, hãy cho phép Tu Tập hoạt động nền trong cài đặt pin.',
+    iosHelp: 'Trên iOS, mở mục nhắc lịch và chọn Cho phép khi iPhone hỏi quyền thông báo. Sau đó có thể kiểm tra tại Cài đặt → Thông báo → Tu tập. Nếu đã từ chối, hãy bật lại ở đây; kiểm tra thêm chế độ Tập trung và âm thanh thông báo.',
+    iosUnavailable: 'Chưa kết nối được tính năng thông báo iOS. Hãy cập nhật bản cài đặt của ứng dụng rồi thử lại.',
+    iosRetry: 'Thử lại quyền thông báo',
+    webSchedule: 'Trên web, hãy mở ứng dụng để lịch nhắc được kiểm tra và cho phép trang gửi thông báo trong trình duyệt.',
+    webHelp: 'Nếu dùng macOS, kiểm tra thêm Cài đặt hệ thống → Thông báo và cho phép thông báo của trình duyệt hoặc ứng dụng web Tu tập.',
+  },
+  en: {
+    nativeSchedule: 'Reminders work when the app is closed and the screen is off. Open the app once after installing or updating to save your schedule.',
+    androidGranted: 'Alarms & reminders access is enabled.',
+    androidDenied: 'Allow Alarms & reminders for timely delivery while the device sleeps. Without this access, Android may delay reminders.',
+    androidButton: 'Allow timely reminders',
+    androidHelp: 'After Force stop in Android settings, reopen the app to restore reminders. If your phone restricts background activity, allow it for Tu Tập in battery settings.',
+    iosHelp: 'On iOS, open a reminder section and choose Allow when iPhone asks for notification permission. Then check Settings → Notifications → Tu tập. If previously denied, enable notifications there; also check Focus and notification sounds.',
+    iosUnavailable: 'The iOS notification feature is unavailable. Update the installed app and try again.',
+    iosRetry: 'Retry notification permission',
+    webSchedule: 'On the web, keep the app open so reminders can be checked, and allow notifications for this site in your browser.',
+    webHelp: 'On macOS, also check System Settings → Notifications and allow notifications for your browser or the Tu tập web app.',
+  },
+};

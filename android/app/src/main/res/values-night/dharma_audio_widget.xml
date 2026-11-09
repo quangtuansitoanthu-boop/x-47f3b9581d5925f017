@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ánh xạ dark tokens: card, bg3, border, text, text2, gold. -->
+    <color name="dharma_audio_bg">#1C1812</color>
+    <color name="dharma_audio_card">#231E16</color>
+    <color name="dharma_audio_border">#3A3226</color>
+    <color name="dharma_audio_text">#EDE8DF</color>
+    <color name="dharma_audio_secondary">#C8BFB0</color>
+    <color name="dharma_audio_accent">#D4A84B</color>
+    <color name="dharma_audio_track">#3A3226</color>
+</resources>

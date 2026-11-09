@@ -1,0 +1,222 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "account_id": "ec98af014ed5d40aa1c939d19c18aaf1",
+  "name": "quangtu-web-local",
+  "main": "dist-sveltekit/_worker.js",
+  "compatibility_date": "2026-07-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "assets": {
+    "directory": "./dist-sveltekit",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/auth/*", "/oauth/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "quangtu-db-local",
+      "database_id": "00000000-0000-0000-0000-000000000001",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "quangtu-local"
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "AUTH_RATE_LIMITER",
+      "namespace_id": "9127001",
+      "simple": { "limit": 5, "period": 60 }
+    },
+    {
+      "name": "COMMENT_RATE_LIMITER",
+      "namespace_id": "9127002",
+      "simple": { "limit": 3, "period": 60 }
+    },
+    {
+      "name": "VIEW_RATE_LIMITER",
+      "namespace_id": "9127003",
+      "simple": { "limit": 30, "period": 60 }
+    },
+    {
+      "name": "UPLOAD_RATE_LIMITER",
+      "namespace_id": "9127004",
+      "simple": { "limit": 2, "period": 60 }
+    },
+    {
+      "name": "PRESENCE_RATE_LIMITER",
+      "namespace_id": "9127005",
+      "simple": { "limit": 30, "period": 60 }
+    }
+  ],
+  "vars": {
+    "APP_ORIGIN": "http://127.0.0.1:4173",
+    "SESSION_SECRET": "local-development-session-secret-with-enough-entropy",
+    "OAUTH_STATE_SECRET": "local-development-oauth-state-secret-with-enough-entropy",
+    "RATE_LIMIT_SALT": "local-development-rate-limit-salt",
+    "ENVIRONMENT": "local",
+    "GOOGLE_NATIVE_CLIENT_IDS": "18472854734-2hpib1tghifb2li4s42vqaqvthfbn1jp.apps.googleusercontent.com",
+    "MEDIA_PUBLIC_BASE_URL": "/api/media",
+    "GOOGLE_DRIVE_ROOT_FOLDER_ID": "1F-14nA9PVLmh20gIVW-zHfa-hXbWko-y",
+    "MIGRATION_SEAL_REQUIRED": "false",
+    "PRESENCE_ENABLED": "true",
+    "AUTOMATIC_PRACTICE_ENABLED": "true",
+    "PRACTICE_COMMUNITY_ENABLED": "true",
+    "FACEBOOK_GRAPH_API_VERSION": "v26.0",
+    "FACEBOOK_IMPORT_ENABLED": "false",
+    "FACEBOOK_IMPORT_SOURCE_URL": "https://www.facebook.com/tranan.buhd",
+    "FACEBOOK_IMPORT_MAX_PAGES": "4",
+    "FACEBOOK_RECONCILE_BATCH": "10",
+    "FACEBOOK_TOKEN_KEY_VERSION": "v1"
+  },
+  "env": {
+    "production-remote": {
+      "name": "quangtu-web-production-remote",
+      "workers_dev": true,
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "quangtu-db",
+          "database_id": "74cbd98d-c702-4243-af99-3af4a0b399c1",
+          "migrations_dir": "migrations",
+          "remote": true
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "MEDIA",
+          "bucket_name": "quangtu",
+          "remote": true
+        }
+      ],
+      "ratelimits": [
+        {
+          "name": "AUTH_RATE_LIMITER",
+          "namespace_id": "9127001",
+          "simple": { "limit": 5, "period": 60 }
+        },
+        {
+          "name": "COMMENT_RATE_LIMITER",
+          "namespace_id": "9127002",
+          "simple": { "limit": 3, "period": 60 }
+        },
+        {
+          "name": "VIEW_RATE_LIMITER",
+          "namespace_id": "9127003",
+          "simple": { "limit": 30, "period": 60 }
+        },
+        {
+          "name": "UPLOAD_RATE_LIMITER",
+          "namespace_id": "9127004",
+          "simple": { "limit": 2, "period": 60 }
+        },
+        {
+          "name": "PRESENCE_RATE_LIMITER",
+          "namespace_id": "9127005",
+          "simple": { "limit": 30, "period": 60 }
+        }
+      ],
+      "vars": {
+        "APP_ORIGIN": "http://127.0.0.1:4173",
+        "SESSION_SECRET": "local-development-session-secret-with-enough-entropy",
+        "OAUTH_STATE_SECRET": "local-development-oauth-state-secret-with-enough-entropy",
+        "RATE_LIMIT_SALT": "local-development-rate-limit-salt",
+        "ENVIRONMENT": "production",
+        "GOOGLE_NATIVE_CLIENT_IDS": "18472854734-2hpib1tghifb2li4s42vqaqvthfbn1jp.apps.googleusercontent.com",
+        "MEDIA_PUBLIC_BASE_URL": "https://media.quangtu.vn",
+        "GOOGLE_DRIVE_ROOT_FOLDER_ID": "1F-14nA9PVLmh20gIVW-zHfa-hXbWko-y",
+        "MIGRATION_SEAL_REQUIRED": "true",
+        "PRESENCE_ENABLED": "true",
+        "AUTOMATIC_PRACTICE_ENABLED": "true",
+        "PRACTICE_COMMUNITY_ENABLED": "true",
+        "FACEBOOK_GRAPH_API_VERSION": "v26.0",
+        "FACEBOOK_IMPORT_ENABLED": "false",
+        "FACEBOOK_IMPORT_SOURCE_URL": "https://www.facebook.com/tranan.buhd",
+        "FACEBOOK_IMPORT_MAX_PAGES": "4",
+        "FACEBOOK_RECONCILE_BATCH": "10",
+        "FACEBOOK_TOKEN_KEY_VERSION": "v1"
+      }
+    },
+    "production": {
+      "name": "quangtu-web",
+      "workers_dev": true,
+      "routes": [
+        {
+          "pattern": "quangtu.vn",
+          "custom_domain": true
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "quangtu-db",
+          "database_id": "74cbd98d-c702-4243-af99-3af4a0b399c1",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "MEDIA",
+          "bucket_name": "quangtu"
+        }
+      ],
+      "secrets": {
+        "required": [
+          "SESSION_SECRET",
+          "OAUTH_STATE_SECRET",
+          "RATE_LIMIT_SALT",
+          "GOOGLE_CLIENT_ID",
+          "GOOGLE_CLIENT_SECRET",
+          "GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON"
+        ]
+      },
+      "ratelimits": [
+        {
+          "name": "AUTH_RATE_LIMITER",
+          "namespace_id": "9127201",
+          "simple": { "limit": 5, "period": 60 }
+        },
+        {
+          "name": "COMMENT_RATE_LIMITER",
+          "namespace_id": "9127202",
+          "simple": { "limit": 3, "period": 60 }
+        },
+        {
+          "name": "VIEW_RATE_LIMITER",
+          "namespace_id": "9127203",
+          "simple": { "limit": 30, "period": 60 }
+        },
+        {
+          "name": "UPLOAD_RATE_LIMITER",
+          "namespace_id": "9127204",
+          "simple": { "limit": 2, "period": 60 }
+        },
+        {
+          "name": "PRESENCE_RATE_LIMITER",
+          "namespace_id": "9127205",
+          "simple": { "limit": 30, "period": 60 }
+        }
+      ],
+      "vars": {
+        "APP_ORIGIN": "https://quangtu.vn",
+        "ENVIRONMENT": "production",
+        "GOOGLE_NATIVE_CLIENT_IDS": "18472854734-2hpib1tghifb2li4s42vqaqvthfbn1jp.apps.googleusercontent.com",
+        "MEDIA_PUBLIC_BASE_URL": "https://media.quangtu.vn",
+        "GOOGLE_DRIVE_ROOT_FOLDER_ID": "1F-14nA9PVLmh20gIVW-zHfa-hXbWko-y",
+        "MIGRATION_SEAL_REQUIRED": "true",
+        "PRESENCE_ENABLED": "true",
+        "AUTOMATIC_PRACTICE_ENABLED": "true",
+        "PRACTICE_COMMUNITY_ENABLED": "true",
+        "FACEBOOK_GRAPH_API_VERSION": "v26.0",
+        "FACEBOOK_IMPORT_ENABLED": "false",
+        "FACEBOOK_IMPORT_SOURCE_URL": "https://www.facebook.com/tranan.buhd",
+        "FACEBOOK_IMPORT_MAX_PAGES": "4",
+        "FACEBOOK_RECONCILE_BATCH": "10",
+        "FACEBOOK_TOKEN_KEY_VERSION": "v1"
+      }
+    }
+  }
+}

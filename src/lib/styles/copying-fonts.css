@@ -1,0 +1,6 @@
+/* Project fonts and OFL-licensed Mali; loaded only when selected. */
+@font-face{font-family:CopyMali;src:url('/fonts/copying/Mali-Regular.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:CopyMali;src:url('/fonts/copying/Mali-Bold.ttf') format('truetype');font-style:normal;font-weight:700;font-display:swap}
+@font-face{font-family:CopyHipsteria;src:url('/fonts/copying/ICIEL-Hipsteria.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:CopyAutogate;src:url('/fonts/copying/MTD-Autogate-Stamp.otf') format('opentype');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:CopyBrignola;src:url('/fonts/copying/MTD-Brignola-PUA-Script.otf') format('opentype');font-style:normal;font-weight:400;font-display:swap}

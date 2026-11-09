@@ -1,0 +1,14 @@
+ID=1777 STT=52
+TIEU_DE: 42. ANH BẠN KHÓ THỞ
+TOM_TAT: Tôi có một người bạn, một năm thì bị khó thở hết sáu tháng, đi bịnh viện khám, chữa chạy đông y tây y đủ hết cũng không bớt.
+Có lần đang trò chuyện anh bị sặc sụa, nghẹt thở, bèn hỏi tôi:
+– Có cách gì...
+NOI_DUNG:
+{align:justify|Tôi có một người bạn, một năm thì bị khó thở hết sáu tháng, đi bịnh viện khám, chữa chạy đông y tây y đủ hết cũng không bớt.}
+{align:justify|Có lần đang trò chuyện anh bị sặc sụa, nghẹt thở, bèn hỏi tôi:}
+{align:justify|– Có cách gì trị chăng? Chắc đây là nghiệp chướng của tôi.}
+{align:justify|Tôi bảo: – Nếu là nghiệp chướng thì cũng phải tìm cho ra nguyên nhân. Nhất định là có nguyên nhân. Anh hãy nhớ kỹ lại xem, trong đời này anh có giết qua loài vật nào không và đã giết bao nhiêu?}
+{align:justify|Anh nói:}
+{align:justify|– Có, hồi đó tôi ở quê, nhà rất nhiều chuột. Ba mẹ tôi phải bẫy chuột và bắt được rất nhiều. Biết tôi ưa nhận nước chuột nên họ giao tôi đem cả lồng chuột ra dìm xuống sông, tôi đã khiến chuột sặc sụa khống thở được và chết đuối cả… mà hễ chuột chưa chết thì tôi nhất quyết chẳng chịu lấy lồng lên…Có lẽ vì vậy mà giờ mới bị báo ứng như thế này! Anh bạn tôi hằng ngày luôn vị sặc, nghẹt thở… đến dở chết dở sống. Chư vị thấy có đáng sợ hay không?}
+{align:justify|Tôi kể ra câu chuyện này không phải đề dọa các vị, mà là muốn các vị hiểu rõ để không sát sinh và đừng kiếm sống bằng những nghề sát sinh. Mong quý vị hãy tự bảo vệ tốt cho mình!}
+{align:justify|Tự thuật của Sư Hải Đào}

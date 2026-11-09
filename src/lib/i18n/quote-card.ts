@@ -1,0 +1,38 @@
+export const quoteCardCopy = {
+  vi: {
+    title: 'Tạo ảnh trích dẫn', create: 'Tạo ảnh',
+    subtitle: 'Chọn nền và chia sẻ lời trích dẫn ý nghĩa',
+    close: 'Đóng', choose: 'Chọn ảnh nền', loading: 'Đang tạo ảnh…',
+    error: 'Không thể tải ảnh. Vui lòng thử lại.', retry: 'Thử lại',
+    copy: 'Sao chép ảnh', save: 'Lưu ảnh', share: 'Chia sẻ',
+    sourceUnavailable: 'Nội dung không còn khả dụng',
+    sourceUnverified: 'Chưa kiểm tra được thông tin nguồn',
+    targetMissing: 'Không tìm thấy trích dẫn này trong dữ liệu của tài khoản hiện tại. Đã mở nội dung nguồn.',
+    targetOrphaned: 'Trích dẫn không còn khớp với nội dung hiện tại. Bản trích dẫn gốc vẫn được giữ.',
+    targetInvalid: 'Không thể mở đúng vị trí trích dẫn này. Đã mở nội dung nguồn.',
+    themes: {
+      'lotus-dawn': 'Sen sớm mai', 'lotus-pink': 'Sen hồng',
+      'lotus-sunrise': 'Sen nắng sớm', 'lotus-moon': 'Sen đêm trăng',
+      'sky-clouds': 'Mây trời', 'sky-sunset': 'Hoàng hôn',
+      'sky-pastel': 'Bình minh', 'sky-stars': 'Trời sao',
+    },
+  },
+  en: {
+    title: 'Create quote image', create: 'Create image',
+    subtitle: 'Choose a background and share a meaningful quote',
+    close: 'Close', choose: 'Choose background', loading: 'Creating image…',
+    error: 'Unable to load the image. Please try again.', retry: 'Try again',
+    copy: 'Copy image', save: 'Save image', share: 'Share',
+    sourceUnavailable: 'Content is no longer available',
+    sourceUnverified: 'Source information has not been verified',
+    targetMissing: 'This quote was not found in the current account’s data. The source is open.',
+    targetOrphaned: 'This quote no longer matches the current content. Your original quote is preserved.',
+    targetInvalid: 'This quote location could not be opened. The source is open.',
+    themes: {
+      'lotus-dawn': 'Morning lotus', 'lotus-pink': 'Pink lotus',
+      'lotus-sunrise': 'Sunlit lotus', 'lotus-moon': 'Moonlit lotus',
+      'sky-clouds': 'Clouds', 'sky-sunset': 'Sunset',
+      'sky-pastel': 'Dawn', 'sky-stars': 'Starry sky',
+    },
+  },
+};

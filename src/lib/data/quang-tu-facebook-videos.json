@@ -1,0 +1,229 @@
+{
+  "bookId": "tuyen-tap-phap-facebook-quang-tu",
+  "remotePrefix": "https://media.quangtu.vn/videos/",
+  "posterPrefix": "https://media.quangtu.vn/posters/",
+  "totalBytes": 76782513,
+  "remoteTotalBytes": 76782513,
+  "videos": [
+    {
+      "chapterId": "13476",
+      "chapterIndex": 498,
+      "title": "VUA ĐƯỜNG THÁI TÔNG NHẬP XÁC VÀO HOÀNG HẬU TÌM TỂ TƯỚNG CẦU GIẢI THOÁT, HOÀNG HẬU VÀ TỂ TƯỚNG N…",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1590804654-1.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1590804654-1.mp4",
+      "filename": "fb-video-1590804654-1.mp4",
+      "bytes": 18801953,
+      "remoteBytes": 18801953,
+      "sha256": "1cd0338429b48fc470a79adff21cdc0457f2f805a78b1cb644fdee02d9daa9b5"
+    },
+    {
+      "chapterId": "13477",
+      "chapterIndex": 499,
+      "title": "THÊM MỘT BẰNG CHỨNG VỀ SỰ TỒN TẠI ĐỊA NGỤC",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1591018490-2.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1591018490-2.mp4",
+      "filename": "fb-video-1591018490-2.mp4",
+      "bytes": 9526368,
+      "remoteBytes": 9526368,
+      "sha256": "71293e4c7420e0ddd7ffa9d081f99a6ddb6d9aad38632ddafd02d887fed71629"
+    },
+    {
+      "chapterId": "13478",
+      "chapterIndex": 500,
+      "title": "Cóc biết niệm Phật và lạy Phật sám hối 🙏",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1591763549-3.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1591763549-3.mp4",
+      "filename": "fb-video-1591763549-3.mp4",
+      "bytes": 613880,
+      "remoteBytes": 613880,
+      "sha256": "96c8fbdb2033532c5b4a3089b66b4461f42b4cc9967d35d214e4450b25bf9d76"
+    },
+    {
+      "chapterId": "13479",
+      "chapterIndex": 501,
+      "title": "Chú chuột nhỏ lạy Phật trước cửa chùa 🙏",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1592019733-4.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1592019733-4.mp4",
+      "filename": "fb-video-1592019733-4.mp4",
+      "bytes": 1154153,
+      "remoteBytes": 1154153,
+      "sha256": "b6921dabec34cabecbbce33d620ef98a29ac427669c90a7d182d82b7aa25a4cb"
+    },
+    {
+      "chapterId": "13480",
+      "chapterIndex": 502,
+      "title": "Lời dạy quý báu của HT. Quảng Khâm !",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1592923020-5.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1592923020-5.mp4",
+      "filename": "fb-video-1592923020-5.mp4",
+      "bytes": 7602386,
+      "remoteBytes": 7602386,
+      "sha256": "3a1c48cf211c8c09d3daf0a1ab4443c0598596fbf202025ab462499848221559"
+    },
+    {
+      "chapterId": "13481",
+      "chapterIndex": 503,
+      "title": "VONG LINH MIÊU TẢ CẢNH KHỔ NƠI ĐỊA NGỤC",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1593854504-6.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1593854504-6.mp4",
+      "filename": "fb-video-1593854504-6.mp4",
+      "bytes": 304128,
+      "remoteBytes": 304128,
+      "sha256": "936f733e7c2eef02e64cb9a672093b318414912e1df5977b3ccc17e86f3f04a2"
+    },
+    {
+      "chapterId": "13482",
+      "chapterIndex": 504,
+      "title": "VÌ SAO ĐỨC PHẬT THÍCH CA KHÔNG GIAO PHÓ SỨ MẠNG ĐỘ TẤT CẢ CHÚNG SANH CHO NHỮNG VỊ BỒ TÁT KHÁC M…",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1594656098-7.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1594656098-7.mp4",
+      "filename": "fb-video-1594656098-7.mp4",
+      "bytes": 2612938,
+      "remoteBytes": 2612938,
+      "sha256": "166263688b44e5dd157ae06776afc6877962af3ea83aae5e1d9a1fd3a2334b8b"
+    },
+    {
+      "chapterId": "13483",
+      "chapterIndex": 505,
+      "title": "THẦN ĐƠN CẦU GÌ ĐƯỢC ĐẤY TRONG THỜI MẠT PHÁP.",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1620178775-8.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1620178775-8.mp4",
+      "filename": "fb-video-1620178775-8.mp4",
+      "bytes": 5939893,
+      "remoteBytes": 5939893,
+      "sha256": "fe90270cbc51284dce032b788f95f6576b0bae12de80621a904013f2d90c52a7"
+    },
+    {
+      "chapterId": "13484",
+      "chapterIndex": 506,
+      "title": "NAM MÔ ĐỊA TẠNG VƯƠNG BỒ TÁT MA HA TÁT",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1668917410-9.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1668917410-9.mp4",
+      "filename": "fb-video-1668917410-9.mp4",
+      "bytes": 769966,
+      "remoteBytes": 769966,
+      "sha256": "f15f1b3e08e624ddb84ecc30d99d0975dae22af36a794e794924ce3f526afdea"
+    },
+    {
+      "chapterId": "13485",
+      "chapterIndex": 507,
+      "title": "Nguồn gốc 10 ngày trai giới",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1693096928-10.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1693096928-10.mp4",
+      "filename": "fb-video-1693096928-10.mp4",
+      "bytes": 54734,
+      "remoteBytes": 54734,
+      "sha256": "cec061fa42a20213f9ea11c534d0e53082e0bcf26efc5148d839907f4e6cbcf1"
+    },
+    {
+      "chapterId": "13486",
+      "chapterIndex": 508,
+      "title": "KÍNH MỪNG NGÀY VÍA",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1694707441-11.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1694707441-11.mp4",
+      "filename": "fb-video-1694707441-11.mp4",
+      "bytes": 405656,
+      "remoteBytes": 405656,
+      "sha256": "c3b84e004faf9b47b13858c0f9ded468034ac5c8529908099b0012045cdd68e7"
+    },
+    {
+      "chapterId": "13487",
+      "chapterIndex": 509,
+      "title": "BỔN NGUYỆN CỦA ĐỊA TẠNG VƯƠNG BỒ TÁT LÀ ĐỘ TẤT CẢ CÁC CHÚNG SINH NƠI ĐỊA NGỤC 🙏🙏🙏",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1701847998-12.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1701847998-12.mp4",
+      "filename": "fb-video-1701847998-12.mp4",
+      "bytes": 1375182,
+      "remoteBytes": 1375182,
+      "sha256": "57ae69ac8f33e2d31f3af0dbb2ebb13be564d23c03eb3186340009af03000a39"
+    },
+    {
+      "chapterId": "13488",
+      "chapterIndex": 510,
+      "title": "CHUYỆN CÓ THẬT: NI SƯ CHẾT ĐI SỐNG LẠI KỂ CHUYỆN DU ĐỊA NGỤC",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1703661284-13.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1703661284-13.mp4",
+      "filename": "fb-video-1703661284-13.mp4",
+      "bytes": 10844408,
+      "remoteBytes": 10844408,
+      "sha256": "89394cb228ba0258934be8b731ccdc9d14d96d99eca5fab62994d7ac1e162dff"
+    },
+    {
+      "chapterId": "13489",
+      "chapterIndex": 511,
+      "title": "PHƯƠNG PHÁP NIỆM PHẬT ĐỂ VÃNG SANH CHO NGƯỜI BẬN RỘN",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1706533871-14.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1706533871-14.mp4",
+      "filename": "fb-video-1706533871-14.mp4",
+      "bytes": 201358,
+      "remoteBytes": 201358,
+      "sha256": "bb8ac79a8db2fd4e2f9a18920551b9521d1a9a8a74e5c83f5d7e319e38ed8fab"
+    },
+    {
+      "chapterId": "13490",
+      "chapterIndex": 512,
+      "title": "Nên suy ngẫm ạ",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1720746478-15.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1720746478-15.mp4",
+      "filename": "fb-video-1720746478-15.mp4",
+      "bytes": 812182,
+      "remoteBytes": 812182,
+      "sha256": "613e207260fbc0261cacb74610534fcd590a1db16226d96e9248e07cac7b5a06"
+    },
+    {
+      "chapterId": "13491",
+      "chapterIndex": 513,
+      "title": "Chú LĂNG NGHIÊM âm Phạn NHÌN VÀO DỄ ĐỌC ( tụng theo các Lạt ma)",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1729941530-16.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1729941530-16.mp4",
+      "filename": "fb-video-1729941530-16.mp4",
+      "bytes": 4784496,
+      "remoteBytes": 4784496,
+      "sha256": "a6a4f98a13c38f1a01014ed3173eb382bee9ac5cc692250946c8dcef0403fb2a"
+    },
+    {
+      "chapterId": "13492",
+      "chapterIndex": 514,
+      "title": "Kinh Địa Tạng Video - Phẩm 1 Phần 1",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1777021689-17.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1777021689-17.mp4",
+      "filename": "fb-video-1777021689-17.mp4",
+      "bytes": 1976613,
+      "remoteBytes": 1976613,
+      "sha256": "3029260a27f2be5bc47d778cd4bf5403635a861ac366594b2eea061c8d06ee92"
+    },
+    {
+      "chapterId": "13493",
+      "chapterIndex": 515,
+      "title": "Kinh Đại Tạng Bồ Tát Bổn Nguyện Video -Phẩm thứ nhất phần 2",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1777104506-18.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1777104506-18.mp4",
+      "filename": "fb-video-1777104506-18.mp4",
+      "bytes": 1478171,
+      "remoteBytes": 1478171,
+      "sha256": "0f67ac96edc92e8e4b44a881ad261b4ee7d6470f6bfbc18296040c773e11c546"
+    },
+    {
+      "chapterId": "13494",
+      "chapterIndex": 516,
+      "title": "Kinh Địa Tạng Bồ Tát Bổn Nguyện Video - Phẩm thứ 3",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1777106226-19.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1777106226-19.mp4",
+      "filename": "fb-video-1777106226-19.mp4",
+      "bytes": 2410249,
+      "remoteBytes": 2410249,
+      "sha256": "3545d005824de88c2d74e9808197bdc0264fb866458977beee5899b2a188958c"
+    },
+    {
+      "chapterId": "13495",
+      "chapterIndex": 517,
+      "title": "Kinh Địa Tạng Video - Phẩm 4",
+      "poster": "https://media.quangtu.vn/posters/fb-poster-1777134680-20.webp",
+      "src": "https://media.quangtu.vn/videos/fb-video-1777134680-20.mp4",
+      "filename": "fb-video-1777134680-20.mp4",
+      "bytes": 5113799,
+      "remoteBytes": 5113799,
+      "sha256": "7219d75370bfe4b4b5124d3dd206a8d89520f0ab367bfdd7358cc16602166f53"
+    }
+  ]
+}

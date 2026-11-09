@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Tu tập</string>
+    <string name="title_activity_main">Tu tập</string>
+    <string name="package_name">vn.quangtu.tutam</string>
+    <string name="custom_url_scheme">vn.quangtu.tutam</string>
+    <string name="facebook_app_id">2174388996483129</string>
+    <string name="fb_login_protocol_scheme">fb2174388996483129</string>
+    <string name="facebook_client_token">2ec34abc6b255345ebd3f937cd630ff7</string>
+    <string name="server_client_id">18472854734-2hpib1tghifb2li4s42vqaqvthfbn1jp.apps.googleusercontent.com</string>
+    <string name="default_web_client_id">18472854734-2hpib1tghifb2li4s42vqaqvthfbn1jp.apps.googleusercontent.com</string>
+</resources>

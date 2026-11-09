@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "vn.quangtu.twa",
+    "sha256_cert_fingerprints": ["A4:9A:92:EB:0F:CA:9A:97:2C:AC:00:30:85:DA:05:DF:4C:FE:0D:C6:50:45:20:CF:AA:35:1E:56:93:28:21:2A"]
+  }
+}]

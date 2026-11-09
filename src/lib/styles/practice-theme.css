@@ -1,0 +1,41 @@
+/* Khôi phục lớp trình bày Tu tập từ tutam-main, giữ owner dữ liệu của mobile. */
+
+:root .tt-mode-card--thien { --mode-tint:#b78af5; --mode-end:#dec5ff; --mode-ink:#361656; }
+:root .tt-mode-card--chuoi { --mode-tint:#f9ad60; --mode-end:#ffdaaa; --mode-ink:#713d20; }
+:root .tt-mode-card--le-phat { --mode-tint:#f5c54e; --mode-end:#ffe49a; --mode-ink:#674811; }
+:root .tt-mode-card--thanh-tinh { --mode-tint:var(--practice-card-mint-start); --mode-end:var(--practice-card-mint-end); --mode-ink:var(--practice-card-ink-strong); }
+:root .tt-mode-card--precepts { --mode-tint:var(--gold-light); --mode-end:var(--gold-muted); --mode-ink:var(--text); }
+:root .tt-mode-card--kinh { --mode-tint:#f58fb6; --mode-end:#ffc9df; --mode-ink:var(--practice-card-ink-strong); }
+:root .tt-mode-card--tri-chu { --mode-tint:var(--practice-card-blue-start); --mode-end:var(--practice-card-blue-end); --mode-ink:var(--practice-card-ink-strong); }
+:root .tt-mode-card--name-copying { --mode-tint:var(--practice-name-copy-start); --mode-end:var(--practice-name-copy-end); --mode-ink:var(--practice-name-copy-ink); }
+:root .tt-mode-card--copying { --mode-tint:var(--gold-light); --mode-end:var(--gold-muted); --mode-ink:var(--brown-dark); }
+:root .tt-mode-card--continue { --mode-tint:var(--practice-meditation-tint); --mode-end:var(--practice-mantra-tint); --mode-ink:var(--text); }
+:root .tt-mode-card--nghi-thuc { --mode-tint:#eaa17e; --mode-end:#f9d2b9; --mode-ink:var(--practice-card-ink-strong); }
+:root .tt-mode-card--rec { --mode-tint:#ff929f; --mode-end:#ffc7c7; --mode-ink:#692332; }
+:root .tt-mode-card--tracker { --mode-tint:#94aafa; --mode-end:#c9d5ff; --mode-ink:#243763; }
+:root .tt-mode-card--community { --mode-tint:#92d568; --mode-end:#c9eda9; --mode-ink:#274b16; }
+:root .tt-mode-card { background:linear-gradient(120deg,var(--mode-tint,var(--card)),var(--mode-end,var(--mode-tint,var(--card)))); color:var(--mode-ink,var(--text)); border:1px solid color-mix(in srgb,var(--mode-ink,var(--border)) 16%,transparent); border-radius:var(--radius-card); box-shadow:none; min-height:100px; }
+:root .tt-mode-card:hover { box-shadow:var(--shadow); transform:translateY(-2px); }
+:root .tt-mode-card .tt-mode-title { color:inherit; font-size:var(--font-size-card-title); }
+:root .tt-mode-card .tt-mode-desc { color:inherit; opacity:1; font-size:var(--font-size-body); line-height:1.5; }
+:root .tt-mode-card .tt-mode-icon-wrap,:root .tt-mode-card .tt-mode-arrow { background:rgba(255,255,255,.65); color:inherit; }
+:root :is(.tt-mode-card--copying,.tt-mode-card--continue) :is(.tt-mode-icon-wrap,.tt-mode-arrow) { background:color-mix(in srgb,currentColor 12%,transparent); }
+:root .tt-mode-card .tt-mode-icon-wrap { width:50px; height:50px; border-radius:15px; }
+:root .tt-hub-section--companion .tt-mode-card { min-height:96px; }
+:root .tt-hub-section--companion .tt-mode-icon-wrap { width:48px; height:48px; border-radius:14px; }
+:root .tt-hub-section--companion .tt-mode-desc { font-size:var(--font-size-body); line-height:1.35; }
+:root .tt-hub-header { text-align:left; }
+:root .tt-hub-title { font-family:var(--font-app); font-size:var(--font-size-section-title); }
+:root .tt-hero { padding:24px 16px 8px; }
+:root .tt-hero-icon { display:none; }
+:root .tt-hub-section--companion { margin-bottom:24px; }
+:root .tt-newbie-guide-banner-wrap { margin-top:28px; }
+:root .tt-event-banner { margin-top:16px; }
+:root .meditation-chooser header { padding:18px; border-radius:16px; background:var(--practice-meditation-tint); }
+:root .meditation-chooser header h2 { color:var(--practice-meditation-ink); }
+@media(max-width:760px) {
+  :root .tt-hub-section { margin-top:24px; }
+}
+@media(prefers-reduced-motion:reduce) { :root .tt-mode-card { transition:none; } :root .tt-mode-card:hover { transform:none; } }
+/* Giữ vùng chạm mobile trong phạm vi Tu tập, không đổi shell của các mục khác. */
+:root body:has(:is(.tt-page,.copy-page,.name-copying)) .tt-topbar button { min-width:44px; min-height:44px; }

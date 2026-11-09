@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup disableIfNoEncryptionCapabilities="true">
+        <exclude domain="root" path="app_webview/Default/Cookies" />
+        <exclude domain="root" path="app_webview/Default/Cookies-journal" />
+        <exclude domain="root" path="app_webview/Default/Cookies-wal" />
+        <exclude domain="root" path="app_webview/Default/Cookies-shm" />
+        <exclude domain="root" path="app_webview/Default/Network/" />
+        <exclude domain="root" path="app_webview/Cookies" />
+        <exclude domain="root" path="app_webview/Cookies-journal" />
+        <exclude domain="root" path="app_webview/Cookies-wal" />
+        <exclude domain="root" path="app_webview/Cookies-shm" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" path="app_webview/Default/Cookies" />
+        <exclude domain="root" path="app_webview/Default/Cookies-journal" />
+        <exclude domain="root" path="app_webview/Default/Cookies-wal" />
+        <exclude domain="root" path="app_webview/Default/Cookies-shm" />
+        <exclude domain="root" path="app_webview/Default/Network/" />
+        <exclude domain="root" path="app_webview/Cookies" />
+        <exclude domain="root" path="app_webview/Cookies-journal" />
+        <exclude domain="root" path="app_webview/Cookies-wal" />
+        <exclude domain="root" path="app_webview/Cookies-shm" />
+    </device-transfer>
+</data-extraction-rules>

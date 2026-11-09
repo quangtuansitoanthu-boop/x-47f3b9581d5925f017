@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/practice_widget_item" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent"
+    android:minHeight="48dp" android:layout_marginEnd="4dp" android:orientation="horizontal" android:gravity="center_vertical"
+    android:paddingStart="4dp" android:paddingEnd="4dp" android:background="@drawable/practice_widget_card">
+    <ImageView android:id="@+id/practice_widget_item_icon" android:layout_width="22dp" android:layout_height="22dp"
+        android:importantForAccessibility="no" android:layout_marginEnd="4dp" />
+    <TextView android:id="@+id/practice_widget_item_title" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+        android:textSize="13sp" android:textStyle="bold" android:textColor="@color/practice_widget_text" android:maxLines="2" android:ellipsize="end" />
+    <TextView android:id="@+id/practice_widget_item_check" android:layout_width="8dp" android:layout_height="match_parent"
+        android:gravity="center" android:text="›" android:textSize="24sp" android:textColor="@color/practice_widget_accent" android:importantForAccessibility="no" />
+</LinearLayout>

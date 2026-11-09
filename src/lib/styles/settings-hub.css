@@ -1,0 +1,149 @@
+body .settings-hub {
+  background: radial-gradient(ellipse at top right, var(--gold-muted), transparent 65%);
+  border-radius: var(--radius-card);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+body .settings-hub .settings-section,
+body .settings-hub .reminder-master-row {
+  margin: 0 0 var(--dialog-action-space);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+.settings-section > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dialog-action-gap);
+  min-height: 44px;
+  padding: var(--dialog-action-space);
+  color: var(--text);
+  cursor: pointer;
+}
+.settings-section > summary::-webkit-details-marker { display: none; }
+.settings-section > summary > span:first-child { min-width: 0; }
+.settings-section > summary strong { font-size: var(--font-size-card-title); }
+.settings-section > summary small {
+  display: block;
+  margin-top: var(--dialog-action-gap);
+  color: var(--text2);
+  font-size: var(--font-size-body);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.settings-section-arrow { display: flex; flex-shrink: 0; color: var(--text2); transition: transform var(--motion-fast) var(--ease-standard); }
+.settings-section[open] > summary .settings-section-arrow { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) {
+  .settings-section-arrow { transition: none; }
+}
+.settings-section-body { padding: 0 var(--dialog-action-space) var(--dialog-action-space); }
+body .settings-hub .reminder-card-container {
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+body .settings-hub .reminder-master-row { padding: var(--dialog-action-space); }
+body .settings-hub .reminder-section-block { margin: 0; padding: 0; border: 0; }
+body .settings-hub .cn-setting-row { min-width: 0; }
+body .settings-hub .cn-setting-label { min-width: 0; }
+body .settings-hub .cn-setting-label strong { overflow-wrap: anywhere; }
+body .settings-hub .reminder-feedback-badge {
+  display: block;
+  position: static;
+  margin-bottom: var(--dialog-action-gap);
+  color: var(--on-gold);
+}
+body .settings-hub .settings-hub-divider { margin: var(--space-page) 0; color: var(--text2); font-size: var(--font-size-meta); }
+body .settings-hub button { min-width: 44px; min-height: 44px; }
+body .settings-hub .reminder-switch-btn { flex-shrink: 0; }
+body .settings-hub .cn-preview-title { text-align: center; font-weight: 700; text-transform: uppercase; }
+body .settings-hub .cn-preview-box p { text-align: justify; }
+/* Cùng bậc chữ với tiêu đề/mô tả nhóm; không đổi font của trang đọc xem trước. */
+body .settings-hub :is(
+  .reminder-perm-text, .reminder-desc-small, .reminder-check-sub,
+  .reminder-field-label, .reminder-time-label, .reminder-days-label,
+  .reminder-sync-indicator, .reminder-feedback-badge, .personal-inline-empty, .personal-summary-text span,
+  .personal-conversion-badge, .personal-col-label, .personal-name-label,
+  .personal-timing .help, .personal-timing .timing-scope, .sync-note,
+  .cn-setting-label small, .cn-ui-font-help, .cn-ui-font-preview-title,
+  .cn-ui-font-demo-tabs span, .cn-ui-font-demo-button, .cn-font-name,
+  .cn-preview-box-header
+) {
+  font-size: var(--font-size-body);
+  line-height: 1.6;
+}
+body .settings-hub :is(
+  .cn-setting-label strong, .reminder-item-strong, .reminder-timing-header,
+  .reminder-check-title, .reminder-slot-name, .personal-inline-title,
+  .personal-summary-text strong, .personal-timing strong,
+  .personal-timing .timing-toggle, .cn-font-sample
+) { font-size: var(--font-size-card-title); }
+body .settings-hub :is(
+  .reminder-perm-btn, .reminder-day-pill, .reminder-add-slot-btn,
+  .reminder-test-btn, .personal-edit-btn, .personal-mode-btn, .personal-inline-add-btn,
+  .personal-timing button, .sync-note button, .cn-toggle-btn,
+  .cn-bg-btn, .cn-preset-btn, .cn-step-btn, .cn-step-val
+) { font-size: var(--font-size-body); }
+body .settings-hub :is(
+  .reminder-practice-input, .reminder-time-input, .personal-select-sm,
+  .personal-type-select, .personal-inline-title-input
+) { font-size: var(--font-size-input); }
+@supports (((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) and (background: color-mix(in srgb, currentColor, transparent))) {
+  body .settings-hub .settings-section,
+  body .settings-hub .reminder-master-row {
+    background: linear-gradient(to bottom right, var(--glass-button-edge), transparent), var(--dialog-glass-background);
+    border-color: var(--dialog-glass-border);
+    -webkit-backdrop-filter: var(--dialog-glass-filter);
+    backdrop-filter: var(--dialog-glass-filter);
+    box-shadow: var(--glass-button-shadow);
+  }
+  body .settings-hub .settings-section[open] {
+    border-color: var(--gold);
+  }
+  /* Nút chọn dùng mặt kính của nhóm cha, không chồng thêm lớp blur. */
+  body .settings-hub :is(.cn-toggle-btn, .cn-font-btn, .cn-preset-btn) {
+    background: linear-gradient(to bottom right, var(--glass-button-edge), transparent), var(--dialog-glass-background);
+    border-color: var(--dialog-glass-border);
+    box-shadow: var(--glass-button-shadow);
+    color: var(--text);
+  }
+  body .settings-hub :is(.cn-toggle-btn.active, .cn-font-btn.selected, .cn-preset-btn.selected) {
+    background: linear-gradient(to bottom right, var(--glass-button-edge), transparent), var(--gold-light);
+    border-color: var(--gold);
+    box-shadow: var(--glass-button-pressed-shadow);
+    color: var(--text);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  body .settings-hub .settings-section,
+  body .settings-hub .reminder-master-row {
+    background: var(--card);
+    border-color: var(--border);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: var(--shadow);
+  }
+  body .settings-hub :is(.cn-toggle-btn, .cn-font-btn, .cn-preset-btn) {
+    background: var(--card);
+    border-color: var(--border);
+    box-shadow: none;
+  }
+  body .settings-hub :is(.cn-toggle-btn.active, .cn-font-btn.selected, .cn-preset-btn.selected) {
+    background: var(--gold-light);
+    border-color: var(--gold);
+  }
+}
+
+body .settings-hub .reminder-master-row .cn-setting-label strong,
+body .settings-hub .reminder-master-row .cn-setting-label small { display: block; }
+body .settings-hub .reminder-master-row .cn-setting-label small {
+  margin-top: var(--dialog-action-gap);
+  color: var(--text2);
+  font-size: var(--font-size-body);
+  line-height: 1.6;
+}

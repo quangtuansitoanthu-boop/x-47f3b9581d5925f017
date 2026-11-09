@@ -1,0 +1,133 @@
+/* Quiet metallic halos. Decoration stays behind the avatar and within 4px. */
+.avatar-ring {
+  --ring-size: 44px;
+  --ring-core-size: 40px;
+  --ring-line: 1px;
+  --ring-gap: 4px;
+  --ring-hue: 80;
+  --ring-chroma: 0.08;
+  --ring-metal: oklch(0.66 var(--ring-chroma) var(--ring-hue));
+  --ring-highlight: oklch(0.9 0.035 var(--ring-hue));
+  --ring-shade: oklch(0.46 var(--ring-chroma) var(--ring-hue));
+  --ring-ink: oklch(0.3 0.035 var(--ring-hue));
+  --ring-paper: oklch(0.95 0.025 var(--ring-hue));
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  place-items: center;
+  width: var(--ring-size);
+  height: var(--ring-size);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.avatar-ring--hero {
+  --ring-size: 68px;
+  --ring-core-size: 64px;
+}
+
+.avatar-ring--mini {
+  --ring-size: 46px;
+}
+
+.avatar-ring__content,
+.avatar-ring > .practice-community__avatar,
+.avatar-ring > .leaderboard__avatar,
+.avatar-ring__core {
+  position: relative;
+  z-index: 2;
+  width: var(--ring-core-size);
+  height: var(--ring-core-size);
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar-ring__core {
+  display: grid;
+  place-items: center;
+  color: var(--ring-ink);
+  background: var(--ring-paper);
+}
+
+/* A continuous inner band remains legible in both light and dark themes. */
+.avatar-ring[class*="avatar-ring--streak-"] {
+  background: conic-gradient(
+    from 30deg,
+    var(--ring-shade),
+    var(--ring-highlight) 22%,
+    var(--ring-metal) 42%,
+    var(--ring-shade) 62%,
+    var(--ring-highlight) 82%,
+    var(--ring-shade)
+  );
+}
+
+.avatar-ring[class*="avatar-ring--streak-"]::before,
+.avatar-ring[class*="avatar-ring--streak-"]::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.avatar-ring[class*="avatar-ring--streak-"]::before {
+  inset: calc(-1 * var(--ring-gap));
+  border: var(--ring-outer-width, var(--ring-line)) var(--ring-outer-style, solid) var(--ring-metal);
+  opacity: 0.65;
+}
+
+/* Progression moves from bronze and silver through jade to warm gold. */
+.avatar-ring--streak-7 { --ring-hue: 55; --ring-chroma: 0.07; }
+.avatar-ring--streak-30 { --ring-hue: 240; --ring-chroma: 0.035; }
+.avatar-ring--streak-90 { --ring-hue: 165; --ring-chroma: 0.07; }
+.avatar-ring--streak-180 { --ring-hue: 185; --ring-chroma: 0.07; }
+.avatar-ring--streak-300 { --ring-hue: 65; --ring-chroma: 0.1; }
+.avatar-ring--streak-365 { --ring-hue: 80; --ring-chroma: 0.11; }
+.avatar-ring--streak-800 { --ring-hue: 145; --ring-chroma: 0.08; }
+.avatar-ring--streak-1000 { --ring-hue: 85; --ring-chroma: 0.12; }
+.avatar-ring--streak-3000 { --ring-hue: 75; --ring-chroma: 0.12; }
+.avatar-ring--streak-10000 { --ring-hue: 90; --ring-chroma: 0.11; }
+.avatar-ring--streak-20000 { --ring-hue: 80; --ring-chroma: 0.13; }
+
+.avatar-ring--streak-365,
+.avatar-ring--streak-800,
+.avatar-ring--streak-1000 {
+  --ring-outer-style: double;
+  --ring-outer-width: 3px;
+}
+
+.avatar-ring--streak-3000::after,
+.avatar-ring--streak-10000::after,
+.avatar-ring--streak-20000::after {
+  inset: calc(-1 * var(--ring-gap));
+  background: repeating-conic-gradient(
+    from 0deg,
+    var(--ring-highlight) 0deg 3deg,
+    transparent 3deg var(--ring-ray-step, 45deg)
+  );
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 2px));
+}
+
+.avatar-ring--streak-10000 { --ring-ray-step: 30deg; }
+.avatar-ring--streak-20000 { --ring-ray-step: 15deg; }
+
+.avatar-ring.locked {
+  --ring-chroma: 0.015;
+}
+
+.avatar-ring.locked::before,
+.avatar-ring.locked::after {
+  opacity: 0.3;
+}
+
+/* No perpetual movement: the avatar remains a calm, stable reading landmark. */
+@media (forced-colors: active) {
+  .avatar-ring[class*="avatar-ring--streak-"] {
+    outline: 2px solid CanvasText;
+  }
+  .avatar-ring__core {
+    color: CanvasText;
+    background: Canvas;
+  }
+}

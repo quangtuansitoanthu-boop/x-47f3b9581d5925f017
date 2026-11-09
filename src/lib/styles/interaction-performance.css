@@ -1,0 +1,33 @@
+:root:is([data-native-app='true'], [data-performance='efficient']) :is(
+  .qts-nav, .qts-bottom-nav, .tt-topbar, .qt-top-floating-banners,
+  .art-left-panel, .card-status-badge, .pt-toolbar, .pt-tabs,
+  .pt-mini-player, .pt-mp-restore-card, .pt-fp-backdrop,
+  .reader-boundary, .reader-tools-panel:not([data-dialog-glass]), .sheet-backdrop
+) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+:root:is([data-native-app='true'], [data-performance='efficient']) :is(
+  .pt-mp-spin-ring, .pt-restore-disc, .playing-bars i,
+  .pt-mp-expand-hint, .pt-mp-hint-badge, .pt-mp-hint-hand, .pt-mp-hint-pointer,
+  .pt-mp-circle-action-btn.expand.has-hint, .art-card, .tt-card
+) {
+  animation: none !important;
+}
+
+:root:is([data-native-app='true'], [data-performance='efficient']) .qts-bottom-nav__item:active {
+  background: var(--gold-muted);
+}
+
+@media (hover: none) {
+  .art-card:hover, .tt-card:hover { transform: none; }
+}
+
+/* Preserve functional breathing cue phase visibility, timers and direct gesture transforms. */
+:root[data-ui-motion='off'], :root[data-ui-motion='off'] * { scroll-behavior:auto!important; }
+:root[data-ui-motion='off'] *, :root[data-ui-motion='off'] *::before, :root[data-ui-motion='off'] *::after {
+  transition-duration:0s!important; transition-delay:0s!important;
+}
+:root[data-ui-motion='off'] *:not(.meditation-screen__breathing-cue span),
+:root[data-ui-motion='off'] *::before, :root[data-ui-motion='off'] *::after { animation:none!important; }
