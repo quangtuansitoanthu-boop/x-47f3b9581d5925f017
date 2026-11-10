@@ -85,7 +85,7 @@
   .personal-timing { color: var(--text); font-size: var(--font-size-body); min-width: 0; }
   .timing-title { display: block; font-size: var(--font-size-section-title); }
   .timing-scope { margin: var(--dialog-action-gap) 0 var(--dialog-action-space); color: var(--text2); line-height: 1.6; }
-  .timing-card { display: grid; grid-auto-rows: 1fr; gap: var(--dialog-action-space); }
+  .timing-card { display: grid; gap: var(--dialog-action-space); }
   .timing-row { min-width: 0; padding: var(--dialog-action-space); border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--bg2); }
   .timing-toggle { display: flex; justify-content: space-between; gap: var(--dialog-action-gap); align-items: center; min-height: var(--touch-target-size); font-weight: 600; cursor: pointer; }
   .timing-toggle span { min-width: 0; }

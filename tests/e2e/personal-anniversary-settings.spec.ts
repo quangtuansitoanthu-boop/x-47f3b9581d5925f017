@@ -13,7 +13,17 @@ async function verifyTimingGeometry(page: Page, timing: Locator) {
     }
     const rows = await timing.locator('.timing-row').all();
     const first = (await rows[0].boundingBox())!, second = (await rows[1].boundingBox())!;
-    expect(Math.abs(first.height - second.height)).toBeLessThan(2);
+    for (const row of rows) {
+      const spacing = await row.evaluate(element => {
+        const last = element.lastElementChild!;
+        const style = getComputedStyle(element);
+        return {
+          emptyBottom: element.getBoundingClientRect().bottom - last.getBoundingClientRect().bottom,
+          padding: parseFloat(style.paddingBottom) + parseFloat(style.borderBottomWidth),
+        };
+      });
+      expect(spacing.emptyBottom).toBeLessThanOrEqual(spacing.padding + 1);
+    }
     const firstTime = (await times.nth(0).boundingBox())!, secondTime = (await times.nth(1).boundingBox())!;
     expect(Math.abs(firstTime.x - secondTime.x)).toBeLessThan(2);
     expect(Math.abs(firstTime.width - secondTime.width)).toBeLessThan(2);
