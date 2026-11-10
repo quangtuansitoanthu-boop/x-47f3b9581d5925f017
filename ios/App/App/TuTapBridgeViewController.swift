@@ -8,6 +8,33 @@ private final class TuTapQAEventsHandler: NSObject, WKScriptMessageHandler {
         guard message.name == "tutamQAEvents", message.frameInfo.isMainFrame,
               let body = message.body as? String, body.utf8.count <= 4096 else { return }
         NSLog("[TutamQA] %@", body)
+        appendEvent(body)
+    }
+
+    private func appendEvent(_ body: String) {
+        // JSON serialization keeps one physical line per sanitized script event.
+        guard let input = body.data(using: .utf8),
+              let event = try? JSONSerialization.jsonObject(with: input) as? [String: Any],
+              let serialized = try? JSONSerialization.data(withJSONObject: event, options: [.sortedKeys]),
+              let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
+        let url = caches.appendingPathComponent("tutam-qa-events.jsonl")
+        var line = serialized
+        line.append(0x0A)
+        let limit: UInt64 = 256 * 1024
+        do {
+            try FileManager.default.createDirectory(at: caches, withIntermediateDirectories: true)
+            if !FileManager.default.fileExists(atPath: url.path) {
+                guard FileManager.default.createFile(atPath: url.path, contents: nil) else { return }
+            }
+            let handle = try FileHandle(forWritingTo: url)
+            defer { try? handle.close() }
+            let size = try handle.seekToEnd()
+            // Preserve earlier evidence across relaunches; never truncate or rotate at the cap.
+            guard size <= limit, UInt64(line.count) <= limit - size else { return }
+            try handle.write(contentsOf: line)
+        } catch {
+            // Diagnostic storage failures must not affect app interaction or auth.
+        }
     }
 }
 #endif

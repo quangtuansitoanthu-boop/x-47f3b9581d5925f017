@@ -6,6 +6,7 @@ from pathlib import Path
 import queue
 import shutil
 import signal
+import stat
 import subprocess
 import threading
 import time
@@ -74,6 +75,57 @@ def capture_app_runtime(stem):
                 log.write(f"\nApp runtime log unavailable ({type(error).__name__}).\n".encode("utf-8"))
     except OSError:
         print(f"App runtime log unavailable for {stem} (artifact write failed).", flush=True)
+
+
+def capture_qa_events():
+    status = {"available": False, "installedMarker": "not-observed"}
+    if (os.environ.get("GITHUB_ACTIONS") != "true"
+            or os.environ.get("TUTAM_QA_HOSTS_ISOLATED") != "1" or not SIMULATOR):
+        return None, {**status, "reason": "isolated-ci-required"}
+    try:
+        container = subprocess.run([
+            "xcrun", "simctl", "get_app_container", SIMULATOR, BUNDLE, "data",
+        ], capture_output=True, text=True, check=True, timeout=15)
+        raw_path = container.stdout.strip()
+        if not raw_path or "\n" in raw_path or not Path(raw_path).is_absolute():
+            raise ValueError("Invalid app data container")
+        root = Path(raw_path).resolve(strict=True)
+        # Open only fixed descendants; O_NOFOLLOW on every component prevents
+        # a sandbox symlink from redirecting diagnostics outside app data.
+        descriptors = []
+        try:
+            directory = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+            descriptors.append(directory)
+            for part in ("Library", "Caches"):
+                directory = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                                    dir_fd=directory)
+                descriptors.append(directory)
+            source = os.open("tutam-qa-events.jsonl", os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK,
+                             dir_fd=directory)
+            descriptors.append(source)
+            if not stat.S_ISREG(os.fstat(source).st_mode):
+                raise ValueError("QA events must be a regular file")
+            limit = 256 * 1024
+            with os.fdopen(os.dup(source), "rb") as events:
+                payload = events.read(limit + 1)
+            payload, truncated = payload[:limit], len(payload) > limit
+            installed = False
+            for line in payload.splitlines():
+                try:
+                    event = json.loads(line)
+                    if isinstance(event, dict) and event.get("type") == "installed":
+                        installed = True
+                        break
+                except (ValueError, UnicodeDecodeError):
+                    continue
+            status.update(available=True, bytesCopied=len(payload), truncated=truncated,
+                          installedMarker="present" if installed else "missing")
+            return payload, status
+        finally:
+            for descriptor in reversed(descriptors):
+                os.close(descriptor)
+    except (OSError, subprocess.SubprocessError, ValueError) as error:
+        return None, {**status, "reason": type(error).__name__}
 
 
 def run_case(index):
@@ -194,6 +246,7 @@ def run_case(index):
             print("::endgroup::", flush=True)
         if not previous_evidence:
             capture_app_runtime(stem)
+            qa_events, qa_events_status = capture_qa_events()
         # Xuất ngay từng bài, kể cả assertion thất bại; bài tiếp theo không phải chờ cả suite mới có bằng chứng.
         if result.is_dir() and not previous_evidence:
             try:
@@ -205,6 +258,15 @@ def run_case(index):
                 infrastructure_error(record, f"Attachment export failed: {error}")
         elif not previous_evidence:
             infrastructure_error(record, "No result bundle was produced")
+        if not previous_evidence:
+            try:
+                attachments = EVIDENCE / f"{stem}-attachments"
+                attachments.mkdir(parents=True, exist_ok=True)
+                if qa_events is not None:
+                    (attachments / "tutam-qa-events.jsonl").write_bytes(qa_events)
+                write_json(attachments / "tutam-qa-events-status.json", qa_events_status)
+            except OSError:
+                print(f"QA events artifact unavailable for {stem} (artifact write failed).", flush=True)
         runtime_log = EVIDENCE / f"{stem}-app-runtime.log"
         if not previous_evidence and runtime_log.is_file():
             try:

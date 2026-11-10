@@ -49,6 +49,23 @@ class NativeGuestUITestCase: XCTestCase {
     }
 
     @MainActor
+    func allowExpectedNotificationPermission(_ app: XCUIApplication) {
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let expected = NSPredicate(format: "label CONTAINS[cd] %@ AND (label CONTAINS[cd] %@ OR label CONTAINS[cd] %@)", "Tu tập", "notification", "thông báo")
+        let system = springboard.alerts.matching(expected).firstMatch
+        let local = app.alerts.matching(expected).firstMatch
+        // Không cố định owner sau lần chờ đầu: iOS có thể xuất alert SpringBoard trễ hơn cây AX app.
+        waitUntil("Fresh install must expose this app's actual notification authorization alert", timeout: 30) { system.exists || local.exists }
+        let alert = system.exists ? system : local
+        let words = ([alert.label] + alert.staticTexts.allElementsBoundByIndex.map { $0.label }).joined(separator: " ").lowercased()
+        XCTAssertTrue(words.contains("tu tập") && (words.contains("notification") || words.contains("thông báo")), "Only this app's notification permission may be granted")
+        let allow = alert.buttons.matching(NSPredicate(format: "label IN %@", ["Allow", "Cho phép", "Cho Phép"] as NSArray)).firstMatch
+        XCTAssertTrue(allow.waitForExistence(timeout: 5), "Expected exact affirmative notification permission button inside the verified alert")
+        allow.tap()
+        waitUntil("Accepted notification permission dialog must dismiss") { !alert.exists }
+    }
+
+    @MainActor
     func insideViewport(_ element: XCUIElement, viewport: CGRect) -> Bool {
         guard element.exists else { return false }
         let frame = element.frame
@@ -338,14 +355,7 @@ final class NativeGuestSmokeTests: NativeGuestUITestCase {
         evidence("notification-sound-after", app: app)
         let send = app.buttons["🔔 Gửi thử thông báo mẫu"].firstMatch
         tap(send, app: app)
-        let systemAlert = springboard.alerts.firstMatch
-        let permission = systemAlert.waitForExistence(timeout: 10) ? systemAlert : app.alerts.firstMatch
-        XCTAssertTrue(permission.waitForExistence(timeout: 10), "Fresh installation must show a notification permission dialog")
-        let dialog = permission.staticTexts.allElementsBoundByIndex.map { $0.label }.joined(separator: " ").lowercased()
-        XCTAssertTrue(dialog.contains("notification") || dialog.contains("thông báo"), "Only notification authorization may be accepted")
-        let allow = permission.buttons.matching(NSPredicate(format: "label IN %@", ["Allow", "Cho phép", "Cho Phép"] as NSArray)).firstMatch
-        XCTAssertTrue(allow.exists, "Expected exact affirmative notification permission button")
-        allow.tap()
+        allowExpectedNotificationPermission(app)
         // Nút trở lại tên thường sau promise schedule. Toast chỉ tồn tại 2.8s; bằng chứng cuối vẫn phải là iOS nhận thông báo.
         XCTAssertTrue(send.waitForExistence(timeout: 20), "Native test scheduling must finish before backgrounding")
         evidence("notification-scheduled", app: app)
@@ -464,15 +474,7 @@ final class NativeExtendedGuestTests: NativeGuestUITestCase {
 final class NativePersonalReminderTests: NativeGuestUITestCase {
     @MainActor
     private func allowPersonalNotificationPermission(_ app: XCUIApplication) {
-        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-        let system = springboard.alerts.firstMatch
-        let alert = system.waitForExistence(timeout: 15) ? system : app.alerts.firstMatch
-        XCTAssertTrue(alert.waitForExistence(timeout: 10), "Opening personal reminders on a fresh install must request notification permission")
-        let words = alert.staticTexts.allElementsBoundByIndex.map { $0.label }.joined(separator: " ").lowercased()
-        XCTAssertTrue(words.contains("notification") || words.contains("thông báo"), "Only notification permission may be granted")
-        let allow = alert.buttons.matching(NSPredicate(format: "label IN %@", ["Allow", "Cho phép", "Cho Phép"] as NSArray)).firstMatch
-        XCTAssertTrue(allow.exists)
-        allow.tap()
+        allowExpectedNotificationPermission(app)
     }
 
     @MainActor
