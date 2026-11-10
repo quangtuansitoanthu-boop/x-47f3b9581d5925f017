@@ -54,7 +54,7 @@ export function formatPersonalEventDateText(item: PersonalLunarEvent, isEn: bool
       ? (isEn ? `🗓️ Day ${pad(item.solarDay || 1)} monthly (Solar)` : `🗓️ Ngày ${pad(item.solarDay || 1)} hàng tháng (Dương lịch)`)
       : `🗓️ ${pad(item.solarDay || 1)}/${pad(item.solarMonth || 1)} ${isEn ? 'Solar' : 'Dương lịch'}`;
   }
-  if (item.frequency === 'monthly') {
+  if (item.frequency === 'monthly' || Number(item.lunarMonth) === 0) {
     return isEn
       ? `🗓️ Day ${pad(item.lunarDay)} monthly (Lunar)`
       : `🗓️ ${formatLunarDayLabel(item.lunarDay, false)} hàng tháng (Âm lịch)`;

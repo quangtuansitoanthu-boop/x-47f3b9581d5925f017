@@ -561,7 +561,7 @@
                         <span class="pem-item-type-tag">
                           {getPersonalEventTypeName(item.type, isEn)}
                         </span>
-                        {#if item.frequency === 'monthly'}
+                        {#if item.frequency === 'monthly' || (item.calendarMode !== 'solar' && Number(item.lunarMonth) === 0)}
                           <span class="pem-freq-tag">
                             {isEn ? 'Monthly' : 'Hàng tháng'}
                           </span>

@@ -26,7 +26,8 @@ public final class BuddhistCalendarWidgetPlugin extends Plugin {
                 return;
             }
             JSONObject timeline = new JSONObject().put("days", days)
-                .put("generatedAt", call.getString("generatedAt", ""));
+                .put("generatedAt", call.getString("generatedAt", ""))
+                .put("locale", "en".equals(call.getString("locale")) ? "en" : "vi");
             String owner = call.getString("personalOwner");
             if (owner != null) timeline.put("personalOwner", owner);
             BuddhistCalendarWidgetProvider.replaceTimeline(getContext(), timeline);

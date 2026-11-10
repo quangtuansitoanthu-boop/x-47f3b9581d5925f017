@@ -45,6 +45,20 @@ public class CalendarWidgetPersonalContractTest {
         assertEquals(2, value.getJSONArray("days").getJSONObject(0).getJSONArray("personalEvents").length());
     }
 
+    @Test public void preservesSnapshotLocaleWhileMaskingPreviousOwnerAndAcceptsLegacyLocale() throws Exception {
+        JSONObject legacy = call("validateTimeline", timeline(), "");
+        assertFalse(legacy.has("locale"));
+        JSONObject original = personal().put("locale", "en");
+        JSONObject current = call("validateTimeline", original, "user:alpha");
+        assertEquals("en", current.getString("locale"));
+        JSONObject masked = call("maskPersonalTimeline", original, "user:beta");
+        assertEquals("en", masked.getString("locale"));
+        assertFalse(masked.has("personalOwner"));
+        assertFalse(masked.getJSONArray("days").getJSONObject(0).has("personalEvents"));
+        assertEquals("en", original.getString("locale"));
+        assertTrue(original.getJSONArray("days").getJSONObject(0).has("personalEvents"));
+    }
+
     @Test public void rejectsLatePreviousOwnerAndStripsUnscopedPrivateData() throws Exception {
         rejected(personal(), "user:beta");
         rejected(personal(), "");

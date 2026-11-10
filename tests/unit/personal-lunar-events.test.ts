@@ -145,4 +145,19 @@ describe('personal-lunar-events', () => {
     expect(formatPersonalEventDateText(monthlyEvent, false)).toBe('🗓️ Mồng 1 hàng tháng (Âm lịch)');
     expect(formatPersonalEventDateText(monthlyEvent, true)).toBe('🗓️ Day 01 monthly (Lunar)');
   });
+
+  it('labels legacy lunar month-zero recurrence as monthly without changing solar recurrence', () => {
+    const legacy: PersonalLunarEvent = {
+      id: 'legacy-monthly', title: 'Giỗ Ông', lunarDay: 6, lunarMonth: 0,
+      type: 'gio-chap', createdAt: '2026-01-01',
+    };
+    for (const event of [legacy, { ...legacy, frequency: 'yearly' as const }]) {
+      expect(formatPersonalEventDateText(event, false)).toBe('🗓️ Mồng 6 hàng tháng (Âm lịch)');
+      expect(formatPersonalEventDateText(event, true)).toBe('🗓️ Day 06 monthly (Lunar)');
+      expect(getPersonalEventsForLunarDate(6, 7, [event])).toEqual([event]);
+    }
+    const solar: PersonalLunarEvent = { ...legacy, calendarMode: 'solar', solarDay: 6, solarMonth: 7 };
+    expect(formatPersonalEventDateText(solar, false)).toBe('🗓️ 06/07 Dương lịch');
+    expect(formatPersonalEventDateText(solar, true)).toBe('🗓️ 06/07 Solar');
+  });
 });

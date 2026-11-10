@@ -38,6 +38,9 @@ public class PracticeWidgetProvider extends AppWidgetProvider {
     private static final String LOCALE_PREFS = "tutam-widget-locale-v1";
     public static Context localizedContext(Context context) {
         String language = context.getSharedPreferences(LOCALE_PREFS, Context.MODE_PRIVATE).getString("locale", "vi");
+        return localizedContext(context, language);
+    }
+    public static Context localizedContext(Context context, String language) {
         Configuration configuration = new Configuration(context.getResources().getConfiguration());
         configuration.setLocale(new Locale("en".equals(language) ? "en" : "vi"));
         return context.createConfigurationContext(configuration);

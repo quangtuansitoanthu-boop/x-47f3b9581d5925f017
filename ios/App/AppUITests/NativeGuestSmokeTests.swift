@@ -92,6 +92,20 @@ class NativeGuestUITestCase: XCTestCase {
                 viewport.size.height = frame.minY - viewport.minY
             }
         }
+        let keyboard = app.keyboards.firstMatch
+        if keyboard.exists {
+            let frame = keyboard.frame
+            if frame.width > 0 && frame.minY > viewport.minY {
+                viewport.size.height = min(viewport.maxY, frame.minY) - viewport.minY
+                let toolbar = app.toolbars.firstMatch
+                if toolbar.exists {
+                    let bar = toolbar.frame
+                    if bar.height > 0 && bar.minY > viewport.minY && bar.maxY <= frame.minY {
+                        viewport.size.height = min(viewport.maxY, bar.minY) - viewport.minY
+                    }
+                }
+            }
+        }
         for attempt in 0..<14 {
             if element.exists {
                 let frame = element.frame
@@ -448,12 +462,13 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
 
     @MainActor
     private func namedControl(_ caption: String, app: XCUIApplication) -> XCUIElement {
+        dismissPersonalKeyboard(app)
         let matches = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", caption))
         reveal(matches.firstMatch, app: app)
         // WebKit iOS có thể xuất HTML select thành Other có value, không nhất thiết PopUpButton.
         let candidates = matches.allElementsBoundByIndex.filter {
-            // Label cũng có thể là Other, nhưng chỉ control có vùng chạm và giá trị thực.
-            $0.elementType != .staticText && $0.frame.height >= 44 &&
+            // Caption Other không có value; select Other có value dù AX nội bộ chỉ cao 35pt.
+            $0.elementType != .staticText && $0.frame.width > 0 && $0.frame.height > 0 &&
                 (($0.value as? String).map { !$0.isEmpty } ?? false)
         }
         guard let control = candidates.first(where: { $0.label == caption }) ?? candidates.first else {
@@ -473,11 +488,30 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
     }
 
     @MainActor
+    private func dismissPersonalKeyboard(_ app: XCUIApplication) {
+        guard app.keyboards.firstMatch.exists else { return }
+        // Nút Done của input accessory đóng bàn phím, không gửi form bằng phím Return.
+        let done = app.toolbars.buttons.matching(NSPredicate(format: "label IN %@", ["Done", "Xong", "Hoàn tất"] as NSArray)).firstMatch
+        XCTAssertTrue(done.waitForExistence(timeout: 5), "Focused personal-event field must expose keyboard Done")
+        done.tap()
+        waitUntil("Personal-event keyboard must dismiss before scrolling controls") { !app.keyboards.firstMatch.exists }
+    }
+
+    @MainActor
+    private func selectPersonalSegment(_ label: String, app: XCUIApplication) {
+        dismissPersonalKeyboard(app)
+        // HTML button aria-pressed được WebKit iOS xuất thành Switch, không phải UIKit Button.
+        let choice = app.switches[label].firstMatch
+        reveal(choice, app: app)
+        XCTAssertNotNil(checked(choice), "Personal segmented control must expose its actual pressed state")
+        if checked(choice) != true { choice.tap() }
+        waitUntil("Personal segmented control must retain selected state \(label)") { self.checked(app.switches[label].firstMatch) == true }
+    }
+
+    @MainActor
     private func select(_ caption: String, option: String, app: XCUIApplication) {
         if caption == "Chu kỳ:" {
-            let choice = app.buttons[option].firstMatch
-            tap(choice, app: app)
-            waitUntil("Recurrence buttons must expose the selected option \(option)") { self.checked(choice) == true || choice.isSelected }
+            selectPersonalSegment(option, app: app)
             return
         }
         let control = namedControl(caption, app: app)
@@ -526,7 +560,7 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
     private func addEvent(_ title: String, solar: Bool, day: Int, month: Int, app: XCUIApplication) {
         tap(app.buttons["+ Thêm ngày lễ kỷ niệm"].firstMatch, app: app)
         replaceName(title, app: app)
-        if solar { tap(app.buttons["Dương lịch"].firstMatch, app: app) }
+        if solar { selectPersonalSegment("Dương lịch", app: app) }
         select("Chu kỳ:", option: "Hàng năm", app: app)
         select(solar ? "Ngày Dương:" : "Ngày Âm lịch:", option: String(day), app: app)
         select(solar ? "Tháng Dương:" : "Tháng Âm lịch:", option: "Tháng \(month)", app: app)

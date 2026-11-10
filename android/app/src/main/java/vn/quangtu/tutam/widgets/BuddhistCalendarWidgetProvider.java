@@ -197,10 +197,15 @@ public class BuddhistCalendarWidgetProvider extends AppWidgetProvider {
 
     private static final class CalendarData {
         final String date;
+        final String locale;
         final JSONObject day;
         final JSONObject upcoming;
         CalendarData(String date, JSONObject day, JSONObject upcoming) {
+            this(date, day, upcoming, "vi");
+        }
+        CalendarData(String date, JSONObject day, JSONObject upcoming, String locale) {
             this.date = date; this.day = day; this.upcoming = upcoming;
+            this.locale = "en".equals(locale) ? "en" : "vi";
         }
     }
 
@@ -222,7 +227,7 @@ public class BuddhistCalendarWidgetProvider extends AppWidgetProvider {
                 events[i] = !note(day, "fastingNote").isEmpty() || !note(day, "buddhistHoliday").isEmpty() || !note(day, "thoKhangNote").isEmpty() || personalCount(day) > 0;
             }
             int next = nextIndex(key, dates, events);
-            return new CalendarData(key, current, next < 0 ? null : days.getJSONObject(next));
+            return new CalendarData(key, current, next < 0 ? null : days.getJSONObject(next), timeline.optString("locale", "vi"));
         } catch (Exception ignored) {
             // Thiếu/hết dữ liệu phải hiện lời mời mở app, không dùng ngày cũ làm hôm nay.
         }
@@ -459,7 +464,7 @@ public class BuddhistCalendarWidgetProvider extends AppWidgetProvider {
     }
 
     private static RemoteViews render(Context context, CalendarData data, int size) {
-        return layout(PracticeWidgetProvider.localizedContext(context), data.day, data.upcoming, data.date, resourceForSize(size));
+        return layout(PracticeWidgetProvider.localizedContext(context, data.locale), data.day, data.upcoming, data.date, resourceForSize(size));
     }
 
     private static void update(Context context, AppWidgetManager manager, int id, Class<?> owner, CalendarData data) {
