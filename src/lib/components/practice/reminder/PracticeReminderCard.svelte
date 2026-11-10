@@ -789,7 +789,7 @@
                   <div class="personal-inline-row2">
                     <!-- Chu kỳ -->
                     <div class="personal-pill-col">
-                      <span class="personal-col-label">{isEn ? 'Recurrence' : 'Chu kỳ'}:</span>
+                      <label class="personal-col-label" for={`personal-frequency-${event.id}`}>{isEn ? 'Recurrence' : 'Chu kỳ'}:</label>
                       <select
                         id={`personal-frequency-${event.id}`}
                         aria-invalid={personalDraftInvalidField === `personal-frequency-${event.id}` || undefined}
@@ -811,7 +811,7 @@
                     {#if getEventMode(event) === 'solar'}
                       <!-- Ngày Dương -->
                       <div class="personal-pill-col">
-                        <span class="personal-col-label">{isEn ? 'Day (Solar)' : 'Ngày Dương'}:</span>
+                        <label class="personal-col-label" for={`personal-solar-day-${event.id}`}>{isEn ? 'Day (Solar)' : 'Ngày Dương'}:</label>
                         <select
                           id={`personal-solar-day-${event.id}`}
                           aria-invalid={personalDraftInvalidField === `personal-solar-day-${event.id}` || undefined}
@@ -827,7 +827,7 @@
 
                       <!-- Tháng Dương -->
                       <div class="personal-pill-col" class:is-dimmed={event.frequency === 'monthly'}>
-                        <span class="personal-col-label">{isEn ? 'Month (Solar)' : 'Tháng Dương'}:</span>
+                        <label class="personal-col-label" for={`personal-solar-month-${event.id}`}>{isEn ? 'Month (Solar)' : 'Tháng Dương'}:</label>
                         <select
                           id={`personal-solar-month-${event.id}`}
                           aria-invalid={personalDraftInvalidField === `personal-solar-month-${event.id}` || undefined}
@@ -848,7 +848,7 @@
                     {:else}
                       <!-- Ngày Âm -->
                       <div class="personal-pill-col">
-                        <span class="personal-col-label">{isEn ? 'Day (Lunar)' : 'Ngày Âm lịch'}:</span>
+                        <label class="personal-col-label" for={`personal-lunar-day-${event.id}`}>{isEn ? 'Day (Lunar)' : 'Ngày Âm lịch'}:</label>
                         <select
                           id={`personal-lunar-day-${event.id}`}
                           aria-invalid={personalDraftInvalidField === `personal-lunar-day-${event.id}` || undefined}
@@ -864,7 +864,7 @@
 
                       <!-- Tháng Âm -->
                       <div class="personal-pill-col" class:is-dimmed={event.frequency === 'monthly'}>
-                        <span class="personal-col-label">{isEn ? 'Month (Lunar)' : 'Tháng Âm lịch'}:</span>
+                        <label class="personal-col-label" for={`personal-lunar-month-${event.id}`}>{isEn ? 'Month (Lunar)' : 'Tháng Âm lịch'}:</label>
                         <select
                           id={`personal-lunar-month-${event.id}`}
                           aria-invalid={personalDraftInvalidField === `personal-lunar-month-${event.id}` || undefined}

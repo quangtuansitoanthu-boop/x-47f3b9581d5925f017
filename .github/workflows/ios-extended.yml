@@ -145,8 +145,9 @@ jobs:
             -workspace ios/App/App.xcworkspace -scheme App -configuration Debug \
             -sdk iphonesimulator -destination "platform=iOS Simulator,id=$TUTAM_QA_SIMULATOR" \
             -derivedDataPath build/ios-simulator \
-            -only-testing:AppUITests/NativeGuestSmokeTests -only-testing:AppUITests/NativeExtendedGuestTests \
+            -only-testing:AppUITests/NativeGuestSmokeTests -only-testing:AppUITests/NativeExtendedGuestTests -only-testing:AppUITests/NativePersonalReminderTests \
             CODE_SIGNING_ALLOWED=NO build-for-testing
+          echo "TUTAM_QA_NATIVE_READY=1" >> "$GITHUB_ENV"
       - name: Preserve simulator app
         run: |
           ditto -c -k --sequesterRsrc --keepParent build/ios-simulator/Build/Products/Debug-iphonesimulator/App.app build/ios-simulator/App.app.zip
@@ -173,31 +174,199 @@ jobs:
         run: |
           cat build/release-evidence/privacy-manifests.txt
           cat build/release-evidence/Podfile.lock
-      - name: Test seven isolated native guest flows
-        timeout-minutes: 45
-        run: python3 scripts/ci/ios-native-seven.py
-      - name: Require all seven native UI tests with no failures or skips
+      - name: Native 01 notification OS delivery
+        id: native_01
+        if: ${{ !cancelled() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        continue-on-error: true
+        timeout-minutes: 22
+        run: python3 scripts/ci/ios-native-seven.py --case 1
+      - name: Upload native 01 diagnostic evidence immediately
+        if: ${{ always() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-native-case-01-${{ github.run_number }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            build/release-evidence/native-01-record.json
+            build/release-evidence/native-01-summary.json
+            build/release-evidence/native-01.log
+            build/release-evidence/native-01.xcresult/
+            build/release-evidence/native-01-attachments/
+            build/release-evidence/native-01-final.png
+      - name: Native 08 personal lunar solar CRUD and persistence
+        id: native_08
+        if: ${{ !cancelled() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        continue-on-error: true
+        timeout-minutes: 22
+        run: python3 scripts/ci/ios-native-seven.py --case 8
+      - name: Upload native 08 diagnostic evidence immediately
+        if: ${{ always() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-native-case-08-${{ github.run_number }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            build/release-evidence/native-08-record.json
+            build/release-evidence/native-08-summary.json
+            build/release-evidence/native-08.log
+            build/release-evidence/native-08.xcresult/
+            build/release-evidence/native-08-attachments/
+            build/release-evidence/native-08-final.png
+      - name: Native 09 personal near future OS delivery
+        id: native_09
+        if: ${{ !cancelled() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        continue-on-error: true
+        timeout-minutes: 22
+        run: python3 scripts/ci/ios-native-seven.py --case 9
+      - name: Upload native 09 diagnostic evidence immediately
+        if: ${{ always() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-native-case-09-${{ github.run_number }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            build/release-evidence/native-09-record.json
+            build/release-evidence/native-09-summary.json
+            build/release-evidence/native-09.log
+            build/release-evidence/native-09.xcresult/
+            build/release-evidence/native-09-attachments/
+            build/release-evidence/native-09-final.png
+      - name: Native 02 motion persistence and native links
+        id: native_02
+        if: ${{ !cancelled() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        continue-on-error: true
+        timeout-minutes: 22
+        run: python3 scripts/ci/ios-native-seven.py --case 2
+      - name: Upload native 02 diagnostic evidence immediately
+        if: ${{ always() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-native-case-02-${{ github.run_number }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            build/release-evidence/native-02-record.json
+            build/release-evidence/native-02-summary.json
+            build/release-evidence/native-02.log
+            build/release-evidence/native-02.xcresult/
+            build/release-evidence/native-02-attachments/
+            build/release-evidence/native-02-final.png
+      - name: Native 03 rosary count and rotation
+        id: native_03
+        if: ${{ !cancelled() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        continue-on-error: true
+        timeout-minutes: 22
+        run: python3 scripts/ci/ios-native-seven.py --case 3
+      - name: Upload native 03 diagnostic evidence immediately
+        if: ${{ always() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-native-case-03-${{ github.run_number }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            build/release-evidence/native-03-record.json
+            build/release-evidence/native-03-summary.json
+            build/release-evidence/native-03.log
+            build/release-evidence/native-03.xcresult/
+            build/release-evidence/native-03-attachments/
+            build/release-evidence/native-03-final.png
+      - name: Native 04 light dark and guest navigation
+        id: native_04
+        if: ${{ !cancelled() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        continue-on-error: true
+        timeout-minutes: 22
+        run: python3 scripts/ci/ios-native-seven.py --case 4
+      - name: Upload native 04 diagnostic evidence immediately
+        if: ${{ always() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-native-case-04-${{ github.run_number }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            build/release-evidence/native-04-record.json
+            build/release-evidence/native-04-summary.json
+            build/release-evidence/native-04.log
+            build/release-evidence/native-04.xcresult/
+            build/release-evidence/native-04-attachments/
+            build/release-evidence/native-04-final.png
+      - name: Native 05 meditation background lifecycle
+        id: native_05
+        if: ${{ !cancelled() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        continue-on-error: true
+        timeout-minutes: 22
+        run: python3 scripts/ci/ios-native-seven.py --case 5
+      - name: Upload native 05 diagnostic evidence immediately
+        if: ${{ always() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-native-case-05-${{ github.run_number }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            build/release-evidence/native-05-record.json
+            build/release-evidence/native-05-summary.json
+            build/release-evidence/native-05.log
+            build/release-evidence/native-05.xcresult/
+            build/release-evidence/native-05-attachments/
+            build/release-evidence/native-05-final.png
+      - name: Native 06 offline catalog and excluded titles
+        id: native_06
+        if: ${{ !cancelled() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        continue-on-error: true
+        timeout-minutes: 22
+        run: python3 scripts/ci/ios-native-seven.py --case 6
+      - name: Upload native 06 diagnostic evidence immediately
+        if: ${{ always() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-native-case-06-${{ github.run_number }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            build/release-evidence/native-06-record.json
+            build/release-evidence/native-06-summary.json
+            build/release-evidence/native-06.log
+            build/release-evidence/native-06.xcresult/
+            build/release-evidence/native-06-attachments/
+            build/release-evidence/native-06-final.png
+      - name: Native 07 offline reader font and rotation
+        id: native_07
+        if: ${{ !cancelled() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        continue-on-error: true
+        timeout-minutes: 22
+        run: python3 scripts/ci/ios-native-seven.py --case 7
+      - name: Upload native 07 diagnostic evidence immediately
+        if: ${{ always() && env.TUTAM_QA_NATIVE_READY == '1' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-native-case-07-${{ github.run_number }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            build/release-evidence/native-07-record.json
+            build/release-evidence/native-07-summary.json
+            build/release-evidence/native-07.log
+            build/release-evidence/native-07.xcresult/
+            build/release-evidence/native-07-attachments/
+            build/release-evidence/native-07-final.png
+      - name: Require original seven and both personal reminder tests
         if: always()
-        run: |
-          python3 - <<'PY'
-          import json
-          data=json.load(open('build/release-evidence/native-ui-summary.json'))
-          assert data['passedTests'] == 7 and data['totalTestCount'] == 7, 'All seven tests must execute and pass'
-          assert data['failedTests'] == 0 and data['skippedTests'] == 0, 'No failures or skips allowed'
-          assert len(data['cases']) == 7 and all(not c['infrastructureError'] and c['xcodeExitCode'] == 0 for c in data['cases']), 'All Xcode invocations must succeed'
-          print('Verified 7 native UI tests passed, 0 failed, 0 skipped, 7 independent installations')
-          PY
-      - name: Capture native simulator evidence
+        run: python3 scripts/ci/ios-native-seven.py --aggregate
+      - name: Capture final native simulator screenshot
         if: always()
         run: |
           python3 - <<'PY'
           import pathlib, subprocess, os
           root=pathlib.Path('build/release-evidence')
+          root.mkdir(parents=True,exist_ok=True)
           simulator=os.environ.get('TUTAM_QA_SIMULATOR')
           if simulator:
               subprocess.run(['xcrun','simctl','io',simulator,'screenshot',str(root/'native-ui-final.png')],check=True,timeout=45)
-          for result in sorted(root.glob('native-*.xcresult')):
-              subprocess.run(['xcrun','xcresulttool','export','attachments','--path',str(result),'--output-path',str(root/'native-ui-attachments'/result.stem)],check=True,timeout=120)
           PY
       - name: Shut down the CI simulator before restoring network resolution
         if: always()
@@ -222,5 +391,13 @@ jobs:
         with:
           name: ios-native-extended-${{ github.run_number }}
           retention-days: 7
-          path: build/release-evidence/
+          path: |
+            build/release-evidence/native-ui-summary.json
+            build/release-evidence/native-ui-cases.json
+            build/release-evidence/production-hosts.json
+            build/release-evidence/production-host-isolation.json
+            build/release-evidence/privacy-manifests.txt
+            build/release-evidence/Podfile.lock
+            build/release-evidence/simulator-selected.json
+            build/release-evidence/native-ui-final.png
           if-no-files-found: error

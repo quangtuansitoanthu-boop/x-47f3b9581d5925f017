@@ -1,4 +1,5 @@
-"""Run the seven native guest flows against independent CI-owned installations."""
+"""Run nine real native flows on isolated CI installs, with per-case evidence."""
+import argparse
 import json
 import os
 from pathlib import Path
@@ -9,7 +10,7 @@ import threading
 ROOT = Path.cwd().resolve()
 EVIDENCE = ROOT / "build/release-evidence"
 APP = ROOT / "build/ios-simulator/Build/Products/Debug-iphonesimulator/App.app"
-SIMULATOR = os.environ["TUTAM_QA_SIMULATOR"]
+SIMULATOR = os.environ.get("TUTAM_QA_SIMULATOR", "")
 BUNDLE = "vn.quangtu.tutam"
 CASES = [
     "NativeGuestSmokeTests/testExistingNotificationButtonDeliversToSystemNotificationCenter",
@@ -19,15 +20,60 @@ CASES = [
     "NativeExtendedGuestTests/testMeditationPauseResumeSurvivesNativeBackgrounding",
     "NativeExtendedGuestTests/testNativeCatalogExcludesWebOnlyBookAndSearchCanBeCleared",
     "NativeExtendedGuestTests/testOfflineLibrarySearchChapterReadingAndLargeTextRotation",
+    "NativePersonalReminderTests/testPersonalLunarSolarCrudInvalidDateCancelAndPersistence",
+    "NativePersonalReminderTests/testPersonalNearFutureReminderDeliversToSystemAndCanBeDeleted",
 ]
+ORDER = [1, 8, 9, 2, 3, 4, 5, 6, 7]
+COUNTS = ("passedTests", "failedTests", "skippedTests", "totalTestCount")
 
 
-def run_case(index, identifier):
+def write_json(path, value):
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def infrastructure_error(record, message):
+    previous = record.get("infrastructureError")
+    record["infrastructureError"] = f"{previous}; {message}" if previous else message
+
+
+def case_passed(record):
+    summary = record.get("summary") or {}
+    return (
+        isinstance(summary, dict)
+        and record.get("completed") is True
+        and not record.get("infrastructureError")
+        and type(record.get("xcodeExitCode")) is int
+        and record.get("xcodeExitCode") == 0
+        and all(type(summary.get(key)) is int for key in COUNTS)
+        and summary.get("passedTests") == 1
+        and summary.get("failedTests") == 0
+        and summary.get("skippedTests") == 0
+        and summary.get("totalTestCount") == 1
+    )
+
+
+def run_case(index):
+    identifier = CASES[index - 1]
     stem = f"native-{index:02d}"
     result = EVIDENCE / f"{stem}.xcresult"
-    summary_path = EVIDENCE / f"{stem}-summary.json"
-    record = {"identifier": identifier, "resultBundle": result.name}
+    record_path = EVIDENCE / f"{stem}-record.json"
+    previous_evidence = record_path.exists() or result.exists()
+    record = {
+        "case": index, "identifier": identifier, "resultBundle": result.name,
+        "workflowRunId": os.environ.get("GITHUB_RUN_ID"),
+        "workflowRunAttempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
+        "completed": False, "xcodeExitCode": None,
+    }
+    EVIDENCE.mkdir(parents=True, exist_ok=True)
+    write_json(record_path, record)
+    group_started = False
     try:
+        if previous_evidence:
+            raise RuntimeError("Refusing to reuse an existing case result bundle or record")
+        if os.environ.get("TUTAM_QA_HOSTS_ISOLATED") != "1":
+            raise RuntimeError("Production host isolation must be verified before native tests")
+        if not APP.is_dir() or not SIMULATOR:
+            raise RuntimeError("Expected compiled simulator app and CI simulator destination")
         installed = subprocess.run(
             ["xcrun", "simctl", "get_app_container", SIMULATOR, BUNDLE, "app"],
             capture_output=True, timeout=30,
@@ -49,7 +95,8 @@ def run_case(index, identifier):
             "-maximum-test-execution-time-allowance", "600", "CODE_SIGNING_ALLOWED=NO",
             "test-without-building",
         ]
-        print(f"::group::Native {index}/7: {identifier}", flush=True)
+        print(f"::group::Native {index}/{len(CASES)}: {identifier}", flush=True)
+        group_started = True
         with (EVIDENCE / f"{stem}.log").open("w", encoding="utf-8") as log:
             process = subprocess.Popen(command, stdout=subprocess.PIPE,
                                        stderr=subprocess.STDOUT, text=True, bufsize=1)
@@ -63,46 +110,116 @@ def run_case(index, identifier):
                 record["xcodeExitCode"] = process.wait()
             finally:
                 watchdog.cancel()
-        print("::endgroup::", flush=True)
         data = subprocess.check_output([
             "xcrun", "xcresulttool", "get", "test-results", "summary", "--path", str(result),
         ], timeout=60)
-        summary_path.write_bytes(data)
+        (EVIDENCE / f"{stem}-summary.json").write_bytes(data)
         summary = json.loads(data)
+        if not isinstance(summary, dict):
+            raise ValueError("XCResult summary must be an object")
         record["summary"] = summary
-        if summary["totalTestCount"] != 1:
-            record["infrastructureError"] = "Each invocation must execute exactly one test"
+        if any(type(summary.get(key)) is not int or summary[key] < 0 for key in COUNTS):
+            infrastructure_error(record, "XCResult summary has invalid or missing test counts")
+        elif summary["totalTestCount"] != 1:
+            infrastructure_error(record, "Each invocation must execute exactly one test")
         elif record["xcodeExitCode"] != 0 and summary["failedTests"] == 0:
-            record["infrastructureError"] = "Xcode failed outside the selected test assertion"
-    except (OSError, subprocess.SubprocessError, ValueError, KeyError) as error:
-        record["infrastructureError"] = str(error)
+            infrastructure_error(record, "Xcode failed outside the selected test assertion")
+    except (OSError, subprocess.SubprocessError, ValueError, KeyError, RuntimeError) as error:
+        infrastructure_error(record, str(error))
         print(f"::error::{identifier}: {error}", flush=True)
+    finally:
+        if group_started:
+            print("::endgroup::", flush=True)
+        # Xuất ngay từng bài, kể cả assertion thất bại; bài tiếp theo không phải chờ cả suite mới có bằng chứng.
+        if result.is_dir() and not previous_evidence:
+            try:
+                subprocess.run([
+                    "xcrun", "xcresulttool", "export", "attachments", "--path", str(result),
+                    "--output-path", str(EVIDENCE / f"{stem}-attachments"),
+                ], check=True, timeout=120)
+            except (OSError, subprocess.SubprocessError) as error:
+                infrastructure_error(record, f"Attachment export failed: {error}")
+        elif not previous_evidence:
+            infrastructure_error(record, "No result bundle was produced")
+        if SIMULATOR:
+            try:
+                subprocess.run([
+                    "xcrun", "simctl", "io", SIMULATOR, "screenshot",
+                    str(EVIDENCE / f"{stem}-final.png"),
+                ], check=True, timeout=45)
+            except (OSError, subprocess.SubprocessError) as error:
+                infrastructure_error(record, f"Case screenshot failed: {error}")
+        record["completed"] = True
+        record["casePassed"] = case_passed(record)
+        write_json(record_path, record)
+    print(json.dumps({"case": index, "identifier": identifier,
+                      "casePassed": record["casePassed"],
+                      "infrastructureError": record.get("infrastructureError")}, ensure_ascii=False), flush=True)
     return record
 
 
-def main():
-    if os.environ.get("TUTAM_QA_HOSTS_ISOLATED") != "1":
-        raise SystemExit("Production host isolation must be verified before native tests")
-    if not APP.is_dir() or not SIMULATOR:
-        raise SystemExit("Expected compiled simulator app and CI simulator destination")
+def aggregate():
     EVIDENCE.mkdir(parents=True, exist_ok=True)
     records = []
     for index, identifier in enumerate(CASES, 1):
-        records.append(run_case(index, identifier))
-        (EVIDENCE / "native-ui-cases.json").write_text(
-            json.dumps(records, ensure_ascii=False, indent=2), encoding="utf-8")
-    totals = {key: sum(case.get("summary", {}).get(key, 0) for case in records)
-              for key in ["passedTests", "failedTests", "skippedTests", "totalTestCount"]}
-    totals["cases"] = [{"identifier": case["identifier"],
-                        "infrastructureError": case.get("infrastructureError"),
-                        "xcodeExitCode": case.get("xcodeExitCode")} for case in records]
-    (EVIDENCE / "native-ui-summary.json").write_text(
-        json.dumps(totals, ensure_ascii=False, indent=2), encoding="utf-8")
+        path = EVIDENCE / f"native-{index:02d}-record.json"
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(record, dict):
+                raise ValueError("Case record must be an object")
+            if record.get("case") != index or record.get("identifier") != identifier:
+                infrastructure_error(record, "Case record identifier does not match its selected test")
+            if record.get("completed") is not True:
+                infrastructure_error(record, "Case invocation did not finish collecting evidence")
+            for key in ("GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT"):
+                field = "workflowRunId" if key == "GITHUB_RUN_ID" else "workflowRunAttempt"
+                if os.environ.get(key) and record.get(field) != os.environ[key]:
+                    infrastructure_error(record, "Case record is not from this workflow run and attempt")
+            summary = record.get("summary") or {}
+            if not isinstance(summary, dict) or any(type(summary.get(key)) is not int or summary[key] < 0 for key in COUNTS):
+                infrastructure_error(record, "Case has no valid XCResult test counts")
+                record["summary"] = {}
+            elif summary["totalTestCount"] != 1:
+                infrastructure_error(record, "Case invocation did not execute exactly one test")
+        except (OSError, ValueError, TypeError) as error:
+            record = {"case": index, "identifier": identifier, "summary": {},
+                      "infrastructureError": f"Missing or unreadable case record: {error}"}
+        records.append(record)
+    expected_paths = {EVIDENCE / f"native-{index:02d}-record.json" for index in range(1, 10)}
+    unexpected = sorted(str(path.name) for path in set(EVIDENCE.glob("native-*-record.json")) - expected_paths)
+    totals = {key: sum(record.get("summary", {}).get(key, 0) for record in records) for key in COUNTS}
+    totals["originalSevenPassed"] = sum(record.get("summary", {}).get("passedTests", 0) for record in records[:7])
+    totals["personalReminderPassed"] = sum(record.get("summary", {}).get("passedTests", 0) for record in records[7:])
+    totals["unexpectedCaseRecords"] = unexpected
+    totals["cases"] = [{"case": index, "identifier": CASES[index - 1],
+                        "infrastructureError": record.get("infrastructureError"),
+                        "xcodeExitCode": record.get("xcodeExitCode"),
+                        "casePassed": case_passed(record)} for index, record in enumerate(records, 1)]
+    write_json(EVIDENCE / "native-ui-cases.json", records)
+    write_json(EVIDENCE / "native-ui-summary.json", totals)
     print(json.dumps(totals, ensure_ascii=False), flush=True)
-    if (totals["passedTests"] != 7 or totals["failedTests"] != 0
-            or totals["skippedTests"] != 0 or totals["totalTestCount"] != 7
-            or any(case.get("infrastructureError") for case in records)):
-        raise SystemExit("All seven isolated native tests must execute and pass; no failures or skips")
+    if (totals["passedTests"] != 9 or totals["failedTests"] != 0
+            or totals["skippedTests"] != 0 or totals["totalTestCount"] != 9
+            or totals["originalSevenPassed"] != 7 or totals["personalReminderPassed"] != 2
+            or unexpected or not all(case_passed(record) for record in records)):
+        raise SystemExit("Original seven and both personal-reminder tests must execute and pass, with successful Xcode invocations and no infrastructure failures or skips")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--case", type=int, choices=range(1, 10), dest="case_index")
+    mode.add_argument("--aggregate", action="store_true")
+    args = parser.parse_args()
+    if args.aggregate:
+        aggregate()
+    elif args.case_index is not None:
+        if not case_passed(run_case(args.case_index)):
+            raise SystemExit(1)
+    else:
+        for index in ORDER:
+            run_case(index)
+        aggregate()
 
 
 if __name__ == "__main__":
