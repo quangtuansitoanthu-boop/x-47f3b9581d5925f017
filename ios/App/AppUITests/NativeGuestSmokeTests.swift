@@ -529,25 +529,55 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
     private func selectWebDialogOption(_ dialog: XCUIElement, option: String, app: XCUIApplication) {
         let close = dialog.buttons["Đóng bảng chọn"].firstMatch
         XCTAssertTrue(close.waitForExistence(timeout: 5), "Actual web select dialog must expose its close control")
+        let header = dialog.otherElements.matching(NSPredicate(format: "label IN %@", ["biểu ngữ", "banner"] as NSArray)).firstMatch
+        XCTAssertTrue(header.waitForExistence(timeout: 5), "Web select must expose its complete fixed header")
         let choice = dialog.switches[option].firstMatch
         for _ in 0..<14 {
             let viewport = app.frame
             let bounds = dialog.frame.intersection(viewport)
-            let contentTop = close.frame.maxY
+            let headerFrame = header.frame
+            guard headerFrame.width > 0 && headerFrame.height > 0 && bounds.contains(headerFrame) else {
+                XCTFail("Actual web select header must remain fully visible")
+                return
+            }
+            let contentTop = headerFrame.maxY
             if choice.exists {
                 let frame = choice.frame
-                if frame.minY >= contentTop && bounds.contains(frame) && choice.isHittable {
+                // AX làm phẳng div overflow: chỉ kéo trong các hàng thực đang thấy và hittable,
+                // không dùng toàn bộ backdrop làm khung cuộn. Bước nhỏ dần để không vượt hàng đích.
+                let visibleRows = dialog.switches.allElementsBoundByIndex.compactMap { row -> CGRect? in
+                    let rect = row.frame
+                    return rect.width > 0 && rect.height > 0 && rect.minY >= contentTop &&
+                        bounds.contains(rect) && row.isHittable ? rect : nil
+                }
+                let scrollArea = visibleRows.reduce(CGRect.null) { $0.union($1) }
+                guard !scrollArea.isNull && scrollArea.height > 0 else {
+                    evidence("missing-web-select-scroll-area", app: app)
+                    XCTFail("Web select scrolling requires actual visible option rows below its fixed header")
+                    return
+                }
+                if scrollArea.contains(frame) && choice.isHittable {
                     choice.tap()
                     waitUntil("Selecting a web dialog option must close that dialog") { !dialog.exists }
                     return
                 }
-                // Cuộn trong danh sách dưới header cố định, không kéo vùng nền trang settings.
-                let startY = contentTop + (bounds.maxY - contentTop) * 0.80
-                let endY = contentTop + (bounds.maxY - contentTop) * 0.20
-                let movingUp = frame.midY >= contentTop
-                let x = (bounds.midX - viewport.minX) / viewport.width
-                let start = app.coordinate(withNormalizedOffset: CGVector(dx: x, dy: ((movingUp ? startY : endY) - viewport.minY) / viewport.height))
-                let end = app.coordinate(withNormalizedOffset: CGVector(dx: x, dy: ((movingUp ? endY : startY) - viewport.minY) / viewport.height))
+                let movingUp: Bool
+                if frame.maxY > scrollArea.maxY { movingUp = true }
+                else if frame.minY < scrollArea.minY { movingUp = false }
+                else {
+                    XCTFail("Fully visible requested web select option must be hittable")
+                    return
+                }
+                let delta = min(abs(frame.midY - scrollArea.midY), scrollArea.height / 2)
+                guard delta > 0 else {
+                    XCTFail("Centered requested web select option must be hittable")
+                    return
+                }
+                let startY = scrollArea.midY + (movingUp ? delta / 2 : -delta / 2)
+                let endY = scrollArea.midY + (movingUp ? -delta / 2 : delta / 2)
+                let x = (scrollArea.midX - viewport.minX) / viewport.width
+                let start = app.coordinate(withNormalizedOffset: CGVector(dx: x, dy: (startY - viewport.minY) / viewport.height))
+                let end = app.coordinate(withNormalizedOffset: CGVector(dx: x, dy: (endY - viewport.minY) / viewport.height))
                 start.press(forDuration: 0.05, thenDragTo: end)
             } else {
                 XCTFail("Requested option must exist inside the actual web select dialog")
