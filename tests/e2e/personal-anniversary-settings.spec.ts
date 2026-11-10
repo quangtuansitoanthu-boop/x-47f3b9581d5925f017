@@ -63,8 +63,8 @@ for (const theme of ['light', 'dark'] as const) {
     const times = timing.locator('input[type="time"]');
     await expect(days).toHaveValue('1');
     await expect(times.nth(0)).toHaveValue('19:30');
-    // Chờ presence khởi động của shell trước khi đo riêng các thao tác cài đặt.
-    await expect.poll(() => requests.some(url => new URL(url).pathname === '/api/presence')).toBe(true);
+    // Presence đã nghỉ; shell không được khởi động lại heartbeat khi mở cài đặt.
+    expect(requests.some(url => new URL(url).pathname === '/api/presence')).toBe(false);
     const initialRequests = requests.length;
     await days.fill('100');
     await times.nth(0).fill('21:45');
@@ -80,6 +80,7 @@ for (const theme of ['light', 'dark'] as const) {
     await timing.getByRole('button', { name: 'Hủy', exact: true }).click();
     await expect(days).toHaveValue('100');
     expect(requests).toHaveLength(initialRequests);
+    expect(requests.some(url => new URL(url).pathname === '/api/presence')).toBe(false);
     for (const width of [320, 375, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

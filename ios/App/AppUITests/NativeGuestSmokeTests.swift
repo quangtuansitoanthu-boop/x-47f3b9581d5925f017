@@ -134,11 +134,26 @@ class NativeGuestUITestCase: XCTestCase {
             XCTFail("Expected visible bottom navigation link \(label)")
             return
         }
-        tab.tap()
+        evidence("navigation-before-" + label, app: app)
+        tab.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        let marker: XCUIElement
+        switch label {
+        case "Cá nhân": marker = app.buttons["Quay lại Trang chủ"].firstMatch
+        case "Kinh sách": marker = app.staticTexts["Kho Kinh Sách"].firstMatch
+        case "Tu tập": marker = app.staticTexts["Chế Độ Tu Tập"].firstMatch
+        default:
+            XCTFail("Missing destination contract for tested navigation tab \(label)")
+            return
+        }
+        XCTAssertTrue(marker.waitForExistence(timeout: 30), "Native tab must reach its actual destination before scrolling content")
+        evidence("navigation-after-" + label, app: app)
     }
 
     @MainActor
     func openSettings(_ app: XCUIApplication) {
+        let master = app.switches["Bật thông báo nhắc nhở tu tập"].firstMatch
+        // Quay lại từ Notification Center vẫn ở settings; bấm lại tab hiện tại không xóa query tab=settings.
+        if master.exists && master.frame.width > 0 && master.frame.height > 0 { return }
         navigate("Cá nhân", app: app)
         let settings = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Cài đặt ứng dụng")).firstMatch
         tap(settings, app: app)
@@ -412,10 +427,12 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
 
     @MainActor
     private func openPersonal(_ app: XCUIApplication, requestPermission: Bool = false) {
-        let summary = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Ngày lễ cá nhân ")).firstMatch
-        tap(summary, app: app)
-        if requestPermission { allowPersonalNotificationPermission(app) }
         let enabled = app.switches["Ngày Lễ Cá Nhân"].firstMatch
+        if !enabled.exists || enabled.frame.width == 0 || enabled.frame.height == 0 {
+            let summary = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Ngày lễ cá nhân ")).firstMatch
+            tap(summary, app: app)
+        }
+        if requestPermission { allowPersonalNotificationPermission(app) }
         reveal(enabled, app: app)
         XCTAssertEqual(checked(enabled), true, "Personal reminders must be enabled for these scenarios")
     }
@@ -433,16 +450,18 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
     private func namedControl(_ caption: String, app: XCUIApplication) -> XCUIElement {
         let matches = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", caption))
         reveal(matches.firstMatch, app: app)
-        let viewport = app.frame
         // WebKit iOS có thể xuất HTML select thành Other có value, không nhất thiết PopUpButton.
         let candidates = matches.allElementsBoundByIndex.filter {
-            $0.elementType != .staticText && $0.value != nil && insideViewport($0, viewport: viewport)
+            // Label cũng có thể là Other, nhưng chỉ control có vùng chạm và giá trị thực.
+            $0.elementType != .staticText && $0.frame.height >= 44 &&
+                (($0.value as? String).map { !$0.isEmpty } ?? false)
         }
         guard let control = candidates.first(where: { $0.label == caption }) ?? candidates.first else {
             evidence("missing-labelled-control-" + caption, app: app)
             XCTFail("Expected a labelled interactive control for \(caption)")
             return matches.firstMatch
         }
+        reveal(control, app: app)
         return control
     }
 
@@ -463,14 +482,10 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
             wheel.adjust(toPickerWheelValue: option)
             finishNativePicker(app)
         } else {
-            let options = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", option))
-            XCTAssertTrue(options.firstMatch.waitForExistence(timeout: 10), "Native select must expose the requested option")
-            let viewport = app.frame
-            guard let visible = options.allElementsBoundByIndex.first(where: { insideViewport($0, viewport: viewport) }) else {
-                XCTFail("Expected visible native option \(option)")
-                return
-            }
-            visible.tap()
+            // Chọn nút thật trong popover của UIKit; không chạm option Switch ẩn của WebKit.
+            let choice = app.buttons.matching(identifier: option).firstMatch
+            XCTAssertTrue(choice.waitForExistence(timeout: 10), "Native select popover must expose the requested option button")
+            choice.tap()
         }
         waitUntil("Native select must retain the chosen option \(option)") { (control.value as? String) == option }
     }
