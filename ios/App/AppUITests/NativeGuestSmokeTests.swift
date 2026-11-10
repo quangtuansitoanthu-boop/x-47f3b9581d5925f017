@@ -520,7 +520,7 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
         reveal(summary, app: app)
         let titleFrame = summary.frame
         let viewport = app.frame
-        let edits = app.buttons["Sửa"].allElementsBoundByIndex
+        let edits = app.buttons.matching(identifier: "Sửa").allElementsBoundByIndex
         guard let edit = edits.first(where: {
             let frame = $0.frame
             return frame.width > 0 && frame.height > 0 && viewport.contains(frame) &&
