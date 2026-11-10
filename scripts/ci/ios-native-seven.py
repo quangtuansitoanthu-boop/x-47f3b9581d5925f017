@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import queue
+import shutil
 import signal
 import subprocess
 import threading
@@ -53,6 +54,26 @@ def case_passed(record):
         and summary.get("skippedTests") == 0
         and summary.get("totalTestCount") == 1
     )
+
+
+def capture_app_runtime(stem):
+    # Guest-only CI diagnostics; never change the selected test's result.
+    if (os.environ.get("GITHUB_ACTIONS") != "true"
+            or os.environ.get("TUTAM_QA_HOSTS_ISOLATED") != "1" or not SIMULATOR):
+        return
+    try:
+        with (EVIDENCE / f"{stem}-app-runtime.log").open("wb") as log:
+            try:
+                captured = subprocess.run([
+                    "xcrun", "simctl", "spawn", SIMULATOR, "log", "show",
+                    "--style", "compact", "--last", "90s", "--predicate", 'process == "App"',
+                ], stdout=log, stderr=subprocess.STDOUT, timeout=15)
+                if captured.returncode != 0:
+                    log.write(f"\nApp runtime log unavailable (exit {captured.returncode}).\n".encode("utf-8"))
+            except (OSError, subprocess.SubprocessError) as error:
+                log.write(f"\nApp runtime log unavailable ({type(error).__name__}).\n".encode("utf-8"))
+    except OSError:
+        print(f"App runtime log unavailable for {stem} (artifact write failed).", flush=True)
 
 
 def run_case(index):
@@ -171,6 +192,8 @@ def run_case(index):
     finally:
         if group_started:
             print("::endgroup::", flush=True)
+        if not previous_evidence:
+            capture_app_runtime(stem)
         # Xuất ngay từng bài, kể cả assertion thất bại; bài tiếp theo không phải chờ cả suite mới có bằng chứng.
         if result.is_dir() and not previous_evidence:
             try:
@@ -182,6 +205,15 @@ def run_case(index):
                 infrastructure_error(record, f"Attachment export failed: {error}")
         elif not previous_evidence:
             infrastructure_error(record, "No result bundle was produced")
+        runtime_log = EVIDENCE / f"{stem}-app-runtime.log"
+        if not previous_evidence and runtime_log.is_file():
+            try:
+                # Existing per-case uploads already include this directory.
+                attachments = EVIDENCE / f"{stem}-attachments"
+                attachments.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(runtime_log, attachments / runtime_log.name)
+            except OSError:
+                print(f"App runtime log upload copy unavailable for {stem}.", flush=True)
         if SIMULATOR:
             try:
                 subprocess.run([

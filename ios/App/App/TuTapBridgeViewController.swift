@@ -1,15 +1,100 @@
 import Capacitor
 import AuthenticationServices
+#if DEBUG
+import WebKit
+
+private final class TuTapQAEventsHandler: NSObject, WKScriptMessageHandler {
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.name == "tutamQAEvents", message.frameInfo.isMainFrame,
+              let body = message.body as? String, body.utf8.count <= 4096 else { return }
+        NSLog("[TutamQA] %@", body)
+    }
+}
+#endif
 
 @objc(TuTapBridgeViewController)
 class TuTapBridgeViewController: CAPBridgeViewController {
+#if DEBUG
+    private var qaEventsInstalled = false
+#endif
+
     override func capacitorDidLoad() {
         bridge?.registerPluginInstance(DharmaAudioPlugin.shared)
         bridge?.registerPluginInstance(ReaderSpeechPlugin())
         bridge?.registerPluginInstance(BuddhistCalendarWidgetPlugin())
         bridge?.registerPluginInstance(PracticeWidgetPlugin())
         bridge?.registerPluginInstance(FacebookBrowserAuthPlugin())
+#if DEBUG
+        installQAEventsIfRequested()
+#endif
     }
+
+#if DEBUG
+    private func installQAEventsIfRequested() {
+        guard !qaEventsInstalled, ProcessInfo.processInfo.arguments.contains("-tutam-qa-events"),
+              let webView = webView else { return }
+        qaEventsInstalled = true
+        webView.configuration.userContentController.add(TuTapQAEventsHandler(), name: "tutamQAEvents")
+        let source = """
+        (() => {
+          const log = (detail) => {
+            const body = JSON.stringify(detail);
+            const handler = window.webkit?.messageHandlers?.tutamQAEvents;
+            if (handler) handler.postMessage(body);
+            else console.info('[TutamQA]', body);
+          };
+          const context = () => ({ path: location.pathname, readyState: document.readyState, time: performance.now() });
+          const describe = (event) => {
+            const origin = event.target instanceof Element ? event.target : null;
+            const target = origin?.closest('a,button,select,input');
+            if (!target) return null;
+            const detail = { ...context(), type: event.type, tag: target.tagName, defaultPrevented: event.defaultPrevented };
+            if (target.id) detail.id = target.id.slice(0, 80);
+            const label = target.getAttribute('aria-label');
+            if (label) detail.label = label.slice(0, 80);
+            else if (target.tagName === 'BUTTON') detail.buttonText = (target.textContent || '').trim().slice(0, 80);
+            if (target.tagName === 'A') {
+              try { detail.anchorPath = new URL(target.getAttribute('href') || '', location.href).pathname; } catch {}
+            }
+            const point = event.changedTouches?.[0] || event;
+            if (typeof point.clientX === 'number' && typeof point.clientY === 'number') {
+              detail.x = point.clientX; detail.y = point.clientY;
+            }
+            return detail;
+          };
+          for (const type of ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'mousedown', 'mouseup', 'click', 'mouseover']) {
+            for (const capture of [true, false]) {
+              window.addEventListener(type, (event) => {
+                const detail = describe(event);
+                if (!detail) return;
+                log({ ...detail, phase: capture ? 'capture' : 'bubble' });
+                if (type === 'click' && capture) queueMicrotask(() => {
+                  log({ ...detail, ...context(), phase: 'final', defaultPrevented: event.defaultPrevented });
+                });
+              }, { capture, passive: true });
+            }
+          }
+          let previousPath = location.pathname;
+          new MutationObserver(() => {
+            if (location.pathname !== previousPath) {
+              previousPath = location.pathname;
+              log({ ...context(), type: 'pathname-change' });
+            }
+          }).observe(document, { childList: true, subtree: true });
+          window.addEventListener('error', (event) => {
+            const names = ['Error', 'TypeError', 'SyntaxError', 'ReferenceError', 'RangeError', 'URIError', 'EvalError'];
+            const name = event.error?.name;
+            // Never include error messages, stacks, source URLs, or rejected values.
+            log({ ...context(), type: 'error', kind: names.includes(name) ? name : 'resource-or-module-error' });
+          }, { capture: true, passive: true });
+          log({ ...context(), type: 'installed' });
+        })();
+        """
+        webView.configuration.userContentController.addUserScript(WKUserScript(
+            source: source, injectionTime: .atDocumentStart, forMainFrameOnly: true
+        ))
+    }
+#endif
 }
 
 // Phiên xác thực hệ thống giữ cookie OAuth trong trình duyệt, không chuyển token về WebView.

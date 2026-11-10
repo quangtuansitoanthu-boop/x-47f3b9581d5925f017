@@ -35,7 +35,7 @@ class NativeGuestUITestCase: XCTestCase {
         XCUIDevice.shared.orientation = .portrait
         let app = XCUIApplication()
         evidenceApplication = app
-        app.launchArguments = ["-AppleLanguages", "(vi)", "-AppleLocale", "vi_VN"]
+        app.launchArguments = ["-tutam-qa-events", "1", "-AppleLanguages", "(vi)", "-AppleLocale", "vi_VN"]
         app.launch()
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 30), "Native WKWebView must load")
         XCTAssertTrue(app.links["Cá nhân"].firstMatch.waitForExistence(timeout: 30), "Native app must finish rendering its navigation")
@@ -142,26 +142,27 @@ class NativeGuestUITestCase: XCTestCase {
     @MainActor
     func navigate(_ label: String, app: XCUIApplication) {
         dismissPracticeSyncNotice(app)
-        let links = app.links.matching(identifier: label)
+        let navigation = app.otherElements.matching(NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@", "Điều hướng nhanh", "Quick navigation")).firstMatch
+        XCTAssertTrue(navigation.waitForExistence(timeout: 20), "Bottom tab tap must belong to the actual navigation group")
+        let links = navigation.links.matching(identifier: label)
         XCTAssertTrue(links.firstMatch.waitForExistence(timeout: 20), "Bottom navigation must expose \(label)")
         let viewport = app.frame
+        let footer = navigation.frame
         let visible = links.allElementsBoundByIndex.compactMap { element -> (XCUIElement, CGRect)? in
             let frame = element.frame
-            return frame.width > 0 && frame.height > 0 && viewport.contains(frame) && element.isHittable ? (element, frame) : nil
+            return frame.width > 0 && frame.height > 0 && viewport.contains(frame) && footer.contains(frame) ? (element, frame) : nil
         }
-        guard let tab = visible.max(by: { $0.1.midY < $1.1.midY })?.0 else {
+        guard visible.count == 1, let tab = visible.first?.0 else {
             evidence("missing-bottom-tab-" + label, app: app)
-            XCTFail("Expected visible bottom navigation link \(label)")
+            XCTFail("Expected one visible link inside the actual bottom navigation: \(label)")
             return
         }
-        let navigation = app.otherElements.matching(NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@", "Điều hướng nhanh", "Quick navigation")).firstMatch
-        XCTAssertTrue(navigation.exists, "Bottom tab tap must belong to the actual navigation group")
         evidence("navigation-before-" + label, app: app)
         let targetViewport = app.frame
         let navigationFrame = navigation.frame
         let labelFrame = tab.frame
         let target = CGPoint(x: labelFrame.midX, y: (navigationFrame.minY + labelFrame.minY) / 2)
-        guard navigationFrame.contains(labelFrame), navigationFrame.contains(target), targetViewport.contains(target), tab.isHittable else {
+        guard navigationFrame.contains(labelFrame), navigationFrame.contains(target), targetViewport.contains(target) else {
             evidence("invalid-bottom-tab-icon-target-" + label, app: app)
             XCTFail("Visible footer icon target must lie inside its actual navigation group")
             return
@@ -176,7 +177,25 @@ class NativeGuestUITestCase: XCTestCase {
             XCTFail("Missing destination contract for tested navigation tab \(label)")
             return
         }
-        XCTAssertTrue(marker.waitForExistence(timeout: 30), "Native tab must reach its actual destination before scrolling content")
+        if !marker.waitForExistence(timeout: 30) {
+            evidence("navigation-first-tap-failed-" + label, app: app)
+            // Chỉ chẩn đoán touch/hover: dù lần hai tới đích, yêu cầu một lần chạm vẫn FAIL.
+            let diagnosticViewport = app.frame
+            let diagnosticFooter = navigation.frame
+            let diagnosticLabel = tab.frame
+            let diagnosticPoint = CGPoint(x: diagnosticLabel.midX, y: (diagnosticFooter.minY + diagnosticLabel.minY) / 2)
+            if diagnosticLabel.width > 0 && diagnosticLabel.height > 0 &&
+                diagnosticFooter.contains(diagnosticLabel) && diagnosticFooter.contains(diagnosticPoint) && diagnosticViewport.contains(diagnosticPoint) {
+                app.coordinate(withNormalizedOffset: CGVector(dx: (diagnosticPoint.x - diagnosticViewport.minX) / diagnosticViewport.width,
+                    dy: (diagnosticPoint.y - diagnosticViewport.minY) / diagnosticViewport.height)).tap()
+                let reachedAfterDiagnosticTap = marker.waitForExistence(timeout: 10)
+                evidence("navigation-diagnostic-second-tap-\(reachedAfterDiagnosticTap ? "reached" : "missing")-" + label, app: app)
+            } else {
+                evidence("navigation-diagnostic-second-tap-invalid-geometry-" + label, app: app)
+            }
+            XCTFail("Native tab must reach its actual destination after one tap; diagnostic second tap cannot satisfy this requirement")
+            return
+        }
         evidence("navigation-after-" + label, app: app)
     }
 
@@ -639,7 +658,37 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
     @MainActor
     private func saveEvent(_ title: String, app: XCUIApplication) {
         tap(app.buttons["Lưu ngày lễ"].firstMatch, app: app)
-        waitUntil("A valid save must close the event draft editor") { !app.textFields["Tên ngày lễ *"].firstMatch.exists }
+        let closed = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            !app.textFields["Tên ngày lễ *"].firstMatch.exists
+        }, object: NSObject())
+        if XCTWaiter.wait(for: [closed], timeout: 15) != .completed {
+            evidence("personal-save-first-tap-failed", app: app)
+            // Lần chạm thứ hai chỉ lấy bằng chứng; không đổi thất bại lưu lần đầu thành PASS.
+            let save = app.buttons["Lưu ngày lễ"].firstMatch
+            if save.exists {
+                var viewport = app.frame
+                let navigation = app.otherElements.matching(NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@", "Điều hướng nhanh", "Quick navigation")).firstMatch
+                if navigation.exists {
+                    let footer = navigation.frame
+                    if footer.minY > viewport.minY && footer.minY < viewport.maxY { viewport.size.height = footer.minY - viewport.minY }
+                }
+                let frame = save.frame
+                if frame.width > 0 && frame.height > 0 && viewport.contains(frame) {
+                    let appFrame = app.frame
+                    app.coordinate(withNormalizedOffset: CGVector(dx: (frame.midX - appFrame.minX) / appFrame.width,
+                        dy: (frame.midY - appFrame.minY) / appFrame.height)).tap()
+                    let diagnosticClosed = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+                        !app.textFields["Tên ngày lễ *"].firstMatch.exists
+                    }, object: NSObject())
+                    let didClose = XCTWaiter.wait(for: [diagnosticClosed], timeout: 10) == .completed
+                    evidence("personal-save-diagnostic-second-tap-\(didClose ? "closed" : "open")", app: app)
+                } else {
+                    evidence("personal-save-diagnostic-invalid-geometry", app: app)
+                }
+            }
+            XCTFail("A valid save must close the draft after one tap; diagnostic second tap cannot satisfy this requirement")
+            return
+        }
         XCTAssertTrue(app.staticTexts[title].firstMatch.waitForExistence(timeout: 15))
     }
 
