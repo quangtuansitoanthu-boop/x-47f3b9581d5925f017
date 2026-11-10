@@ -1,10 +1,74 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator } from '@playwright/test';
 import { settleClient } from './runtime-helpers';
 
 const events = [
   { id: 'layout-birthday', title: 'Sinh nhật mẹ', type: 'gia-dinh', calendarMode: 'solar', solarDay: 20, solarMonth: 11, lunarDay: 1, lunarMonth: 1, frequency: 'yearly', createdAt: '2026-01-01T00:00:00Z' },
   { id: 'layout-memorial', title: 'Ngày giỗ ông bà và tưởng niệm gia đình', type: 'gio-chap', calendarMode: 'lunar', lunarDay: 15, lunarMonth: 7, frequency: 'yearly', note: 'Chuẩn bị hương hoa', createdAt: '2026-01-01T00:00:00Z' },
 ];
+
+async function appearance(control: Locator) {
+  return control.evaluate(element => {
+    const style = getComputedStyle(element);
+    return { background: style.backgroundColor, color: style.color, fontSize: style.fontSize, radius: style.borderRadius };
+  });
+}
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`home anniversary form matches settings controls (${theme})`, async ({ page }, testInfo) => {
+    await page.addInitScript(theme => {
+      localStorage.setItem('tutam_locale', 'vi');
+      localStorage.setItem('tutam_dark_mode', theme === 'dark' ? '1' : '0');
+    }, theme);
+    await page.route('**/api/**', route => route.abort('failed'));
+    for (const width of [375, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/');
+      await settleClient(page);
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+      await page.locator('.personal-add-first-btn').click();
+      const modal = page.locator('.pem-dialog');
+      await expect(modal).toBeVisible();
+      const form = modal.locator('.pem-form');
+      const yearly = form.getByRole('button', { name: 'Hàng năm', exact: true });
+      const monthly = form.getByRole('button', { name: 'Hàng tháng', exact: true });
+      const lunar = form.getByRole('button', { name: 'Âm lịch', exact: true });
+      await expect(lunar).toHaveAttribute('aria-pressed', 'true');
+      await expect(yearly).toHaveAttribute('aria-pressed', 'true');
+      const month = form.locator('#pem-select-month');
+      await month.selectOption('8');
+      await monthly.click();
+      await expect(monthly).toHaveAttribute('aria-pressed', 'true');
+      await expect(yearly).toHaveAttribute('aria-pressed', 'false');
+      await expect(month).toBeDisabled();
+      await expect(month).toHaveValue('0');
+      await yearly.click();
+      await expect(month).toBeEnabled();
+      await expect(month).toHaveValue('8');
+      for (const control of await form.locator('input, select, button').all()) {
+        const box = (await control.boundingBox())!;
+        expect(box.width).toBeGreaterThanOrEqual(44);
+        expect(box.height).toBeGreaterThanOrEqual(44);
+      }
+      expect(await modal.locator('.pem-body').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+      const title = form.locator('#pem-input-title');
+      const titleBox = (await title.boundingBox())!, categoryBox = (await form.locator('#pem-select-type').boundingBox())!;
+      expect(categoryBox.y).toBeGreaterThanOrEqual(titleBox.y + titleBox.height);
+      const modalAppearance = await Promise.all([title, lunar, yearly, form.getByRole('button', { name: 'Lưu ngày lễ', exact: true })].map(appearance));
+      await modal.screenshot({ path: testInfo.outputPath(`home-form-${theme}-${width}.png`) });
+      await page.keyboard.press('Escape');
+      await expect(modal).toHaveCount(0);
+      await page.goto('/ca-nhan?tab=settings');
+      await settleClient(page);
+      await page.locator('#settings-personal > summary').click();
+      await page.locator('.personal-inline-add-btn').click();
+      const editor = page.locator('.personal-inline-editor');
+      const settingsControls = [editor.locator('.personal-inline-title-input'), editor.getByRole('button', { name: 'Âm lịch', exact: true }), editor.getByRole('button', { name: 'Hàng năm', exact: true }), editor.getByRole('button', { name: 'Lưu ngày lễ', exact: true })];
+      expect(await Promise.all(settingsControls.map(appearance))).toEqual(modalAppearance);
+      await editor.screenshot({ path: testInfo.outputPath(`settings-form-${theme}-${width}.png`) });
+      await editor.getByRole('button', { name: 'Hủy', exact: true }).click();
+    }
+  });
+}
 
 for (const theme of ['light', 'dark'] as const) {
   test(`each personal anniversary keeps its own date beside its title (${theme})`, async ({ page }, testInfo) => {

@@ -509,6 +509,39 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
     }
 
     @MainActor
+    private func selectWebDialogOption(_ dialog: XCUIElement, option: String, app: XCUIApplication) {
+        let close = dialog.buttons["Đóng bảng chọn"].firstMatch
+        XCTAssertTrue(close.waitForExistence(timeout: 5), "Actual web select dialog must expose its close control")
+        let choice = dialog.switches[option].firstMatch
+        for _ in 0..<14 {
+            let viewport = app.frame
+            let bounds = dialog.frame.intersection(viewport)
+            let contentTop = close.frame.maxY
+            if choice.exists {
+                let frame = choice.frame
+                if frame.minY >= contentTop && bounds.contains(frame) && choice.isHittable {
+                    choice.tap()
+                    waitUntil("Selecting a web dialog option must close that dialog") { !dialog.exists }
+                    return
+                }
+                // Cuộn trong danh sách dưới header cố định, không kéo vùng nền trang settings.
+                let startY = contentTop + (bounds.maxY - contentTop) * 0.80
+                let endY = contentTop + (bounds.maxY - contentTop) * 0.20
+                let movingUp = frame.midY >= contentTop
+                let x = (bounds.midX - viewport.minX) / viewport.width
+                let start = app.coordinate(withNormalizedOffset: CGVector(dx: x, dy: ((movingUp ? startY : endY) - viewport.minY) / viewport.height))
+                let end = app.coordinate(withNormalizedOffset: CGVector(dx: x, dy: ((movingUp ? endY : startY) - viewport.minY) / viewport.height))
+                start.press(forDuration: 0.05, thenDragTo: end)
+            } else {
+                XCTFail("Requested option must exist inside the actual web select dialog")
+                return
+            }
+        }
+        evidence("unreachable-web-select-option-" + option, app: app)
+        XCTFail("Requested web select option must become visible and hittable within bounded scrolling")
+    }
+
+    @MainActor
     private func select(_ caption: String, option: String, app: XCUIApplication) {
         if caption == "Chu kỳ:" {
             selectPersonalSegment(option, app: app)
@@ -517,6 +550,12 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
         let control = namedControl(caption, app: app)
         if (control.value as? String) == option { return }
         control.tap()
+        let webDialog = app.otherElements.matching(NSPredicate(format: "label BEGINSWITH %@ AND (label CONTAINS %@ OR label CONTAINS %@)", caption, "hộp thoại web", "web dialog")).firstMatch
+        if webDialog.waitForExistence(timeout: 2) {
+            selectWebDialogOption(webDialog, option: option, app: app)
+            waitUntil("Web select must retain the chosen option \(option)") { (control.value as? String) == option }
+            return
+        }
         let wheel = app.pickerWheels.firstMatch
         if wheel.waitForExistence(timeout: 2) {
             wheel.adjust(toPickerWheelValue: option)

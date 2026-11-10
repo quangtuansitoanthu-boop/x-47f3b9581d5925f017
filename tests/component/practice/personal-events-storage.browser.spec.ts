@@ -6,6 +6,7 @@ import PersonalReminderTiming from '../../../src/lib/components/practice/reminde
 import DeletePersonalEventDialog from '../../../src/lib/components/practice/reminder/DeletePersonalEventDialog.svelte';
 import HomeDailyReminders from '../../../src/lib/components/home/HomeDailyReminders.svelte';
 import * as sessions from '../../../src/lib/stores/session.svelte';
+import { personalEventFormIssue } from '../../../src/lib/domain/personal-event-form';
 
 const mocks = vi.hoisted(() => ({ add: vi.fn(), remove: vi.fn(), native: false, masterEnabled: true, sync: vi.fn(), alert: vi.fn() }));
 vi.mock('$lib/browser/app-dialog', () => ({ alertInApp: mocks.alert }));
@@ -127,7 +128,7 @@ it('defaults both calendars to the device date and does not persist until saving
   open();
   expect(document.querySelector<HTMLSelectElement>('#pem-select-day')!.value).toBe('28');
   expect(document.querySelector<HTMLSelectElement>('#pem-select-month')!.value).toBe('9');
-  Array.from(document.querySelectorAll<HTMLButtonElement>('[role="tab"]')).find(button => button.textContent?.includes('Nhập theo Dương lịch'))!.click();
+  Array.from(document.querySelectorAll<HTMLButtonElement>('.pem-mode-tabs button')).find(button => button.textContent?.trim() === 'Dương lịch')!.click();
   flushSync();
   expect(document.querySelector<HTMLSelectElement>('#pem-solar-day')!.value).toBe('6');
   expect(document.querySelector<HTMLSelectElement>('#pem-solar-month')!.value).toBe('11');
@@ -147,7 +148,7 @@ it('blocks a blank title, reports its field, and focuses it after the alert', as
 
 it.each([
   ['pem-select-day', 'Ngày Âm'], ['pem-select-month', 'Tháng Âm'],
-  ['pem-select-freq', 'Chu kỳ nhắc'], ['pem-select-type', 'Phân loại sự kiện'],
+  ['pem-select-type', 'Phân loại sự kiện'],
 ])('blocks missing %s without saving and identifies the field', async (id, label) => {
   open();
   const select = document.getElementById(id) as HTMLSelectElement;
@@ -163,13 +164,43 @@ it.each([
 });
 
 function solarDate(day: number, month: number, frequency: 'yearly' | 'monthly') {
-  Array.from(document.querySelectorAll<HTMLButtonElement>('[role="tab"]')).find(button => button.textContent?.includes('Nhập theo Dương lịch'))!.click();
+  Array.from(document.querySelectorAll<HTMLButtonElement>('.pem-mode-tabs button')).find(button => button.textContent?.trim() === 'Dương lịch')!.click();
   flushSync();
-  for (const [id, value] of [['pem-solar-day', String(day)], ['pem-solar-month', String(month)], ['pem-solar-freq', frequency]]) {
+  for (const [id, value] of [['pem-solar-day', String(day)], ['pem-solar-month', String(month)]]) {
     const select = document.getElementById(id) as HTMLSelectElement;
     select.value = value; select.dispatchEvent(new Event('change', { bubbles: true })); flushSync();
   }
+  Array.from(document.querySelectorAll<HTMLButtonElement>('#pem-solar-freq button')).find(button => button.textContent?.trim() === (frequency === 'monthly' ? 'Hàng tháng' : 'Hàng năm'))!.click();
+  flushSync();
 }
+
+it.each(['lunar', 'solar'] as const)('keeps the chosen %s month when recurrence changes without saving the draft', mode => {
+  open();
+  if (mode === 'solar') solarDate(15, 8, 'yearly');
+  const month = document.querySelector<HTMLSelectElement>(mode === 'solar' ? '#pem-solar-month' : '#pem-select-month')!;
+  month.value = '8'; month.dispatchEvent(new Event('change', { bubbles: true })); flushSync();
+  const recurrence = document.querySelector(mode === 'solar' ? '#pem-solar-freq' : '#pem-select-freq')!;
+  const yearly = Array.from(recurrence.querySelectorAll('button')).find(button => button.textContent?.trim() === 'Hàng năm')!;
+  const monthly = Array.from(recurrence.querySelectorAll('button')).find(button => button.textContent?.trim() === 'Hàng tháng')!;
+  expect(yearly.getAttribute('aria-pressed')).toBe('true');
+  monthly.click(); flushSync();
+  expect(monthly.getAttribute('aria-pressed')).toBe('true');
+  expect(yearly.getAttribute('aria-pressed')).toBe('false');
+  expect(month.disabled).toBe(true);
+  expect(month.value).toBe('0');
+  yearly.click(); flushSync();
+  expect(month.disabled).toBe(false);
+  expect(month.value).toBe('8');
+  expect(yearly.getAttribute('aria-pressed')).toBe('true');
+  expect(mocks.add).not.toHaveBeenCalled();
+  expect(mocks.sync).not.toHaveBeenCalled();
+});
+
+it('keeps rejecting missing recurrence in the shared validator', () => {
+  expect(personalEventFormIssue({ title: 'Ngày lễ chưa đầy đủ', frequency: '', type: 'gia-dinh', lunarDay: 15, lunarMonth: 8 }, ['gia-dinh'])).toBe('missingFrequency');
+  expect(mocks.add).not.toHaveBeenCalled();
+  expect(mocks.sync).not.toHaveBeenCalled();
+});
 
 it.each([2, 4])('rejects a yearly solar day 31 in month %i without writing or scheduling and retains the form', async month => {
   mocks.native = true;

@@ -366,7 +366,7 @@
       const result = await syncRemindersWithSystem(settings, localeStore.current);
       if (!feedbackAlive || generation !== feedbackGeneration || owner !== personalOwner()) return true;
       lastSyncResult = result;
-      showFeedback(reminderSyncStatusText(result, localeStore.current), !result.success, personalFeedback);
+      showFeedback(result.success ? (isEn ? 'Saved successfully' : 'Đã lưu thành công') : reminderSyncStatusText(result, localeStore.current), !result.success, personalFeedback);
     } catch {
       if (!feedbackAlive || generation !== feedbackGeneration || owner !== personalOwner()) return true;
       lastSyncResult = null;
@@ -545,7 +545,7 @@
 <section class="cn-card cn-subpage-card reminder-card-container">
   {#if feedbackMessage && !feedbackPersonal}
     <span class="reminder-feedback-badge" role={feedbackIsError ? 'alert' : 'status'}>{feedbackMessage}</span>
-  {:else if !feedbackMessage && lastSyncResult}
+  {:else if !feedbackMessage && lastSyncResult && !lastSyncResult.success}
     <span class="reminder-feedback-badge" role={lastSyncResult.success ? 'status' : 'alert'}>{reminderSyncStatusText(lastSyncResult, localeStore.current)}</span>
   {/if}
 

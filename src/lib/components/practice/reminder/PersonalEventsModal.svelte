@@ -297,7 +297,6 @@
     <dialog
       use:modalDialog
       class="pem-dialog"
-      data-dialog-glass
       aria-labelledby="pem-title"
       oncancel={(event) => { event.preventDefault(); onClose(); }}
     >
@@ -381,26 +380,40 @@
             />
           </div>
 
+          <!-- Phân loại & Ghi chú -->
+          <div class="pem-field">
+            <label for="pem-select-type" class="pem-label">
+              {isEn ? 'Event Type' : 'Phân loại sự kiện'}
+            </label>
+            <select id="pem-select-type" aria-invalid={invalidField === 'pem-select-type' || undefined} aria-describedby={invalidField === 'pem-select-type' ? 'pem-validation-error' : undefined} class="pem-select" bind:value={newType}>
+              {#each PERSONAL_EVENT_TYPES as t}
+                <option value={t.type}>
+                  {t.icon} {isEn ? t.nameEn : t.nameVi}
+                </option>
+              {/each}
+            </select>
+          </div>
+
           <!-- Bộ Chuyển Đổi Tab: Âm Lịch ⇄ Dương Lịch -->
           <div class="pem-mode-switch-wrap">
-            <div class="pem-mode-tabs" role="tablist">
+            <div class="pem-mode-tabs" role="group" aria-label={isEn ? 'Calendar' : 'Lịch'}>
               <button
                 type="button"
-                role="tab"
                 class="mode-tab-btn"
                 class:mode-tab-btn--active={inputMode === 'lunar'}
+                aria-pressed={inputMode === 'lunar'}
                 onclick={() => setMode('lunar')}
               >
-                🌙 {isEn ? 'Lunar Input' : 'Nhập theo Âm lịch'}
+                {isEn ? 'Lunar' : 'Âm lịch'}
               </button>
               <button
                 type="button"
-                role="tab"
                 class="mode-tab-btn"
                 class:mode-tab-btn--active={inputMode === 'solar'}
+                aria-pressed={inputMode === 'solar'}
                 onclick={() => setMode('solar')}
               >
-                ☀️ {isEn ? 'Solar Input' : 'Nhập theo Dương lịch'}
+                {isEn ? 'Solar' : 'Dương lịch'}
               </button>
             </div>
           </div>
@@ -425,26 +438,24 @@
                 <label for="pem-select-month" class="pem-label">
                   {isEn ? 'Lunar Month' : 'Tháng Âm'}
                 </label>
-                <select id="pem-select-month" aria-invalid={invalidField === 'pem-select-month' || undefined} aria-describedby={invalidField === 'pem-select-month' ? 'pem-validation-error' : undefined} class="pem-select" bind:value={newMonth} disabled={newFrequency === 'monthly'}>
-                  {#each Array.from({ length: 12 }, (_, i) => i + 1) as month}
-                    <option value={month}>
-                      {isEn ? `Month ${pad(month)}` : `Tháng ${pad(month)}`}
-                    </option>
-                  {/each}
+                <select id="pem-select-month" aria-invalid={invalidField === 'pem-select-month' || undefined} aria-describedby={invalidField === 'pem-select-month' ? 'pem-validation-error' : undefined} class="pem-select" value={newFrequency === 'monthly' ? 0 : newMonth} disabled={newFrequency === 'monthly'} onchange={(event) => { newMonth = Number(event.currentTarget.value);  }}>
+                  {#if newFrequency === 'monthly'}<option value={0}>{isEn ? 'Every month' : 'Mỗi tháng'}</option>{:else}
+                    {#each Array.from({ length: 12 }, (_, i) => i + 1) as month (month)}<option value={month}>{isEn ? `Month ${month}` : `Tháng ${month}`}</option>{/each}
+                  {/if}
                 </select>
               </div>
 
-              <div class="pem-field">
-                <label for="pem-select-freq" class="pem-label">
-                  {isEn ? 'Frequency' : 'Chu kỳ nhắc'}
-                </label>
-                <select id="pem-select-freq" aria-invalid={invalidField === 'pem-select-freq' || undefined} aria-describedby={invalidField === 'pem-select-freq' ? 'pem-validation-error' : undefined} class="pem-select" bind:value={newFrequency}>
-                  <option value="yearly">{isEn ? 'Yearly' : 'Hàng năm'}</option>
-                  <option value="monthly">{isEn ? 'Monthly' : 'Hàng tháng'}</option>
-                </select>
-              </div>
+
             </div>
 
+          <div class="pem-field">
+            <span class="pem-label" id="pem-frequency-label">{isEn ? 'Recurrence' : 'Lặp lại'}</span>
+            <div id="pem-select-freq" class="pem-frequency" role="group" aria-labelledby="pem-frequency-label" tabindex="-1" data-invalid={invalidField === 'pem-select-freq' || invalidField === 'pem-solar-freq' || undefined}>
+              {#each ['yearly', 'monthly'] as frequency (frequency)}
+                <button type="button" aria-pressed={newFrequency === frequency} onclick={() => { newFrequency = frequency as PersonalEventFrequency; formTouched = true; invalidField = ''; formError = ''; }}>{frequency === 'yearly' ? (isEn ? 'Yearly' : 'Hàng năm') : (isEn ? 'Monthly' : 'Hàng tháng')}</button>
+              {/each}
+            </div>
+          </div>
             <!-- Quy đổi Dương lịch tương ứng -->
             <div class="conversion-pill">
               <span class="conv-icon" aria-hidden="true">☀️</span>
@@ -470,24 +481,24 @@
                 <label for="pem-solar-month" class="pem-label">
                   {isEn ? 'Solar Month' : 'Tháng Dương'}
                 </label>
-                <select id="pem-solar-month" aria-invalid={invalidField === 'pem-solar-month' || undefined} aria-describedby={invalidField === 'pem-solar-month' ? 'pem-validation-error' : undefined} class="pem-select" bind:value={newSolarMonth} onchange={handleSolarChange}>
-                  {#each Array.from({ length: 12 }, (_, i) => i + 1) as month}
-                    <option value={month}>{isEn ? `Month ${pad(month)}` : `Tháng ${pad(month)}`}</option>
-                  {/each}
+                <select id="pem-solar-month" aria-invalid={invalidField === 'pem-solar-month' || undefined} aria-describedby={invalidField === 'pem-solar-month' ? 'pem-validation-error' : undefined} class="pem-select" value={newFrequency === 'monthly' ? 0 : newSolarMonth} disabled={newFrequency === 'monthly'} onchange={(event) => { newSolarMonth = Number(event.currentTarget.value); handleSolarChange(); }}>
+                  {#if newFrequency === 'monthly'}<option value={0}>{isEn ? 'Every month' : 'Mỗi tháng'}</option>{:else}
+                    {#each Array.from({ length: 12 }, (_, i) => i + 1) as month (month)}<option value={month}>{isEn ? `Month ${month}` : `Tháng ${month}`}</option>{/each}
+                  {/if}
                 </select>
               </div>
 
-              <div class="pem-field">
-                <label for="pem-solar-freq" class="pem-label">
-                  {isEn ? 'Frequency' : 'Chu kỳ nhắc'}
-                </label>
-                <select id="pem-solar-freq" aria-invalid={invalidField === 'pem-solar-freq' || undefined} aria-describedby={invalidField === 'pem-solar-freq' ? 'pem-validation-error' : undefined} class="pem-select" bind:value={newFrequency}>
-                  <option value="yearly">{isEn ? 'Yearly' : 'Hàng năm'}</option>
-                  <option value="monthly">{isEn ? 'Monthly' : 'Hàng tháng'}</option>
-                </select>
-              </div>
+
             </div>
 
+          <div class="pem-field">
+            <span class="pem-label" id="pem-frequency-label">{isEn ? 'Recurrence' : 'Lặp lại'}</span>
+            <div id="pem-solar-freq" class="pem-frequency" role="group" aria-labelledby="pem-frequency-label" tabindex="-1" data-invalid={invalidField === 'pem-select-freq' || invalidField === 'pem-solar-freq' || undefined}>
+              {#each ['yearly', 'monthly'] as frequency (frequency)}
+                <button type="button" aria-pressed={newFrequency === frequency} onclick={() => { newFrequency = frequency as PersonalEventFrequency; formTouched = true; invalidField = ''; formError = ''; }}>{frequency === 'yearly' ? (isEn ? 'Yearly' : 'Hàng năm') : (isEn ? 'Monthly' : 'Hàng tháng')}</button>
+              {/each}
+            </div>
+          </div>
             <!-- Quy đổi Âm lịch tương ứng -->
             <div class="conversion-pill">
               <span class="conv-icon" aria-hidden="true">🌙</span>
@@ -500,20 +511,6 @@
               </span>
             </div>
           {/if}
-
-          <!-- Phân loại & Ghi chú -->
-          <div class="pem-field">
-            <label for="pem-select-type" class="pem-label">
-              {isEn ? 'Event Type' : 'Phân loại sự kiện'}
-            </label>
-            <select id="pem-select-type" aria-invalid={invalidField === 'pem-select-type' || undefined} aria-describedby={invalidField === 'pem-select-type' ? 'pem-validation-error' : undefined} class="pem-select" bind:value={newType}>
-              {#each PERSONAL_EVENT_TYPES as t}
-                <option value={t.type}>
-                  {t.icon} {isEn ? t.nameEn : t.nameVi}
-                </option>
-              {/each}
-            </select>
-          </div>
 
           <div class="pem-field">
             <label for="pem-input-note" class="pem-label">
@@ -530,7 +527,7 @@
           </div>
 
           <button type="submit" class="pem-submit-btn">
-            {isEn ? '+ Save Personal Anniversary' : '+ Lưu Ngày Lễ Cá Nhân'}
+            {personalEventsUi[isEn ? 'en' : 'vi'].saveEvent}
           </button>
         </form>
 
@@ -604,477 +601,58 @@
 <DeletePersonalEventDialog event={pendingDelete} {isEn} onCancel={() => pendingDelete = null} onConfirm={confirmPersonalDelete} />
 
 <style>
-  .pem-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.65);
-  }
-
-  .pem-dialog {
-    width: min(580px, calc(100% - 24px));
-    max-width: none;
-    max-height: min(90vh, 90dvh);
-    padding: 0;
-    margin: auto;
-    border-radius: 22px;
-    background: var(--dialog-surface-background,var(--card));
-    color: var(--text);
-    border: 1.5px solid var(--dialog-surface-border,var(--border));
-    box-shadow: var(--dialog-surface-shadow,var(--shadow-xl));
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    animation: pem-fade-in var(--motion-enter) var(--ease-standard);
-  }
-
-  /* Header */
-  .pem-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 16px 20px 14px;
-    border-bottom: 1px solid var(--border2);
-    background: var(--bg2);
-  }
-
-  .pem-title-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .pem-icon {
-    font-size: 24px;
-    line-height: 1;
-    transform: translateY(2px);
-  }
-
-  .pem-title {
-    margin: 0;
-    font-size: 17.5px;
-    font-weight: 800;
-    color: var(--text);
-    line-height: 1.25;
-  }
-
-  .pem-subtitle {
-    margin: 4px 0 0;
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .pem-close-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 1px solid var(--border2);
-    background: var(--card);
-    color: var(--text);
-    font-size: 15px;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
-  /* Body */
-  .pem-body {
-    padding: 16px 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  /* Thông Báo Switch Card */
-  .pem-notify-toggle-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px 14px;
-    border-radius: 16px;
-    background: color-mix(in srgb, var(--gold) 10%, var(--card));
-    border: 1.5px solid color-mix(in srgb, var(--gold) 35%, var(--border));
-  }
-
-  .notify-card-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .notify-icon {
-    font-size: 20px;
-  }
-
-  .notify-text-box {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .notify-title {
-    font-size: 13.5px;
-    font-weight: 750;
-    color: var(--text);
-  }
-
-  .notify-desc {
-    margin: 0;
-    font-size: 11.5px;
-    color: var(--muted);
-  }
-
-  .pem-switch {
-    position: relative;
-    display: inline-block;
-    width: 44px;
-    height: 24px;
-    flex-shrink: 0;
-  }
-
-  .pem-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-
-  .pem-slider {
-    position: absolute;
-    cursor: pointer;
-    inset: 0;
-    background-color: var(--border2, #ccc);
-    transition: 0.25s;
-    border-radius: 24px;
-  }
-
-  .pem-slider:before {
-    position: absolute;
-    content: '';
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: 0.25s;
-    border-radius: 50%;
-  }
-
-  .pem-switch input:checked + .pem-slider {
-    background-color: var(--gold, #c8963e);
-  }
-
-  .pem-switch input:checked + .pem-slider:before {
-    transform: translateX(20px);
-  }
-
-  /* Form */
-  .pem-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 14px 16px;
-    border-radius: 18px;
-    background: var(--card);
-    border: 1.5px solid var(--border);
-  }
-
-  .pem-form-title {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--gold);
-  }
-
-  .pem-mode-switch-wrap {
-    display: flex;
-    width: 100%;
-  }
-
-  .pem-mode-tabs {
-    display: flex;
-    width: 100%;
-    gap: 6px;
-    background: var(--bg2);
-    padding: 4px;
-    border-radius: 10px;
-    border: 1px solid var(--border2);
-  }
-
-  .mode-tab-btn {
-    flex: 1;
-    min-height: 32px;
-    border-radius: 8px;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .mode-tab-btn--active {
-    background: var(--card);
-    color: var(--gold);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  }
-
-  .conversion-pill {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--gold) 12%, var(--bg2));
-    border: 1px dashed var(--gold);
-    font-size: 12px;
-    color: var(--text);
-  }
-
-  .conv-icon {
-    font-size: 15px;
-  }
-
-  .pem-error {
-    padding: 8px 12px;
-    border-radius: 10px;
-    background: rgba(229, 57, 53, 0.12);
-    border: 1px solid rgba(229, 57, 53, 0.3);
-    color: #e53935;
-    font-size: 12.5px;
-    font-weight: 700;
-  }
-
-  .pem-field {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex: 1;
-  }
-
-  .pem-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .pem-input,
-  .pem-select {
-    width: 100%;
-    min-height: 38px;
-    padding: 0 12px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    font: inherit;
-    font-size: 13.5px;
-    box-sizing: border-box;
-    outline: none;
-  }
-
-  .pem-input:focus,
-  .pem-select:focus {
-    border-color: var(--gold);
-  }
-
-  .pem-row-3 {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
-
-  .pem-submit-btn {
-    min-height: 44px;
-    border-radius: 12px;
-    border: none;
-    background: linear-gradient(135deg, var(--gold) 0%, #996d24 100%);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 750;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(200, 150, 62, 0.3);
-    transition: transform 0.12s ease;
-    margin-top: 4px;
-  }
-
-  .pem-submit-btn:active {
-    transform: scale(0.98);
-  }
-
-  /* List */
-  .pem-list-section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .pem-list-heading {
-    margin: 0;
-    font-size: 14.5px;
-    font-weight: 800;
-    color: var(--text);
-  }
-
-  .pem-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 16px;
-    border-radius: 16px;
-    background: var(--bg2);
-    border: 1.5px dashed var(--border2);
-    text-align: center;
-    color: var(--muted);
-    font-size: 12.5px;
-    gap: 4px;
-  }
-
-  .pem-empty-icon {
-    font-size: 28px;
-    margin-bottom: 2px;
-  }
-
-  .pem-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .pem-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 10px 14px;
-    border-radius: 14px;
-    background: var(--card);
-    border: 1px solid var(--border);
-  }
-
-  .pem-item-left {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .pem-item-badge-icon {
-    font-size: 22px;
-    line-height: 1;
-    transform: translateY(2px);
-  }
-
-  .pem-item-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .pem-item-title-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-
-  .pem-item-title {
-    font-size: 13.5px;
-    color: var(--text);
-  }
-
-  .pem-item-type-tag {
-    font-size: 10.5px;
-    font-weight: 700;
-    padding: 1px 6px;
-    border-radius: 6px;
-    background: var(--bg2);
-    color: var(--muted);
-  }
-
-  .pem-freq-tag {
-    font-size: 10.5px;
-    font-weight: 700;
-    padding: 1px 6px;
-    border-radius: 6px;
-    background: color-mix(in srgb, #ab47bc 15%, var(--card));
-    color: #ab47bc;
-  }
-
-  .pem-item-date {
-    font-size: 11.5px;
-    color: var(--gold);
-    font-weight: 700;
-  }
-
-  .pem-item-note {
-    margin: 2px 0 0;
-    font-size: 11.5px;
-    color: var(--muted);
-    font-style: italic;
-  }
-
-  .pem-delete-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: 1px solid var(--border2);
-    background: transparent;
-    font-size: 14px;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    transition: background 0.12s ease;
-  }
-
-  .pem-delete-btn:hover {
-    background: rgba(229, 57, 53, 0.15);
-    border-color: #e53935;
-  }
-
-  /* Footer */
-  .pem-footer {
-    display: flex;
-    justify-content: flex-end;
-    padding: 12px 20px;
-    border-top: 1px solid var(--border2);
-    background: var(--bg2);
-  }
-
-  .pem-done-btn {
-    min-height: 44px;
-    padding: 0 20px;
-    border-radius: 10px;
-    border: 1px solid var(--border2);
-    background: var(--card);
-    color: var(--text);
-    font-weight: 700;
-    font-size: 13.5px;
-    cursor: pointer;
-  }
-
-  @keyframes pem-fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .pem-row-3 {
-      grid-template-columns: 1fr;
-    }
-  }
+  .pem-dialog::backdrop { background: var(--practice-dialog-backdrop); }
+  .pem-dialog { box-sizing: border-box; width: min(var(--practice-dialog-width), calc(100% - var(--space-page))); max-width: none; max-height: var(--practice-dialog-height); margin: auto; padding: 0; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--bg); color: var(--text); display: flex; flex-direction: column; overflow: hidden; font: inherit; font-size: var(--font-size-body); }
+  .pem-header, .pem-footer { display: flex; justify-content: space-between; gap: var(--dialog-action-gap); padding: var(--space-page); border-bottom: 1px solid var(--border); }
+  .pem-header { align-items: flex-start; }
+  .pem-title-box, .notify-card-info, .pem-item-left { display: flex; align-items: flex-start; gap: var(--dialog-action-gap); min-width: 0; }
+  .pem-title { margin: 0; font-size: var(--font-size-section-title); line-height: 1.5; }
+  .pem-subtitle, .notify-desc { margin: var(--dialog-action-gap) 0 0; color: var(--text2); font-size: var(--font-size-label); line-height: 1.6; }
+  .pem-icon, .notify-icon, .pem-empty-icon, .pem-item-badge-icon { font-size: var(--font-size-section-title); }
+  button { box-sizing: border-box; min-width: var(--touch-target-size); min-height: var(--touch-target-size); padding: var(--dialog-action-gap) var(--dialog-action-space); border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--card); color: var(--text); font: inherit; cursor: pointer; }
+  .pem-close-btn, .pem-delete-btn { flex-shrink: 0; padding: var(--dialog-action-gap); }
+  .pem-body { padding: var(--space-page); min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: var(--space-page); }
+  .pem-notify-toggle-card { display: flex; justify-content: space-between; align-items: center; gap: var(--dialog-action-gap); padding-bottom: var(--dialog-action-space); border-bottom: 1px solid var(--border); }
+  .notify-title { font-size: var(--font-size-card-title); }
+  .pem-switch { position: relative; width: calc(var(--touch-target-size) + var(--dialog-action-gap)); height: var(--touch-target-size); flex-shrink: 0; }
+  .pem-switch input { position: absolute; margin: 0; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+  .pem-slider { pointer-events: none; position: absolute; inset: var(--dialog-action-gap) 0; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--bg3); }
+  .pem-slider::before { content: ''; position: absolute; width: var(--space-page); height: var(--space-page); top: 50%; left: calc(var(--dialog-action-gap) / 2); transform: translateY(-50%); border-radius: 50%; background: var(--card); }
+  .pem-switch input:checked + .pem-slider { background: var(--gold); border-color: var(--gold); }
+  .pem-switch input:checked + .pem-slider::before { left: auto; right: calc(var(--dialog-action-gap) / 2); background: var(--white); }
+  .pem-switch input:focus-visible + .pem-slider { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .pem-form { display: flex; flex-direction: column; gap: var(--dialog-action-space); min-width: 0; }
+  .pem-form-title { display: flex; gap: var(--dialog-action-gap); font-size: var(--font-size-section-title); }
+  .pem-field { display: flex; flex-direction: column; gap: var(--dialog-action-gap); min-width: 0; }
+  .pem-label { color: var(--text2); line-height: 1.6; }
+  .pem-input, .pem-select { box-sizing: border-box; width: 100%; min-width: 0; min-height: calc(var(--touch-target-size) + var(--dialog-action-gap) / 2); padding: var(--dialog-action-gap); border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--card); color: var(--text); font: inherit; font-size: var(--font-size-input); }
+  .pem-select:disabled { background: var(--bg3); color: var(--text2); cursor: not-allowed; }
+  .pem-mode-tabs, .pem-frequency { display: flex; padding: calc(var(--dialog-action-gap) / 2); gap: calc(var(--dialog-action-gap) / 2); border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--card); }
+  .pem-mode-switch-wrap { min-width: 0; }
+  .pem-mode-tabs button, .pem-frequency button { flex: 1; min-width: 0; padding: var(--dialog-action-gap); border: 0; border-radius: var(--radius); background: transparent; font-weight: 600; }
+  .pem-mode-tabs button[aria-pressed='true'] { background: var(--gold); color: var(--on-gold); }
+  .pem-frequency button[aria-pressed='true'] { background: var(--gold-light); }
+  .pem-row-3 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--dialog-action-space); }
+  .conversion-pill { color: var(--text2); line-height: 1.6; overflow-wrap: anywhere; }
+  .conv-icon { display: none; }
+  .conversion-pill strong { color: var(--brown); font-weight: 600; }
+  :global([data-theme='dark']) .conversion-pill strong { color: var(--gold2); }
+  .pem-error { color: var(--danger-text); line-height: 1.6; }
+  [aria-invalid='true'], [data-invalid='true'] { border-color: var(--danger-text); }
+  .pem-submit-btn { min-height: calc(var(--touch-target-size) + var(--dialog-action-gap) / 2); background: var(--gold); color: var(--on-gold); font-weight: 600; }
+  :is(button, input, select, [tabindex]):focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .pem-list-section { display: flex; flex-direction: column; gap: var(--dialog-action-space); padding-top: var(--dialog-action-space); border-top: 1px solid var(--border); }
+  .pem-list-heading { margin: 0; font-size: var(--font-size-section-title); }
+  .pem-empty { color: var(--text2); line-height: 1.6; }
+  .pem-empty p { margin: var(--dialog-action-gap) 0; }
+  .pem-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--dialog-action-space); }
+  .pem-item { display: flex; align-items: center; justify-content: space-between; gap: var(--dialog-action-gap); padding-bottom: var(--dialog-action-space); border-bottom: 1px solid var(--border); }
+  .pem-item-left, .pem-item-info { flex: 1; min-width: 0; }
+  .pem-item-info { overflow-wrap: anywhere; }
+  .pem-item-title-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--dialog-action-gap); }
+  .pem-item-title { font-size: var(--font-size-card-title); }
+  .pem-item-type-tag, .pem-freq-tag, .pem-item-date, .pem-item-note { color: var(--text2); font-size: var(--font-size-label); line-height: 1.6; }
+  .pem-item-note { margin: var(--dialog-action-gap) 0 0; font-style: italic; }
+  .pem-delete-btn { color: var(--danger-text); background: transparent; }
+  .pem-footer { justify-content: flex-end; border-top: 1px solid var(--border); border-bottom: 0; padding-bottom: max(var(--space-page), env(safe-area-inset-bottom, 0px)); }
 </style>
