@@ -84,12 +84,18 @@ class NativeGuestUITestCase: XCTestCase {
     func reveal(_ element: XCUIElement, app: XCUIApplication) {
         // WKWebView có thể chưa đưa control ngoài màn hình vào AX; phải tìm bằng cuộn trước khi kết luận thiếu.
         var viewport = app.frame
-        let navigation = app.otherElements.matching(NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@", "Điều hướng nhanh", "Quick navigation")).firstMatch
-        if navigation.exists {
-            let frame = navigation.frame
-            if frame.width > 0 && frame.minY > viewport.midY && frame.minY < viewport.maxY {
-                // WebKit có thể báo hittable cho nội dung nằm dưới thanh điều hướng fixed.
-                viewport.size.height = frame.minY - viewport.minY
+        let dialog = app.otherElements.matching(NSPredicate(format: "label ENDSWITH %@ OR label ENDSWITH %@", "hộp thoại web", "web dialog")).firstMatch
+        if dialog.exists {
+            // aria-modal ẩn cây AX phía sau; chỉ dùng khung dialog, không truy vấn footer nền.
+            viewport = viewport.intersection(dialog.frame)
+        } else {
+            let navigation = app.otherElements.matching(NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@", "Điều hướng nhanh", "Quick navigation")).firstMatch
+            if navigation.exists {
+                let frame = navigation.frame
+                if frame.width > 0 && frame.minY > viewport.midY && frame.minY < viewport.maxY {
+                    // WebKit có thể báo hittable cho nội dung nằm dưới thanh điều hướng fixed.
+                    viewport.size.height = frame.minY - viewport.minY
+                }
             }
         }
         let keyboard = app.keyboards.firstMatch
