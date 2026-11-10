@@ -4,7 +4,6 @@ import json
 import os
 from pathlib import Path
 import queue
-import shutil
 import signal
 import stat
 import subprocess
@@ -57,28 +56,12 @@ def case_passed(record):
     )
 
 
-def capture_app_runtime(stem):
-    # Guest-only CI diagnostics; never change the selected test's result.
-    if (os.environ.get("GITHUB_ACTIONS") != "true"
-            or os.environ.get("TUTAM_QA_HOSTS_ISOLATED") != "1" or not SIMULATOR):
-        return
-    try:
-        with (EVIDENCE / f"{stem}-app-runtime.log").open("wb") as log:
-            try:
-                captured = subprocess.run([
-                    "xcrun", "simctl", "spawn", SIMULATOR, "log", "show",
-                    "--style", "compact", "--last", "90s", "--predicate", 'process == "App"',
-                ], stdout=log, stderr=subprocess.STDOUT, timeout=15)
-                if captured.returncode != 0:
-                    log.write(f"\nApp runtime log unavailable (exit {captured.returncode}).\n".encode("utf-8"))
-            except (OSError, subprocess.SubprocessError) as error:
-                log.write(f"\nApp runtime log unavailable ({type(error).__name__}).\n".encode("utf-8"))
-    except OSError:
-        print(f"App runtime log unavailable for {stem} (artifact write failed).", flush=True)
-
-
-def capture_qa_events():
-    status = {"available": False, "installedMarker": "not-observed"}
+def capture_qa_events(index, identifier, fresh_install_completed):
+    status = {"case": index, "identifier": identifier,
+              "freshInstallCompleted": fresh_install_completed,
+              "available": False, "installedMarker": "not-observed"}
+    if not fresh_install_completed:
+        return None, {**status, "reason": "fresh-install-not-completed"}
     if (os.environ.get("GITHUB_ACTIONS") != "true"
             or os.environ.get("TUTAM_QA_HOSTS_ISOLATED") != "1" or not SIMULATOR):
         return None, {**status, "reason": "isolated-ci-required"}
@@ -138,11 +121,12 @@ def run_case(index):
         "case": index, "identifier": identifier, "resultBundle": result.name,
         "workflowRunId": os.environ.get("GITHUB_RUN_ID"),
         "workflowRunAttempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
-        "completed": False, "xcodeExitCode": None,
+        "completed": False, "xcodeExitCode": None, "freshInstallCompleted": False,
     }
     EVIDENCE.mkdir(parents=True, exist_ok=True)
     write_json(record_path, record)
     group_started = False
+    fresh_install_completed = False
     try:
         if previous_evidence:
             raise RuntimeError("Refusing to reuse an existing case result bundle or record")
@@ -161,6 +145,8 @@ def run_case(index):
                            check=True, timeout=60)
         subprocess.run(["xcrun", "simctl", "install", SIMULATOR, str(APP)],
                        check=True, timeout=90)
+        fresh_install_completed = True
+        record["freshInstallCompleted"] = True
         command = [
             "xcodebuild", "-workspace", "ios/App/App.xcworkspace", "-scheme", "App",
             "-configuration", "Debug", "-sdk", "iphonesimulator",
@@ -245,8 +231,7 @@ def run_case(index):
         if group_started:
             print("::endgroup::", flush=True)
         if not previous_evidence:
-            capture_app_runtime(stem)
-            qa_events, qa_events_status = capture_qa_events()
+            qa_events, qa_events_status = capture_qa_events(index, identifier, fresh_install_completed)
         # Xuất ngay từng bài, kể cả assertion thất bại; bài tiếp theo không phải chờ cả suite mới có bằng chứng.
         if result.is_dir() and not previous_evidence:
             try:
@@ -267,15 +252,6 @@ def run_case(index):
                 write_json(attachments / "tutam-qa-events-status.json", qa_events_status)
             except OSError:
                 print(f"QA events artifact unavailable for {stem} (artifact write failed).", flush=True)
-        runtime_log = EVIDENCE / f"{stem}-app-runtime.log"
-        if not previous_evidence and runtime_log.is_file():
-            try:
-                # Existing per-case uploads already include this directory.
-                attachments = EVIDENCE / f"{stem}-attachments"
-                attachments.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(runtime_log, attachments / runtime_log.name)
-            except OSError:
-                print(f"App runtime log upload copy unavailable for {stem}.", flush=True)
         if SIMULATOR:
             try:
                 subprocess.run([

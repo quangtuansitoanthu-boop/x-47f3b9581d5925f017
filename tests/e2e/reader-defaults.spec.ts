@@ -46,35 +46,74 @@ test('without a saved theme, the reader follows a dark system preference', async
 });
 
 for (const appTheme of ['0', '1']) {
-  test(`reader italic guidance stays readable on every paper with app theme ${appTheme}`, async ({ page }) => {
+  test(`reader imported ink and highlighted emphasis stay readable on every paper with app theme ${appTheme}`, async ({ page }, testInfo) => {
     await page.addInitScript(value => localStorage.setItem('tutam_dark_mode', value), appTheme);
     await page.goto('/?article=e2e-public');
     await settleClient(page);
     const reader = page.locator('.reader-modal');
     await expect(reader.locator('.reader-content')).toBeVisible();
     const papers = appTheme === '1' ? ['Tối', 'Be nhạt'] : ['Trắng', 'Be nhạt', 'Xám'];
-    for (const paper of papers) {
+    for (const width of [375, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      if (width === 375) await reader.getByRole('button', { name: 'Công cụ', exact: true }).click();
+      for (const paper of papers) {
       await page.getByRole('button', { name: `Nền giấy ${paper}`, exact: true }).click();
+      await expect(reader.locator('.reader-scroll')).toHaveCSS('color', await reader.evaluate(modal => getComputedStyle(modal).color));
       // Fixture text exercises the real reader CSS without changing stored content.
-      const ratio = await reader.evaluate(modal => {
+      const ratios = await reader.evaluate(modal => {
         const content = modal.querySelector('.reader-content')!;
-        let sample = content.querySelector<HTMLElement>('[data-contrast-probe]');
-        if (!sample) {
-          sample = document.createElement('em');
-          sample.dataset.contrastProbe = '';
-          sample.textContent = '(3 lần)';
-          content.append(sample);
+        if (!content.querySelector('[data-contrast-probes]')) {
+          const samples = document.createElement('div');
+          samples.dataset.contrastProbes = '';
+          samples.innerHTML = '<em data-contrast-probe="guidance">(3 lần)</em>'
+            + '<p style="background-color:rgb(255,255,255);color:rgb(51,51,51)"><span data-contrast-probe="imported-paper">Kinh văn</span></p>'
+            + '<span style="color:#ffffff" data-contrast-probe="imported-white">Lời giảng</span>'
+            + '<div class="tt-converted-book"><p class="book-paragraph"><strong data-contrast-probe="converted-bold">Khuyên người niệm Phật</strong></p><aside class="footnote"><p class="note-label" data-contrast-probe="note-label">Chú thích</p><p><strong data-contrast-probe="note-bold">Lời giải</strong></p></aside><div class="boxed"><em data-contrast-probe="boxed-guidance">(Lời hướng dẫn)</em></div></div>'
+            + '<mark data-reading-annotation="contrast-yellow" data-color="yellow"><strong data-contrast-probe="highlight-bold">Đoạn đã đánh dấu</strong> <em data-contrast-probe="highlight-italic">(3 lần)</em></mark>';
+          // Các cặp màu nhập thực tế trong sách đóng offline phải theo nền giấy.
+          for (const [index, style] of [
+            'color:#ff0000', 'background-color:hsl(0,0%,100%)',
+            'background-color:hsl(0,0%,100%);color:rgb(33,37,41)',
+            'color:hsl(240,75%,60%)', 'color:#0000DE', 'color:rgb(255,0,0)',
+            'background-color:rgb(255,255,255);color:rgb(51,51,51);font-size:15px',
+            'color:rgb(33,37,41)', 'background-color:rgb(255,255,255);color:rgb(51,51,51)',
+            'color:#dfb75c', 'text-align:center;color:#b45309;line-height:1.4',
+          ].entries()) {
+            const sample = document.createElement('span');
+            sample.dataset.contrastProbe = `corpus-style-${index}`;
+            sample.setAttribute('style', style);
+            sample.textContent = 'Nội dung sách';
+            samples.append(sample);
+          }
+          const nested = document.createElement('span');
+          nested.dataset.contrastProbe = 'highlight-imported-style';
+          nested.style.color = '#ffffff';
+          nested.textContent = 'Chữ có màu trong đánh dấu';
+          samples.querySelector('mark')!.append(nested);
+          content.append(samples);
         }
         const channels = (value: string) => value.match(/[\d.]+/g)!.slice(0, 3).map(Number);
         const luminance = (rgb: number[]) => rgb.map(value => {
           const channel = value / 255;
           return channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4;
         }).reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
-        const ink = luminance(channels(getComputedStyle(sample).color));
-        const background = luminance(channels(getComputedStyle(modal).backgroundColor));
-        return (Math.max(ink, background) + .05) / (Math.min(ink, background) + .05);
+        return [...content.querySelectorAll<HTMLElement>('[data-contrast-probe]')].map(sample => {
+          const ancestors: Element[] = [];
+          for (let node: Element | null = sample; node; node = node.parentElement) ancestors.unshift(node);
+          let paper = [255, 255, 255];
+          for (const node of ancestors) {
+            const rgba = getComputedStyle(node).backgroundColor.match(/[\d.]+/g)!.map(Number);
+            const alpha = rgba[3] ?? 1;
+            paper = paper.map((channel, index) => rgba[index] * alpha + channel * (1 - alpha));
+          }
+          const ink = luminance(channels(getComputedStyle(sample).color));
+          const background = luminance(paper);
+          return { name: sample.dataset.contrastProbe, ratio: (Math.max(ink, background) + .05) / (Math.min(ink, background) + .05) };
+        });
       });
-      expect(ratio, `italic guidance on ${paper}`).toBeGreaterThanOrEqual(4.5);
+      await testInfo.attach(`contrast-${width}-${paper}`, { body: JSON.stringify(ratios), contentType: 'application/json' });
+      for (const sample of ratios) expect.soft(sample.ratio, `${sample.name} on ${paper}, ${width}px`).toBeGreaterThanOrEqual(4.5);
+      }
     }
   });
 }

@@ -1946,18 +1946,13 @@
   .reader-content :global(p),
   .reader-content :global(div),
   .reader-content :global(font){color:inherit}
-  :global([data-theme='dark']) .reader-content :global(*),
-  :global(.bg-dark) .reader-content :global(*),
+  /* Màu nhập theo nền giấy đang đọc; giữ nguyên HTML lưu trữ và trình biên tập. */
+  .reader-content :global(:where([style*='color']:not(mark[data-reading-annotation]))){color:inherit!important;background-color:transparent!important}
   .reader-modal.bg-dark .reader-content :global(*){color:inherit!important}
-  :global([data-theme='dark']) .reader-content :global(mark[data-reading-annotation]),
-  :global(.bg-dark) .reader-content :global(mark[data-reading-annotation]),
-  .reader-modal.bg-dark .reader-content :global(mark[data-reading-annotation]){color:var(--highlight-ink)!important}
-  :global([data-theme='dark']) .reader-content :global(strong),
-  :global(.bg-dark) .reader-content :global(strong),
   .reader-modal.bg-dark .reader-content :global(strong){color:var(--gold,#d4a84b)!important}
-  :global([data-theme='dark']) .reader-content :global(em),
-  :global(.bg-dark) .reader-content :global(em),
   .reader-modal.bg-dark .reader-content :global(em){color:var(--text)!important}
+  .reader-modal .reader-content :global(mark[data-reading-annotation]),
+  .reader-modal .reader-content :global(mark[data-reading-annotation] *){color:var(--highlight-ink)!important}
   .reader-content :global(p){margin:0 0 .38em!important;white-space:normal}
   .reader-content :global(p:empty){display:none!important}
   .reader-content :global(h1),.reader-content :global(h2),.reader-content :global(h3){margin:1.1em 0 .4em!important}
