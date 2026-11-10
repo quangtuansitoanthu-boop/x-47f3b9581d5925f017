@@ -43,14 +43,19 @@ it('keeps timing edits local until save and cancels back to the saved configurat
   } });
   try {
     flushSync();
-    const days = document.querySelector<HTMLInputElement>('.personal-timing input[type="number"]')!;
+    const leadTime = document.querySelector<HTMLSelectElement>('.personal-timing select')!;
+    leadTime.value = 'custom'; leadTime.dispatchEvent(new Event('change', { bubbles: true })); flushSync();
+    let days = document.querySelector<HTMLInputElement>('.personal-timing input[type="number"]')!;
     days.value = '100'; days.dispatchEvent(new Event('input', { bubbles: true })); flushSync();
     expect(days.checkValidity()).toBe(true);
     expect(onsave).not.toHaveBeenCalled();
     const cancel = document.querySelector<HTMLButtonElement>('.timing-actions button[type="button"]')!;
     cancel.click(); flushSync();
-    expect(days.value).toBe('1');
+    expect(leadTime.value).toBe('1');
+    expect(document.querySelector('.personal-timing input[type="number"]')).toBeNull();
     expect(onsave).not.toHaveBeenCalled();
+    leadTime.value = 'custom'; leadTime.dispatchEvent(new Event('change', { bubbles: true })); flushSync();
+    days = document.querySelector<HTMLInputElement>('.personal-timing input[type="number"]')!;
     days.value = '100'; days.dispatchEvent(new Event('input', { bubbles: true })); flushSync();
     const times = document.querySelectorAll<HTMLInputElement>('.personal-timing input[type="time"]');
     times[0].value = '21:45'; times[0].dispatchEvent(new Event('input', { bubbles: true })); flushSync();
@@ -72,6 +77,8 @@ it('retains the timing draft on storage failure and disables controls for inacti
   } });
   try {
     flushSync();
+    const leadTime = document.querySelector<HTMLSelectElement>('.personal-timing select')!;
+    leadTime.value = 'custom'; leadTime.dispatchEvent(new Event('change', { bubbles: true })); flushSync();
     const toggles = document.querySelectorAll<HTMLInputElement>('.personal-timing input[type="checkbox"]');
     toggles[0].click(); flushSync();
     expect(document.querySelector<HTMLInputElement>('.personal-timing input[type="number"]')!.disabled).toBe(true);
@@ -345,6 +352,45 @@ it('keeps an existing anniversary and reports a failed local deletion without an
   expect(document.querySelector('.pem-item-title')?.textContent).toContain('Ngày lễ đã lưu');
   expect(document.querySelector('[role="alert"]')?.textContent?.trim()).toBeTruthy();
   expect(unhandled).toEqual([]);
+});
+
+it.each([['a', 'b'], ['a', null], [null, 'b']] as const)('clears an unsaved anniversary draft when principal changes from %s to %s', async (initial, next) => {
+  let principal: string | null = initial;
+  vi.spyOn(sessions, 'getBrowserSessionSnapshot').mockImplementation(() => ({
+    authenticated: principal !== null,
+    user: principal === null ? null : { id: principal, displayName: principal, role: 'user', email: '' },
+    csrfToken: null, expiresAt: null,
+  }));
+  open();
+  const title = document.querySelector<HTMLInputElement>('#pem-input-title')!;
+  const note = document.querySelector<HTMLInputElement>('#pem-input-note')!;
+  title.value = 'Bản nháp riêng'; title.dispatchEvent(new Event('input', { bubbles: true }));
+  note.value = 'Ghi chú riêng'; note.dispatchEvent(new Event('input', { bubbles: true }));
+  flushSync();
+  window.dispatchEvent(new CustomEvent(sessions.SESSION_CHANGE_EVENT));
+  await settle();
+  expect(title.value).toBe('Bản nháp riêng');
+  expect(note.value).toBe('Ghi chú riêng');
+  principal = next;
+  window.dispatchEvent(new CustomEvent(sessions.SESSION_CHANGE_EVENT));
+  await settle();
+  expect(title.value).toBe('');
+  expect(note.value).toBe('');
+  expect(mocks.add).not.toHaveBeenCalled();
+});
+
+it('blocks saving the previous principal draft before the session event arrives', async () => {
+  let principal = 'a';
+  vi.spyOn(sessions, 'getBrowserSessionSnapshot').mockImplementation(() => ({
+    authenticated: true, user: { id: principal, displayName: principal, role: 'user', email: '' },
+    csrfToken: null, expiresAt: null,
+  }));
+  open();
+  principal = 'b';
+  submitAnniversary('Bản nháp tài khoản cũ');
+  await settle();
+  expect(mocks.add).not.toHaveBeenCalled();
+  expect(document.querySelector<HTMLInputElement>('#pem-input-title')!.value).toBe('');
 });
 
 it.each([['a', 'b'], ['a', null], [null, 'b']] as const)('cancels a pending anniversary deletion when principal changes from %s to %s', async (initial, next) => {

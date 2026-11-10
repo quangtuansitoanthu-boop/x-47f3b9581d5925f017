@@ -1,5 +1,7 @@
 export const personalEventsUi = {
   vi: {
+    missingInformationTitle: 'Chưa đủ thông tin',
+    invalidDateTitle: 'Ngày chưa hợp lệ',
     timingTitle: 'Thời điểm nhắc ngày lễ cá nhân',
     beforeLabel: 'Nhắc trước ngày lễ',
     beforeDays: 'Trước:',
@@ -37,6 +39,8 @@ export const personalEventsUi = {
     remindersDisabled: 'Nhắc nhở chung đang tắt. Bật nhắc nhở chung trong cài đặt để ứng dụng nhắc ngày lễ.',
   },
   en: {
+    missingInformationTitle: 'Missing information',
+    invalidDateTitle: 'Invalid date',
     timingTitle: 'Personal anniversary reminder times',
     beforeLabel: 'Remind before the anniversary',
     beforeDays: 'Before:',

@@ -2,6 +2,7 @@
   import SettingsSection from '$lib/components/shared/SettingsSection.svelte';
   import { settingsHubCopy } from '$lib/i18n/settings-hub';
   import { personalEventsUi } from '$lib/i18n/personal-events-ui';
+  import { Check, CircleAlert } from '@lucide/svelte';
   let { activeSection = $bindable('') }: { activeSection?: string } = $props();
   import PersonalEventsSyncStatus from './PersonalEventsSyncStatus.svelte';
   import PersonalReminderTiming from './PersonalReminderTiming.svelte';
@@ -64,6 +65,7 @@
   let iosPermissionAttempted = $state(false);
   let exactPermission = $state<'granted' | 'denied' | 'unsupported'>('unsupported');
   let feedbackMessage = $state('');
+  let feedbackPersonal = $state(false);
   let lastSyncResult = $state<ReminderSyncResult | null>(null);
   let feedbackGeneration = 0;
   let feedbackAlive = true;
@@ -79,6 +81,7 @@
   let personalDraft = $state<PersonalLunarEvent | null>(null);
   let personalDraftBase = $state<PersonalLunarEvent | null>(null);
   let personalDraftOwner = '';
+  let personalDraftYearlyLunarMonth = 1;
   let personalDraftInvalidField = $state('');
   const visiblePersonalEvents = $derived(personalDraft
     ? personalDraftBase && personalEventsList.some(event => event.id === personalDraft!.id) ? personalEventsList.map(event => event.id === personalDraft!.id ? personalDraft! : event)
@@ -95,11 +98,16 @@
     personalDraftBase = null;
     personalDraftInvalidField = '';
     editingPersonalEventId = null;
+    personalDraftYearlyLunarMonth = 1;
+  }
+
+  function effectivePersonalFrequency(event: PersonalLunarEvent): PersonalEventFrequency {
+    return event.frequency ?? (Number(event.lunarMonth) === 0 ? 'monthly' : 'yearly');
   }
 
   function beginPersonalEdit(event: PersonalLunarEvent): void {
     if (editingPersonalEventId === event.id) {
-      if (personalDraftBase && JSON.stringify(personalDraft) === JSON.stringify({ ...personalDraftBase, frequency: personalDraftBase.frequency ?? 'yearly' })) {
+      if (personalDraftBase && JSON.stringify(personalDraft) === JSON.stringify({ ...personalDraftBase, frequency: effectivePersonalFrequency(personalDraftBase) })) {
         clearPersonalDraft();
         return;
       }
@@ -113,7 +121,8 @@
     }
     if (!personalDraft) {
       personalDraftBase = { ...event };
-      personalDraft = { ...event, frequency: event.frequency ?? 'yearly' };
+      personalDraft = { ...event, frequency: effectivePersonalFrequency(event) };
+      personalDraftYearlyLunarMonth = event.lunarMonth || 1;
       personalDraftOwner = personalOwner();
     }
     currentYear = new Date().getFullYear();
@@ -145,7 +154,17 @@
   function updateEventField(id: string, patch: Partial<Omit<PersonalLunarEvent, 'id' | 'createdAt'>>) {
     if (personalDraft?.id !== id) return;
     personalDraft = { ...personalDraft, ...patch };
+    if (effectivePersonalFrequency(personalDraft) === 'yearly' && personalDraft.lunarMonth >= 1 && personalDraft.lunarMonth <= 12) {
+      personalDraftYearlyLunarMonth = personalDraft.lunarMonth;
+    }
     personalDraftInvalidField = '';
+  }
+  function changePersonalFrequency(id: string, frequency: PersonalEventFrequency): void {
+    if (personalDraft?.id !== id || effectivePersonalFrequency(personalDraft) === frequency) return;
+    if (frequency === 'monthly' && personalDraft.lunarMonth >= 1 && personalDraft.lunarMonth <= 12) {
+      personalDraftYearlyLunarMonth = personalDraft.lunarMonth;
+    }
+    updateEventField(id, { frequency, lunarMonth: frequency === 'monthly' ? 0 : personalDraftYearlyLunarMonth });
   }
   function switchEventCalendarMode(id: string, mode: 'lunar' | 'solar') {
     const event = selectedPersonalEvent(id);
@@ -157,7 +176,7 @@
     } else {
       const lunar = equivalentLunar(event);
       if (!lunar) { void alertInApp(personalEventsUi[isEn ? 'en' : 'vi'].noEquivalentDate); return; }
-      updateEventField(id, { calendarMode: mode, lunarDay: lunar.day, lunarMonth: event.frequency === 'monthly' ? 0 : lunar.month });
+      updateEventField(id, { calendarMode: mode, lunarDay: lunar.day, lunarMonth: effectivePersonalFrequency(event) === 'monthly' ? 0 : lunar.month });
     }
     triggerHaptic('selection');
   }
@@ -165,13 +184,13 @@
     const event = selectedPersonalEvent(id);
     if (!event) return;
     const lunar = lunarDateForSolarDay(day, Number(event.solarMonth || 1), currentYear);
-    updateEventField(id, { solarDay: day, ...(lunar ? { lunarDay: lunar.day, lunarMonth: event.frequency === 'monthly' ? 0 : lunar.month } : {}), calendarMode: 'solar' });
+    updateEventField(id, { solarDay: day, ...(lunar ? { lunarDay: lunar.day, lunarMonth: effectivePersonalFrequency(event) === 'monthly' ? 0 : lunar.month } : {}), calendarMode: 'solar' });
   }
   function handleSolarMonthChange(id: string, month: number) {
     const event = selectedPersonalEvent(id);
     if (!event) return;
     const lunar = lunarDateForSolarDay(Number(event.solarDay || 1), month, currentYear);
-    updateEventField(id, { solarMonth: month, ...(lunar ? { lunarDay: lunar.day, lunarMonth: event.frequency === 'monthly' ? 0 : lunar.month } : {}), calendarMode: 'solar' });
+    updateEventField(id, { solarMonth: month, ...(lunar ? { lunarDay: lunar.day, lunarMonth: effectivePersonalFrequency(event) === 'monthly' ? 0 : lunar.month } : {}), calendarMode: 'solar' });
   }
   function handleLunarDayChange(id: string, day: number) {
     const event = selectedPersonalEvent(id);
@@ -205,6 +224,7 @@
     personalDraft = { id: 'personal-event-draft', createdAt: now.toISOString(), title: '', type: 'gio-chap', frequency: 'yearly',
       calendarMode: 'lunar', lunarDay: date.lunarDay, lunarMonth: date.lunarMonth, solarDay: date.solarDay, solarMonth: date.solarMonth, note: '' };
     personalDraftBase = null;
+    personalDraftYearlyLunarMonth = date.lunarMonth;
     personalDraftOwner = personalOwner();
     personalDraftInvalidField = '';
     editingPersonalEventId = personalDraft.id;
@@ -217,11 +237,11 @@
     const copy = personalEventsUi[isEn ? 'en' : 'vi'];
     if (personalDraftBase) {
       const current = loadPersonalLunarEvents().find(event => event.id === draft!.id);
-      if (!current) { showFeedback(copy.storageError, true); return; }
+      if (!current) { showFeedback(copy.storageError, true, true); return; }
       // Giữ các trường thiết bị khác đã sửa; bản nháp chỉ ghi phần người dùng đổi.
       const patch = personalDraftPatch(draft, personalDraftBase);
       personalDraftBase = { ...current };
-      personalDraft = { ...current, ...patch, frequency: patch.frequency ?? current.frequency ?? 'yearly' };
+      personalDraft = { ...current, ...patch, frequency: patch.frequency ?? effectivePersonalFrequency(current) };
       draft = personalDraft;
     }
     const issue = personalEventFormIssue(draft, PERSONAL_EVENT_TYPES.map(item => item.type));
@@ -230,7 +250,7 @@
         invalidLunarMonth: 'lunar-month', invalidSolarDay: 'solar-day', invalidSolarMonth: 'solar-month', invalidSolarDate: 'solar-day' }[issue];
       const id = `personal-${field}-${draft.id}`;
       personalDraftInvalidField = id;
-      await alertInApp(copy[issue]);
+      await alertInApp(copy[issue], { title: issue.startsWith('missing') ? copy.missingInformationTitle : copy.invalidDateTitle, presentation: 'personal-event' });
       await tick();
       if (personalDraft?.id === draft.id && personalDraftOwner === personalOwner()) document.getElementById(id)?.focus();
       return;
@@ -246,9 +266,9 @@
       }
       clearPersonalDraft();
       personalEventsList = loadPersonalLunarEvents();
-      showFeedback(copy.eventSaved);
+      showFeedback(copy.eventSaved, false, true);
     } catch {
-      showFeedback(copy.storageError, true);
+      showFeedback(copy.storageError, true, true);
     }
   }
 
@@ -256,6 +276,7 @@
     const patch: Partial<Omit<PersonalLunarEvent, 'id' | 'createdAt'>> = {};
     const fields = ['title', 'type', 'frequency', 'calendarMode', 'lunarDay', 'lunarMonth', 'solarDay', 'solarMonth', 'note'] as const;
     for (const field of fields) {
+      if (field === 'frequency' && effectivePersonalFrequency(draft) === effectivePersonalFrequency(base)) continue;
       if (draft[field] !== base[field]) Object.assign(patch, { [field]: field === 'title' ? draft.title.trim() : draft[field] });
     }
     return patch;
@@ -274,10 +295,10 @@
       else if (editingPersonalEventId === pendingDelete.id) editingPersonalEventId = null;
       pendingDelete = null;
       personalEventsList = loadPersonalLunarEvents();
-      showFeedback(isEn ? 'Anniversary removed' : 'Đã xóa ngày lễ');
+      showFeedback(isEn ? 'Anniversary removed' : 'Đã xóa ngày lễ', false, true);
     } catch {
       pendingDelete = null;
-      showFeedback(personalEventsUi[isEn ? 'en' : 'vi'].storageError, true);
+      showFeedback(personalEventsUi[isEn ? 'en' : 'vi'].storageError, true, true);
     }
   }
 
@@ -322,8 +343,9 @@
     }
   }
 
-  function showFeedback(msg: string, isError = false) {
+  function showFeedback(msg: string, isError = false, personal = false) {
     feedbackMessage = msg;
+    feedbackPersonal = personal;
     feedbackIsError = isError;
     if (feedbackTimer) clearTimeout(feedbackTimer);
     feedbackTimer = setTimeout(() => {
@@ -331,9 +353,9 @@
     }, 2800);
   }
 
-  async function triggerSync(nextSettings = settings): Promise<boolean> {
+  async function triggerSync(nextSettings = settings, personalFeedback = false): Promise<boolean> {
     if (!saveReminderSettings(nextSettings)) {
-      showFeedback(isEn ? 'Could not save on this device. Check available storage and try again.' : 'Không thể lưu trên máy. Hãy kiểm tra bộ nhớ và thử lại.', true);
+      showFeedback(isEn ? 'Could not save on this device. Check available storage and try again.' : 'Không thể lưu trên máy. Hãy kiểm tra bộ nhớ và thử lại.', true, personalFeedback);
       return false;
     }
     settings = nextSettings;
@@ -344,11 +366,11 @@
       const result = await syncRemindersWithSystem(settings, localeStore.current);
       if (!feedbackAlive || generation !== feedbackGeneration || owner !== personalOwner()) return true;
       lastSyncResult = result;
-      showFeedback(reminderSyncStatusText(result, localeStore.current), !result.success);
+      showFeedback(reminderSyncStatusText(result, localeStore.current), !result.success, personalFeedback);
     } catch {
       if (!feedbackAlive || generation !== feedbackGeneration || owner !== personalOwner()) return true;
       lastSyncResult = null;
-      showFeedback(isEn ? 'Saved on this device; reminders could not be scheduled. Please try again.' : 'Đã lưu trên máy; chưa thể đặt lịch nhắc. Vui lòng thử lại.', true);
+      showFeedback(isEn ? 'Saved on this device; reminders could not be scheduled. Please try again.' : 'Đã lưu trên máy; chưa thể đặt lịch nhắc. Vui lòng thử lại.', true, personalFeedback);
     } finally {
       if (generation === feedbackGeneration) syncing = false;
     }
@@ -356,7 +378,7 @@
   }
 
   const personalTiming = $derived(resolvePersonalReminderConfig(settings));
-  const savePersonalTiming = (personal: PersonalReminderConfig) => triggerSync({ ...settings, personal });
+  const savePersonalTiming = (personal: PersonalReminderConfig) => triggerSync({ ...settings, personal }, true);
 
   async function toggleMaster() {
     triggerHaptic('medium');
@@ -516,10 +538,14 @@
   });
 </script>
 
+{#snippet feedbackBadge()}
+    <span class="reminder-feedback-badge personal-feedback" class:feedback-error={feedbackIsError} role={feedbackIsError ? 'alert' : 'status'}><span aria-hidden="true">{#if feedbackIsError}<CircleAlert size={20} />{:else}<Check size={20} />{/if}</span>{feedbackMessage}</span>
+{/snippet}
+
 <section class="cn-card cn-subpage-card reminder-card-container">
-  {#if feedbackMessage}
+  {#if feedbackMessage && !feedbackPersonal}
     <span class="reminder-feedback-badge" role={feedbackIsError ? 'alert' : 'status'}>{feedbackMessage}</span>
-  {:else if lastSyncResult}
+  {:else if !feedbackMessage && lastSyncResult}
     <span class="reminder-feedback-badge" role={lastSyncResult.success ? 'status' : 'alert'}>{reminderSyncStatusText(lastSyncResult, localeStore.current)}</span>
   {/if}
 
@@ -703,11 +729,13 @@
 
       <!-- Khối Quản lý Ngày Lễ Cá Nhân Trực Tiếp (Inline) -->
       {#if personalNotifyEnabled}
+        <div class="personal-settings-layout">
         <div class="personal-inline-container" id="personal-events-settings">
           <PersonalEventsSyncStatus {isEn} />
+          {#if feedbackMessage && feedbackPersonal}{@render feedbackBadge()}{/if}
           <div class="personal-inline-header">
             <span class="personal-inline-title">
-              🕯️ {isEn ? 'Personal Anniversaries' : 'Danh Sách Ngày Lễ Kỷ Niệm'} ({personalEventsList.length})
+              {isEn ? 'Personal Anniversaries' : 'Ngày lễ cá nhân'} ({personalEventsList.length})
             </span>
           </div>
 
@@ -723,7 +751,7 @@
                     <span class="personal-summary-icon" aria-hidden="true">{getPersonalEventTypeIcon(event.type)}</span>
                     <div class="personal-summary-text">
                       <strong>{event.title.trim() || event.note?.trim() || getPersonalEventTypeName(event.type, isEn)}</strong>
-                      <span>{formatPersonalEventDateText(event, isEn)}</span>
+                      <span>{formatPersonalEventDateText({ ...event, frequency: effectivePersonalFrequency(event) }, isEn)}</span>
                     </div>
                     <button
                       type="button"
@@ -735,8 +763,22 @@
                   </div>
                   {#if editingPersonalEventId === event.id}
                   <div class="personal-inline-editor" id={`personal-editor-${event.id}`}>
+                  <div class="personal-inline-row3">
+                    <label class="personal-name-label" for={`personal-name-${event.id}`}>{personalEventsUi[isEn ? 'en' : 'vi'].eventNameLabel}</label>
+                    <input
+                      id={`personal-name-${event.id}`}
+                      aria-invalid={personalDraftInvalidField === `personal-name-${event.id}` || undefined}
+                      maxlength={80}
+                      type="text"
+                      class="personal-inline-title-input"
+                      placeholder={isEn ? 'e.g. Grandfather memorial, Refuge vow...' : 'VD: Giỗ Ông Nội, Ngày Quy Y...'}
+                      value={event.title}
+                      oninput={(e) => updateEventField(event.id, { title: e.currentTarget.value })}
+                    />
+                  </div>
                   <!-- Dòng 1: Chọn loại + Nút Xóa (loại bỏ ô nhập tiêu đề bị chèn ép) -->
                   <div class="personal-inline-row1">
+                    <label class="personal-name-label" for={`personal-type-${event.id}`}>{isEn ? 'Event category' : 'Loại ngày lễ'}</label>
                     <select
                       id={`personal-type-${event.id}`}
                       aria-invalid={personalDraftInvalidField === `personal-type-${event.id}` || undefined}
@@ -753,61 +795,29 @@
                   </div>
 
                   <!-- Dòng Chuyển đổi Âm lịch / Dương lịch -->
-                  <div class="personal-inline-row3">
-                    <label class="personal-name-label" for={`personal-name-${event.id}`}>{personalEventsUi[isEn ? 'en' : 'vi'].eventNameLabel}</label>
-                    <input
-                      id={`personal-name-${event.id}`}
-                      aria-invalid={personalDraftInvalidField === `personal-name-${event.id}` || undefined}
-                      maxlength={80}
-                      type="text"
-                      class="personal-inline-title-input"
-                      placeholder={isEn ? 'e.g. Grandfather memorial, Refuge vow...' : 'VD: Giỗ Ông Nội, Ngày Quy Y...'}
-                      value={event.title}
-                      oninput={(e) => updateEventField(event.id, { title: e.currentTarget.value })}
-                    />
-                  </div>
                   <div class="personal-mode-segmented">
                     <button
                       type="button"
                       class="personal-mode-btn"
                       class:active={getEventMode(event) === 'lunar'}
+                      aria-pressed={getEventMode(event) === 'lunar'}
                       onclick={() => switchEventCalendarMode(event.id, 'lunar')}
                     >
-                      🌙 {isEn ? 'Lunar' : 'Âm lịch'}
+                      {isEn ? 'Lunar' : 'Âm lịch'}
                     </button>
                     <button
                       type="button"
                       class="personal-mode-btn"
                       class:active={getEventMode(event) === 'solar'}
+                      aria-pressed={getEventMode(event) === 'solar'}
                       onclick={() => switchEventCalendarMode(event.id, 'solar')}
                     >
-                      ☀️ {isEn ? 'Solar' : 'Dương lịch'}
+                      {isEn ? 'Solar' : 'Dương lịch'}
                     </button>
                   </div>
 
                   <!-- Dòng 2: Chu kỳ + Chọn ngày & tháng tùy theo Âm / Dương -->
                   <div class="personal-inline-row2">
-                    <!-- Chu kỳ -->
-                    <div class="personal-pill-col">
-                      <label class="personal-col-label" for={`personal-frequency-${event.id}`}>{isEn ? 'Recurrence' : 'Chu kỳ'}:</label>
-                      <select
-                        id={`personal-frequency-${event.id}`}
-                        aria-invalid={personalDraftInvalidField === `personal-frequency-${event.id}` || undefined}
-                        class="personal-select-sm"
-                        value={event.frequency ?? 'yearly'}
-                        onchange={(e) => {
-                          const freq = e.currentTarget.value as PersonalEventFrequency;
-                          updateEventField(event.id, {
-                            frequency: freq,
-                            lunarMonth: freq === 'monthly' ? 0 : (event.lunarMonth || 1)
-                          });
-                        }}
-                      >
-                        <option value="yearly">{isEn ? 'Yearly' : 'Hàng năm'}</option>
-                        <option value="monthly">{isEn ? 'Monthly' : 'Hàng tháng'}</option>
-                      </select>
-                    </div>
-
                     {#if getEventMode(event) === 'solar'}
                       <!-- Ngày Dương -->
                       <div class="personal-pill-col">
@@ -826,17 +836,17 @@
                       </div>
 
                       <!-- Tháng Dương -->
-                      <div class="personal-pill-col" class:is-dimmed={event.frequency === 'monthly'}>
+                      <div class="personal-pill-col" class:is-dimmed={effectivePersonalFrequency(event) === 'monthly'}>
                         <label class="personal-col-label" for={`personal-solar-month-${event.id}`}>{isEn ? 'Month (Solar)' : 'Tháng Dương'}:</label>
                         <select
                           id={`personal-solar-month-${event.id}`}
                           aria-invalid={personalDraftInvalidField === `personal-solar-month-${event.id}` || undefined}
                           class="personal-select-sm"
-                          disabled={event.frequency === 'monthly'}
-                          value={event.frequency === 'monthly' ? 0 : (event.solarMonth || 1)}
+                          disabled={effectivePersonalFrequency(event) === 'monthly'}
+                          value={effectivePersonalFrequency(event) === 'monthly' ? 0 : (event.solarMonth || 1)}
                           onchange={(e) => handleSolarMonthChange(event.id, Number(e.currentTarget.value))}
                         >
-                          {#if event.frequency === 'monthly'}
+                          {#if effectivePersonalFrequency(event) === 'monthly'}
                             <option value={0}>{isEn ? 'Every month' : 'Mỗi tháng'}</option>
                           {:else}
                             {#each Array.from({ length: 12 }, (_, i) => i + 1) as m}
@@ -863,17 +873,17 @@
                       </div>
 
                       <!-- Tháng Âm -->
-                      <div class="personal-pill-col" class:is-dimmed={event.frequency === 'monthly'}>
+                      <div class="personal-pill-col" class:is-dimmed={effectivePersonalFrequency(event) === 'monthly'}>
                         <label class="personal-col-label" for={`personal-lunar-month-${event.id}`}>{isEn ? 'Month (Lunar)' : 'Tháng Âm lịch'}:</label>
                         <select
                           id={`personal-lunar-month-${event.id}`}
                           aria-invalid={personalDraftInvalidField === `personal-lunar-month-${event.id}` || undefined}
                           class="personal-select-sm"
-                          disabled={event.frequency === 'monthly'}
-                          value={event.frequency === 'monthly' ? 0 : (event.lunarMonth || 1)}
+                          disabled={effectivePersonalFrequency(event) === 'monthly'}
+                          value={effectivePersonalFrequency(event) === 'monthly' ? 0 : (event.lunarMonth || 1)}
                           onchange={(e) => handleLunarMonthChange(event.id, Number(e.currentTarget.value))}
                         >
-                          {#if event.frequency === 'monthly'}
+                          {#if effectivePersonalFrequency(event) === 'monthly'}
                             <option value={0}>{isEn ? 'Every month' : 'Mỗi tháng'}</option>
                           {:else}
                             {#each Array.from({ length: 12 }, (_, i) => i + 1) as m}
@@ -889,18 +899,28 @@
                   <div class="personal-inline-footer">
                   <div class="personal-conversion-badge" class:is-solar={getEventMode(event) === 'solar'}>
                     {#if getEventMode(event) === 'solar'}
-                      <span class="conversion-icon">🌙</span>
                       <span>{isEn ? 'Lunar equivalent:' : 'Âm lịch tương ứng:'} <strong>{getEquivalentLunarText(event)}</strong></span>
                     {:else}
-                      <span class="conversion-icon">☀️</span>
-                      <span>{isEn ? `Solar equivalent (${currentYear}):` : `Dương lịch tương ứng (${currentYear}):`} <strong>{getEquivalentSolarText(event)}</strong></span>
+                      <span>{isEn ? 'Solar equivalent:' : 'Dương lịch tương ứng:'} <strong>{getEquivalentSolarText(event)}</strong></span>
                     {/if}
                   </div>
-                  <button type="button" class="personal-inline-del-btn" onclick={() => removePersonalEvent(event.id)}
-                    title={isEn ? 'Delete' : 'Xóa'} aria-label={isEn ? 'Delete' : 'Xóa'}>✕</button>
                   </div>
 
-                  <button type="button" class="personal-edit-btn personal-edit-done" onclick={() => void savePersonalDraft()}>{personalEventsUi[isEn ? 'en' : 'vi'].saveEvent}</button>
+                  <div class="personal-frequency">
+                    <span class="personal-col-label" id={`personal-frequency-label-${event.id}`}>{isEn ? 'Recurrence' : 'Lặp lại'}</span>
+                    <div class="personal-frequency-segmented" id={`personal-frequency-${event.id}`} role="group" aria-labelledby={`personal-frequency-label-${event.id}`} data-invalid={personalDraftInvalidField === `personal-frequency-${event.id}` || undefined} tabindex="-1">
+                      {#each ['yearly', 'monthly'] as frequency (frequency)}
+                        <button type="button" class="personal-frequency-btn" aria-pressed={effectivePersonalFrequency(event) === frequency} onclick={() => changePersonalFrequency(event.id, frequency as PersonalEventFrequency)}>{frequency === 'yearly' ? (isEn ? 'Yearly' : 'Hàng năm') : (isEn ? 'Monthly' : 'Hàng tháng')}</button>
+                      {/each}
+                    </div>
+                  </div>
+                  <div class="personal-editor-actions">
+                    <button type="button" class="personal-edit-btn personal-edit-done" onclick={() => void savePersonalDraft()}>{personalEventsUi[isEn ? 'en' : 'vi'].saveEvent}</button>
+                    <button type="button" class="personal-edit-btn" onclick={clearPersonalDraft}>{personalEventsUi[isEn ? 'en' : 'vi'].cancel}</button>
+                  </div>
+                  {#if personalDraftBase}
+                    <button type="button" class="personal-inline-del-btn" onclick={() => removePersonalEvent(event.id)}>{isEn ? 'Delete anniversary' : 'Xóa ngày lễ'}</button>
+                  {/if}
                   </div>
                   {/if}
                 </div>
@@ -916,6 +936,7 @@
         {#if platform !== null}
           <PersonalReminderTiming config={personalTiming} {isEn} onsave={savePersonalTiming} />
         {/if}
+        </div>
       {/if}
 
     </SettingsSection>
@@ -1107,6 +1128,24 @@
     border-radius: 999px;
     animation: fadeIn 0.2s ease-out;
   }
+  .reminder-card-container .personal-feedback {
+    display: flex;
+    align-items: center;
+    gap: var(--dialog-action-gap);
+    position: static;
+    padding: var(--dialog-action-space);
+    margin-bottom: var(--dialog-action-space);
+    border: 1px solid var(--gold);
+    border-radius: var(--radius-card);
+    background: var(--gold-light);
+    color: var(--text);
+    font-size: var(--font-size-body);
+    font-weight: 600;
+    line-height: 1.6;
+  }
+  .personal-feedback > span { display: flex; flex-shrink: 0; color: var(--gold); }
+  .reminder-card-container .personal-feedback.feedback-error { border-color: var(--danger-text); }
+  .personal-feedback.feedback-error > span { color: var(--danger-text); }
 
   @keyframes fadeIn {
     from {
@@ -1529,341 +1568,46 @@
     color: var(--muted);
   }
 
-  /* Inline Personal Events in Settings */
-  .personal-inline-container {
-    margin-top: 10px;
-    margin-bottom: 12px;
-    padding: 14px;
-    border-radius: 14px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .personal-inline-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .personal-inline-title {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: var(--gold);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .personal-inline-empty {
-    padding: 10px 0;
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.45;
-  }
-
-  .personal-inline-empty p {
-    margin: 0;
-  }
-
-  .personal-inline-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .personal-inline-card {
-    padding: 12px;
-    border-radius: 12px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .personal-inline-row1 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .personal-inline-summary { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  .personal-summary-icon { flex-shrink: 0; font-size: 20px; }
-  .personal-summary-text {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    overflow-wrap: anywhere;
-  }
-  .personal-summary-text strong { color: var(--text); font-size: 14px; }
-  .personal-summary-text span { color: var(--muted); font-size: 12px; line-height: 1.45; }
-  .personal-edit-btn {
-    flex-shrink: 0;
-    min-width: 44px;
-    min-height: 44px;
-    padding: 8px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--card);
-    color: var(--gold);
-    font: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .personal-edit-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-  .personal-edit-done { align-self: flex-end; }
-  .personal-inline-editor {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-  }
-
-  .personal-mode-segmented {
-    display: flex;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 3px;
-    gap: 4px;
-  }
-
-  .personal-mode-btn {
-    flex: 1;
-    min-height: 44px;
-    border: none;
-    border-radius: 7px;
-    background: transparent;
-    color: var(--muted);
-    font: 700 12.5px/1 inherit;
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-  }
-
-  .personal-mode-btn.active {
-    background: #ca9636;
-    color: #24180c;
-    font-weight: 800;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  }
-
-  .personal-conversion-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 10px;
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--gold) 10%, var(--card));
-    border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--border));
-    font-size: 12px;
-    color: var(--text);
-  }
-
-  .personal-conversion-badge.is-solar {
-    background: color-mix(in srgb, var(--gold) 10%, var(--card));
-    border-color: color-mix(in srgb, var(--gold) 28%, var(--border));
-  }
-
-  .personal-conversion-badge strong {
-    color: var(--gold);
-  }
-
-  .personal-conversion-badge.is-solar strong {
-    color: var(--gold);
-  }
-
-  :global([data-theme='dark']) .personal-conversion-badge.is-solar strong {
-    color: var(--gold);
-  }
-
-  .conversion-icon {
-    font-size: 14px;
-    line-height: 1;
-    flex-shrink: 0;
-  }
-
-  .personal-type-select {
-    flex: 1;
-    min-width: 0;
-    min-height: 44px;
-    padding: 0 10px;
-    border-radius: 9px;
-    border: 1.5px solid var(--border);
-    background: var(--card);
-    color: var(--text);
-    font: 600 13.5px/1 inherit;
-    cursor: pointer;
-  }
-
-  .personal-type-select:focus {
-    border-color: var(--gold);
-    outline: none;
-  }
-
-  .personal-inline-del-btn {
-    width: 44px;
-    height: 44px;
-    display: grid;
-    place-items: center;
-    border: 0;
-    background: transparent;
-    color: #e53935;
-    font-size: 15px;
-    cursor: pointer;
-    border-radius: 8px;
-    flex-shrink: 0;
-    transition: background 0.12s ease;
-  }
-
-  .personal-inline-del-btn:hover {
-    background: rgba(229, 57, 53, 0.1);
-  }
-
-  .personal-inline-row2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .personal-pill-col {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-    transition: opacity 0.2s ease, filter 0.2s ease;
-  }
-
-  .personal-inline-row2 > .personal-pill-col:first-child {
-    grid-column: 1 / -1;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .personal-inline-row2 > .personal-pill-col:first-child .personal-select-sm {
-    width: auto;
-    flex: 1;
-  }
-
-  .personal-inline-footer { display: flex; align-items: center; gap: 8px; }
-  .personal-inline-footer .personal-conversion-badge { flex: 1; min-width: 0; }
-
-  .personal-pill-col.is-dimmed {
-    opacity: 0.35;
-    filter: grayscale(0.8);
-    pointer-events: none;
-  }
-
-  .personal-col-label {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .personal-select-sm {
-    height: 44px;
-    padding: 0 8px;
-    border-radius: 8px;
-    border: 1.5px solid var(--border);
-    background: var(--card);
-    color: var(--text);
-    font: 600 13px/1 inherit;
-    cursor: pointer;
-    min-width: 0;
-    width: 100%;
-  }
-
-  .personal-select-sm:focus {
-    border-color: var(--gold);
-    outline: none;
-  }
-
-  .personal-select-sm:disabled {
-    cursor: not-allowed;
-    background: color-mix(in srgb, var(--card) 60%, var(--border));
-    color: var(--muted);
-  }
-
-  .personal-inline-row3 {
-    width: 100%;
-  }
-
-  .personal-name-label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .personal-inline-title-input {
-    width: 100%;
-    box-sizing: border-box;
-    height: 44px;
-    padding: 0 12px;
-    border-radius: 9px;
-    border: 1.5px solid var(--border);
-    background: var(--card);
-    color: var(--text);
-    font: 500 13.5px/1 inherit;
-    outline: none;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  }
-
-  .personal-inline-title-input:focus {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 2px rgba(200, 150, 62, 0.15);
-  }
-
-  .personal-inline-add-btn {
-    min-height: 44px;
-    width: 100%;
-    padding: 10px;
-    border: 1.5px dashed var(--gold);
-    background: rgba(200, 150, 62, 0.04);
-    color: var(--gold);
-    font-size: 13.5px;
-    font-weight: 700;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    margin-top: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-
-  .personal-inline-add-btn:hover {
-    background: rgba(200, 150, 62, 0.1);
-  }
-
-  @media (max-width: 480px) {
-    .personal-inline-row2 {
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-    .personal-col-label {
-      font-size: 12px;
-    }
-    .personal-select-sm {
-      font-size: 13px;
-      padding: 0 4px;
-    }
+  /* Personal anniversaries: the approved flat form, scoped to this owner. */
+  .personal-settings-layout { display: grid; gap: var(--space-page); min-width: 0; }
+  .personal-inline-container { display: flex; flex-direction: column; gap: var(--dialog-action-space); min-width: 0; }
+  .personal-inline-header { display: flex; align-items: center; justify-content: space-between; }
+  .personal-inline-container .personal-inline-title { font-size: var(--font-size-section-title); font-weight: 700; color: var(--text); }
+  .personal-inline-empty { padding: var(--dialog-action-space) 0; color: var(--text2); line-height: 1.6; }
+  .personal-inline-empty p { margin: 0; }
+  .personal-inline-cards { display: flex; flex-direction: column; gap: var(--dialog-action-space); }
+  .personal-inline-card { display: flex; flex-direction: column; gap: var(--dialog-action-space); min-width: 0; padding-bottom: var(--dialog-action-space); border-bottom: 1px solid var(--border); }
+  .personal-inline-summary { display: flex; align-items: center; gap: var(--dialog-action-gap); min-width: 0; }
+  .personal-summary-icon { flex-shrink: 0; font-size: var(--font-size-section-title); }
+  .personal-summary-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: calc(var(--dialog-action-gap) / 2); overflow-wrap: anywhere; }
+  .personal-summary-text strong { color: var(--text); font-size: var(--font-size-card-title); }
+  .personal-summary-text span { color: var(--text2); font-size: var(--font-size-label); line-height: 1.6; }
+  .personal-edit-btn { min-width: var(--touch-target-size); min-height: calc(var(--touch-target-size) + var(--dialog-action-gap) / 2); padding: var(--dialog-action-gap) var(--dialog-action-space); border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--card); color: var(--text); font: inherit; font-size: var(--font-size-body); font-weight: 600; cursor: pointer; }
+  .personal-editor-actions { display: flex; flex-direction: column; gap: var(--dialog-action-gap); }
+  .personal-edit-done { background: var(--gold); border-color: var(--gold); color: var(--on-gold); }
+  .personal-inline-editor { display: flex; flex-direction: column; gap: var(--dialog-action-space); min-width: 0; }
+  .personal-inline-row1, .personal-inline-row3 { display: flex; flex-direction: column; min-width: 0; }
+  .personal-mode-segmented, .personal-frequency-segmented { display: flex; padding: calc(var(--dialog-action-gap) / 2); gap: calc(var(--dialog-action-gap) / 2); border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--card); }
+  .personal-mode-btn, .personal-frequency-btn { flex: 1; min-width: 0; min-height: var(--touch-target-size); padding: var(--dialog-action-gap); border: 0; border-radius: var(--radius); background: transparent; color: var(--text); font: inherit; font-size: var(--font-size-body); font-weight: 600; cursor: pointer; }
+  .personal-mode-btn.active { background: var(--gold); color: var(--on-gold); }
+  .personal-frequency { display: flex; flex-direction: column; gap: var(--dialog-action-gap); }
+  .personal-frequency-btn[aria-pressed='true'] { background: var(--gold-light); color: var(--text); }
+  .personal-inline-row2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--dialog-action-space); align-items: start; }
+  .personal-pill-col { display: flex; flex-direction: column; gap: var(--dialog-action-gap); min-width: 0; }
+  .personal-col-label, .personal-name-label { color: var(--text2); font-size: var(--font-size-body); line-height: 1.6; }
+  .personal-name-label { margin-bottom: var(--dialog-action-gap); font-weight: 600; }
+  .personal-select-sm, .personal-type-select, .personal-inline-title-input { box-sizing: border-box; width: 100%; min-width: 0; min-height: calc(var(--touch-target-size) + var(--dialog-action-gap) / 2); padding: var(--dialog-action-gap); border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--card); color: var(--text); font: inherit; font-size: var(--font-size-input); }
+  .personal-select-sm:disabled { background: var(--bg3); color: var(--text2); cursor: not-allowed; }
+  .personal-inline-footer { min-width: 0; }
+  .personal-conversion-badge { color: var(--text2); font-size: var(--font-size-body); line-height: 1.6; overflow-wrap: anywhere; }
+  .personal-conversion-badge strong { color: var(--brown); font-weight: 600; }
+  :global([data-theme='dark']) .personal-conversion-badge strong { color: var(--gold2); }
+  .personal-inline-del-btn { align-self: center; min-width: var(--touch-target-size); min-height: var(--touch-target-size); padding: var(--dialog-action-gap) var(--dialog-action-space); border: 0; border-radius: var(--radius-control); background: transparent; color: var(--danger-text); font: inherit; cursor: pointer; }
+  .personal-inline-add-btn { width: 100%; min-height: calc(var(--touch-target-size) + var(--dialog-action-gap) / 2); padding: var(--dialog-action-gap) var(--dialog-action-space); border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--gold-light); color: var(--text); font: inherit; font-weight: 600; cursor: pointer; }
+  .personal-inline-editor :is(button, input, select):focus-visible, .personal-inline-add-btn:focus-visible, .personal-edit-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .personal-inline-editor :is([aria-invalid='true'], [data-invalid='true']) { border-color: var(--danger-text); }
+  @media (min-width: 1100px) {
+    .personal-settings-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+    .personal-settings-layout :global(.personal-timing) { padding-left: var(--space-page); border-left: 1px solid var(--border); }
   }
 </style>

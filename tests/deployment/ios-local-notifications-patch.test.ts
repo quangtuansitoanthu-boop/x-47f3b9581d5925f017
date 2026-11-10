@@ -104,6 +104,54 @@ it('stages valid requests before enqueueing and settles once with the original o
   expect(JSON.parse(fs.readFileSync(path.join(value.directory, 'package.json'), 'utf8'))).toEqual({ name: pluginName, version: '7.0.7' });
 });
 
+// Source-contract checks: they guard the emitted Swift control flow, not OS delivery or atomicity.
+it('rolls back mixed native acceptance before rejecting, retaining old requests and foreign IDs', async () => {
+  const value = fixture();
+  (await patch())(value.directory);
+  const method = schedule(fs.readFileSync(value.swift, 'utf8'));
+  const snapshot = method.indexOf('center.getPendingNotificationRequests');
+  const add = method.indexOf('center.add(request)');
+  const settled = method.indexOf('group.notify(queue: .main)');
+  const remove = method.indexOf('center.removePendingNotificationRequests(withIdentifiers: createdIds)');
+  const restore = method.indexOf('center.add(restoreRequest)');
+  const rollbackSettled = method.indexOf('rollback.notify(queue: .main)');
+  const verifyRemoval = method.indexOf('center.getPendingNotificationRequests', snapshot + 1);
+  const reject = method.indexOf('call.reject(', settled);
+  expect(snapshot).toBeLessThan(add);
+  expect(add).toBeLessThan(settled);
+  expect(settled).toBeLessThan(remove);
+  expect(remove).toBeLessThan(restore);
+  expect(restore).toBeLessThan(rollbackSettled);
+  expect(rollbackSettled).toBeLessThan(verifyRemoval);
+  expect(verifyRemoval).toBeLessThan(reject);
+  expect(method).toContain('allPending.filter { affectedIds.contains($0.identifier) }');
+  expect(method).toContain('Array(affectedIds.subtracting(previousIds))');
+  expect(method).toContain('defer { rollback.leave() }');
+  expect(method).toContain('notificationRequestLookup[identifier] = previousLookup[identifier]');
+  expect(method).toContain('Notification rollback failed:');
+  expect(method).toContain('Notification rollback incomplete;');
+  expect(method).toContain('previous.content.userInfo["cap_schedule"] as? JSObject');
+  expect(method).toContain('UNTimeIntervalNotificationTrigger(timeInterval: remaining, repeats: false)');
+  expect(method).toContain('Previous notification deadline expired or unavailable');
+  expect(method).not.toContain('removeAllPendingNotificationRequests');
+  expect(method.match(/removePendingNotificationRequests\(/gu)).toHaveLength(1);
+});
+
+it('upgrades the exact previous completion patch and remains idempotent', async () => {
+  const value = fixture();
+  // The installed SDK is the previous exact patch until the normal postinstall applies this revision.
+  const installed = fs.readFileSync(path.resolve('node_modules/@capacitor/local-notifications', relativeSwift), 'utf8');
+  const previous = installed.replaceAll('\r\n', '\n');
+  fs.writeFileSync(value.swift, previous);
+  const apply = await patch();
+  // Works both before and after the repository's postinstall has upgraded the installed SDK.
+  apply(value.directory);
+  const updated = fs.readFileSync(value.swift);
+  expect(updated.toString()).toContain('center.add(restoreRequest)');
+  expect(apply(value.directory)).toBe(false);
+  expect(fs.readFileSync(value.swift)).toEqual(updated);
+});
+
 it('is idempotent and preserves the upstream line endings', async () => {
   const value = fixture(false, true);
   const apply = await patch();

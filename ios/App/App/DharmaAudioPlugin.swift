@@ -749,10 +749,10 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
         let upcoming = tracks.indices.dropFirst(index + 1).prefix(3).map { next in
             let row = tracks[next]
             let seconds = (row["duration"] as? Double) ?? (row["duration"] as? NSNumber)?.doubleValue ?? 0
-            return DharmaAudioTrackWidgetData(id: "\(queueID):\(next)", title: String((row["title"] as? String ?? "Pháp thoại").prefix(300)), duration: seconds > 0 ? DharmaAudioWidgetStore.time(seconds) : "")
+            return DharmaAudioTrackWidgetData(id: "\(queueID):\(next)", title: String((row["title"] as? String ?? "").prefix(300)), duration: seconds > 0 ? DharmaAudioWidgetStore.time(seconds) : "")
         }
-        let snapshot = DharmaAudioWidgetData(trackId: "\(queueID):\(index)", title: String((tracks[index]["title"] as? String ?? "Pháp thoại").prefix(300)),
-            speakerOrCategory: String((album["description"] as? String ?? album["title"] as? String ?? "Pháp thoại").prefix(300)),
+        let snapshot = DharmaAudioWidgetData(trackId: "\(queueID):\(index)", title: String((tracks[index]["title"] as? String ?? "").prefix(300)),
+            speakerOrCategory: String((album["description"] as? String ?? album["title"] as? String ?? "").prefix(300)),
             currentTime: DharmaAudioWidgetStore.time(position), totalDuration: DharmaAudioWidgetStore.time(duration), progress: duration > 0 ? min(1, max(0, position / duration)) : 0,
             isPlaying: intendedPlaying && !ended, playlist: upcoming, repeatMode: repeatMode, sleepRemainingMinutes: sleepMinutes, updatedAt: Date(), error: errorMessage, albumId: album["id"] as? String, hasAlbumArtwork: widgetArtworkVerified, artworkKey: widgetArtworkKey)
         DharmaAudioWidgetStore.write(snapshot)

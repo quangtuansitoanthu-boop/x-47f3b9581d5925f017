@@ -43,16 +43,20 @@ private struct PracticePalette {
     var onAccent: Color { color(0x24180C) }
 }
 
-private enum PracticeWidgetCopy {
-    static var title: String { WidgetLocaleStore.text("Tu tập mỗi ngày", "Daily practice") }
-    static var missing: String { WidgetLocaleStore.text("Chưa có dữ liệu hôm nay", "No data for today") }
-    static var start: String { WidgetLocaleStore.text("Bắt đầu tu tập", "Start practice") }
-    static var guidance: String { WidgetLocaleStore.text("Mở công cụ để bắt đầu thực hành.", "Open a tool to begin.") }
-    static var fallbackItems: [PracticeWidgetItem] { [
-        PracticeWidgetItem(id: "meditation", title: WidgetLocaleStore.text("Thiền định", "Meditation"), subtitle: WidgetLocaleStore.text("Mở công cụ thiền", "Open meditation"), icon: "🧘", progress: nil, isCompleted: false, hasData: false),
-        PracticeWidgetItem(id: "chanting_beads", title: WidgetLocaleStore.text("Lần tràng hạt", "Rosary"), subtitle: WidgetLocaleStore.text("Mở chuỗi hạt", "Open rosary beads"), icon: "📿", progress: nil, isCompleted: false, hasData: false),
-        PracticeWidgetItem(id: "sutra", title: WidgetLocaleStore.text("Tụng kinh", "Sutra recitation"), subtitle: WidgetLocaleStore.text("Chọn bài kinh", "Choose a sutra"), icon: "📖", progress: nil, isCompleted: false, hasData: false),
-        PracticeWidgetItem(id: "mantra", title: WidgetLocaleStore.text("Trì chú", "Mantra recitation"), subtitle: WidgetLocaleStore.text("Chọn bài chú", "Choose a mantra"), icon: "🙏", progress: nil, isCompleted: false, hasData: false)
+private struct PracticeWidgetCopy {
+    let locale: String?
+    func text(_ vietnamese: String, _ english: String) -> String {
+        WidgetLocaleStore.text(vietnamese, english, locale: locale)
+    }
+    var title: String { text("Tu tập mỗi ngày", "Daily practice") }
+    var missing: String { text("Chưa có dữ liệu hôm nay", "No data for today") }
+    var start: String { text("Bắt đầu tu tập", "Start practice") }
+    var guidance: String { text("Mở công cụ để bắt đầu thực hành.", "Open a tool to begin.") }
+    var fallbackItems: [PracticeWidgetItem] { [
+        PracticeWidgetItem(id: "meditation", title: text("Thiền định", "Meditation"), subtitle: text("Mở công cụ thiền", "Open meditation"), icon: "🧘", progress: nil, isCompleted: false, hasData: false),
+        PracticeWidgetItem(id: "chanting_beads", title: text("Lần tràng hạt", "Rosary"), subtitle: text("Mở chuỗi hạt", "Open rosary beads"), icon: "📿", progress: nil, isCompleted: false, hasData: false),
+        PracticeWidgetItem(id: "sutra", title: text("Tụng kinh", "Sutra recitation"), subtitle: text("Chọn bài kinh", "Choose a sutra"), icon: "📖", progress: nil, isCompleted: false, hasData: false),
+        PracticeWidgetItem(id: "mantra", title: text("Trì chú", "Mantra recitation"), subtitle: text("Chọn bài chú", "Choose a mantra"), icon: "🙏", progress: nil, isCompleted: false, hasData: false)
     ] }
 }
 
@@ -62,14 +66,16 @@ struct PracticeWidgetView: View {
     @Environment(\.colorScheme) private var colorScheme
     private var palette: PracticePalette { PracticePalette(dark: colorScheme == .dark) }
     private var snapshot: PracticeWidgetSnapshot? { entry.snapshot }
+    // Nhãn và nội dung snapshot phải cùng ngôn ngữ; snapshot cũ không có locale là tiếng Việt.
+    private var copy: PracticeWidgetCopy { PracticeWidgetCopy(locale: snapshot.map { $0.locale ?? "vi" }) }
     private var completionText: String {
-        if entry.isPreview { return WidgetLocaleStore.text("Mẫu · Chưa có dữ liệu", "Preview · No data") }
-        guard snapshot?.hasData == true, let completed = snapshot?.completedCount, let total = snapshot?.totalCount else { return PracticeWidgetCopy.missing }
-        return WidgetLocaleStore.text("\(completed)/\(total) hoàn thành", "\(completed)/\(total) completed")
+        if entry.isPreview { return copy.text("Mẫu · Chưa có dữ liệu", "Preview · No data") }
+        guard snapshot?.hasData == true, let completed = snapshot?.completedCount, let total = snapshot?.totalCount else { return copy.missing }
+        return copy.text("\(completed)/\(total) hoàn thành", "\(completed)/\(total) completed")
     }
     private var items: [PracticeWidgetItem] {
         // Snapshot cũ hoặc chưa đủ dữ liệu vẫn phải có đủ bốn lối vào thực hành.
-        PracticeWidgetCopy.fallbackItems.map { fallback in
+        copy.fallbackItems.map { fallback in
             guard let item = snapshot?.items.first(where: { $0.id == fallback.id }) else { return fallback }
             return PracticeWidgetItem(id: fallback.id, title: item.title.isEmpty ? fallback.title : item.title,
                 subtitle: item.hasData && !item.subtitle.isEmpty ? item.subtitle : fallback.subtitle,
@@ -101,22 +107,22 @@ struct PracticeWidgetView: View {
                 HStack(spacing: 7) {
                     Image("PracticeMeditation").resizable().scaledToFit()
                         .frame(width: compact ? 20 : 26, height: compact ? 18 : 24).accessibilityHidden(true)
-                    Text(WidgetLocaleStore.text("TU TẬP", "PRACTICE")).font(.system(size: compact ? 10 : 11, weight: .semibold)).foregroundColor(palette.secondary)
+                    Text(copy.text("TU TẬP", "PRACTICE")).font(.system(size: compact ? 10 : 11, weight: .semibold)).foregroundColor(palette.secondary)
                 }
-                Text(WidgetLocaleStore.text("Một chút\nbình an", "A moment of\npeace")).font(.system(size: compact ? 18 : 22, weight: .bold))
+                Text(copy.text("Một chút\nbình an", "A moment of\npeace")).font(.system(size: compact ? 18 : 22, weight: .bold))
                     .lineSpacing(-2).fixedSize(horizontal: false, vertical: true)
                 Text(completionText).font(.system(size: compact ? 11 : 13))
                     .foregroundColor(palette.secondary).lineLimit(2).minimumScaleFactor(0.9)
                 Spacer(minLength: 0)
                 HStack(spacing: 4) {
-                    Text(PracticeWidgetCopy.start).font(.system(size: compact ? 12 : 13, weight: .bold))
+                    Text(copy.start).font(.system(size: compact ? 12 : 13, weight: .bold))
                         .lineLimit(1).minimumScaleFactor(0.9)
                     Spacer(minLength: 0)
                     Image(systemName: "chevron.right").font(.system(size: 11, weight: .semibold))
                 }.padding(.horizontal, 10).frame(maxWidth: .infinity, minHeight: 44)
                     .background(palette.accent).foregroundColor(palette.onAccent)
                     .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .accessibilityElement(children: .ignore).accessibilityLabel(PracticeWidgetCopy.start)
+                    .accessibilityElement(children: .ignore).accessibilityLabel(copy.start)
             }.padding(compact ? 7 : 14).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }
@@ -124,7 +130,7 @@ struct PracticeWidgetView: View {
     private var medium: some View {
         VStack(spacing: 6) {
             HStack(alignment: .top, spacing: 8) {
-                Text(PracticeWidgetCopy.title).font(.system(size: 16, weight: .bold))
+                Text(copy.title).font(.system(size: 16, weight: .bold))
                     .lineLimit(2).minimumScaleFactor(0.85)
                 Spacer(minLength: 0)
                 Text(completionText).font(.system(size: 11)).foregroundColor(palette.secondary)
@@ -141,13 +147,13 @@ struct PracticeWidgetView: View {
             let compact = geometry.size.height < 360
             VStack(alignment: .leading, spacing: compact ? 6 : 8) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(PracticeWidgetCopy.title).font(.system(size: compact ? 19 : 21, weight: .bold)).lineLimit(1).minimumScaleFactor(0.85)
+                    Text(copy.title).font(.system(size: compact ? 19 : 21, weight: .bold)).lineLimit(1).minimumScaleFactor(0.85)
                     Text(completionText).font(.system(size: 13)).foregroundColor(palette.secondary).lineLimit(2)
                 }
                 VStack(spacing: 6) {
                     ForEach(items) { item in itemCard(item, large: true, compact: compact) }
                 }.frame(maxHeight: .infinity)
-                Text(PracticeWidgetCopy.guidance).font(.system(size: compact ? 11 : 12)).foregroundColor(palette.secondary)
+                Text(copy.guidance).font(.system(size: compact ? 11 : 12)).foregroundColor(palette.secondary)
                     .lineLimit(2).minimumScaleFactor(0.9).frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top, 6).overlay(Rectangle().fill(palette.border).frame(height: 1), alignment: .top)
             }.padding(compact ? 12 : 14).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -173,7 +179,7 @@ struct PracticeWidgetView: View {
                 .background(palette.card).clipShape(RoundedRectangle(cornerRadius: 14))
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: 1))
                 .contentShape(RoundedRectangle(cornerRadius: 14))
-        }.buttonStyle(.plain).accessibilityLabel(WidgetLocaleStore.text("\(item.title), \(item.subtitle). Mở công cụ để thực hành", "\(item.title), \(item.subtitle). Open a practice tool"))
+        }.buttonStyle(.plain).accessibilityLabel(copy.text("\(item.title), \(item.subtitle). Mở công cụ để thực hành", "\(item.title), \(item.subtitle). Open a practice tool"))
     }
 }
 struct PracticeHomeWidget: Widget {

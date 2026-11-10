@@ -29,6 +29,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 
 const legacyScheduleHash = "2ae33219022cb23d78c58542310a3990ae1c95ded8ec33aabc59544d27f0d42b";
+const completionScheduleHash = 'b3cbd9f5d0b427efaea0c1e871b7ba10c458158d860bcbcf3443d67b28200e99';
 const patchedSchedule = String.raw`    @objc func schedule(_ call: CAPPluginCall) {
         guard let notifications = call.getArray("notifications", JSObject.self) else {
             call.reject("Must provide notifications array as notifications option")
@@ -71,42 +72,99 @@ const patchedSchedule = String.raw`    @objc func schedule(_ call: CAPPluginCall
             ids.append(request.identifier)
         }
 
-        let group = DispatchGroup()
-        let stateLock = NSLock()
-        var firstError: Error?
         let center = UNUserNotificationCenter.current()
-        for pending in requests {
-            let request = pending.request
-            self.notificationDelegationHandler.notificationRequestLookup[request.identifier] = pending.notification
-            group.enter()
-            center.add(request) { (error: Error?) in
-                defer { group.leave() }
-                if let theError = error {
-                    CAPLog.print(theError.localizedDescription)
+        let affectedIds = Set(ids)
+        center.getPendingNotificationRequests { allPending in
+            // Chỉ giữ bản trước của những ID batch này có thể thay thế.
+            let previousRequests = allPending.filter { affectedIds.contains($0.identifier) }
+            let previousIds = Set(previousRequests.map { $0.identifier })
+            let createdIds = Array(affectedIds.subtracting(previousIds))
+            DispatchQueue.main.async {
+                let previousLookup = self.notificationDelegationHandler.notificationRequestLookup.filter { affectedIds.contains($0.key) }
+                let group = DispatchGroup()
+                let stateLock = NSLock()
+                var firstError: Error?
+                for pending in requests {
+                    let request = pending.request
+                    self.notificationDelegationHandler.notificationRequestLookup[request.identifier] = pending.notification
+                    group.enter()
+                    center.add(request) { (error: Error?) in
+                        defer { group.leave() }
+                        if let theError = error {
+                            CAPLog.print(theError.localizedDescription)
+                            stateLock.lock()
+                            if firstError == nil { firstError = theError }
+                            stateLock.unlock()
+                        }
+                    }
+                }
+                // Không trả promise trước callback cuối hoặc trước khi hoàn tác xong.
+                group.notify(queue: .main) {
                     stateLock.lock()
-                    if firstError == nil { firstError = theError }
+                    let error = firstError
                     stateLock.unlock()
+                    if let theError = error {
+                        center.removePendingNotificationRequests(withIdentifiers: createdIds)
+                        let rollback = DispatchGroup()
+                        var rollbackError: Error?
+                        for previous in previousRequests {
+                            var restoreRequest = previous
+                            // Re-adding the original interval would restart its full delay.
+                            // The SDK retains the absolute at date in cap_schedule.
+                            if let interval = previous.trigger as? UNTimeIntervalNotificationTrigger, !interval.repeats {
+                                let schedule = previous.content.userInfo["cap_schedule"] as? JSObject
+                                let remaining = (schedule?["at"] as? NSDate)?.timeIntervalSinceNow ?? 0
+                                if remaining > 0 {
+                                    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: remaining, repeats: false)
+                                    restoreRequest = UNNotificationRequest(identifier: previous.identifier, content: previous.content, trigger: trigger)
+                                } else {
+                                    stateLock.lock()
+                                    if rollbackError == nil {
+                                        rollbackError = NSError(domain: "TuTapLocalNotifications", code: 1, userInfo: [NSLocalizedDescriptionKey: "Previous notification deadline expired or unavailable"])
+                                    }
+                                    stateLock.unlock()
+                                    continue
+                                }
+                            }
+                            rollback.enter()
+                            center.add(restoreRequest) { restoreError in
+                                defer { rollback.leave() }
+                                if let restoreError = restoreError {
+                                    stateLock.lock()
+                                    if rollbackError == nil { rollbackError = restoreError }
+                                    stateLock.unlock()
+                                }
+                            }
+                        }
+                        rollback.notify(queue: .main) {
+                            for identifier in affectedIds {
+                                self.notificationDelegationHandler.notificationRequestLookup[identifier] = previousLookup[identifier]
+                            }
+                            // removePending có API void; đọc lại sau các callback để kiểm tra ID mới đã được dọn.
+                            center.getPendingNotificationRequests { remaining in
+                                let createdRemain = remaining.contains { createdIds.contains($0.identifier) }
+                                stateLock.lock()
+                                let restoreError = rollbackError
+                                stateLock.unlock()
+                                DispatchQueue.main.async {
+                                    if let restoreError = restoreError {
+                                        call.reject("Notification rollback failed: \(restoreError.localizedDescription); original: \(theError.localizedDescription)")
+                                    } else if createdRemain {
+                                        call.reject("Notification rollback incomplete; original: \(theError.localizedDescription)")
+                                    } else {
+                                        call.reject(theError.localizedDescription)
+                                    }
+                                }
+                            }
+                        }
+                        return
+                    }
+                    let ret = ids.map({ (id) -> JSObject in
+                        return ["id": Int(id) ?? -1]
+                    })
+                    call.resolve(["notifications": ret])
                 }
             }
-        }
-
-        let ret = ids.map({ (id) -> JSObject in
-            return [
-                "id": Int(id) ?? -1
-            ]
-        })
-        // Callback có thể đến từ các hàng đợi khác nhau; chỉ hoàn tất lời gọi một lần.
-        group.notify(queue: .main) {
-            stateLock.lock()
-            let error = firstError
-            stateLock.unlock()
-            if let theError = error {
-                call.reject(theError.localizedDescription)
-                return
-            }
-            call.resolve([
-                "notifications": ret
-            ])
         }
     }`;
 
@@ -174,14 +232,17 @@ export function patchIosLocalNotifications(packageDirectory = path.resolve('node
     }
     return false;
   }
-  if (createHash('sha256').update(method.value).digest('hex') !== legacyScheduleHash ||
-      occurrences(source, oldEnum) !== 1 || source.includes('    case triggerDateInPast\n') ||
-      occurrences(source, oldPastDate) !== 1 || source.includes(newPastDate)) {
+  const methodHash = createHash('sha256').update(method.value).digest('hex');
+  const upgradingCompletionPatch = methodHash === completionScheduleHash;
+  const validDateSource = upgradingCompletionPatch
+    ? occurrences(source, '    case triggerDateInPast\n') === 1 && occurrences(source, newPastDate) === 1 && !source.includes(oldPastDate)
+    : occurrences(source, oldEnum) === 1 && !source.includes('    case triggerDateInPast\n') && occurrences(source, oldPastDate) === 1 && !source.includes(newPastDate);
+  if ((!upgradingCompletionPatch && methodHash !== legacyScheduleHash) || !validDateSource) {
     throw new Error('Unsupported LocalNotifications SDK source; refusing partial or unexpected patch');
   }
 
   let updated = source.slice(0, method.start) + patchedSchedule + source.slice(method.end);
-  updated = updated.replace(oldEnum, newEnum).replace(oldPastDate, newPastDate);
+  if (!upgradingCompletionPatch) updated = updated.replace(oldEnum, newEnum).replace(oldPastDate, newPastDate);
   if (crlf) updated = updated.replaceAll('\n', '\r\n');
   const temporary = swiftFile + '.tutam-schedule.tmp';
   if (fs.existsSync(temporary)) throw new Error('LocalNotifications patch temporary source already exists');

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, tick, untrack } from 'svelte';
   import { alertInApp } from '$lib/browser/app-dialog';
+  import { getBrowserSessionSnapshot, SESSION_CHANGE_EVENT } from '$lib/stores/session.svelte';
   import { defaultPersonalEventDate, lunarDateForSolarDay, personalEventFormIssue, solarDateForLunarDay } from '$lib/domain/personal-event-form';
   import PersonalEventsSyncStatus from './PersonalEventsSyncStatus.svelte';
   import DeletePersonalEventDialog from './DeletePersonalEventDialog.svelte';
@@ -55,6 +56,29 @@
   let invalidField = $state('');
   let formTouched = false;
   let reminderGeneration = 0;
+  function personalOwner(): string | null {
+    const session = getBrowserSessionSnapshot();
+    return session.authenticated && session.user?.id ? String(session.user.id) : null;
+  }
+  let draftOwner = untrack(personalOwner);
+  function ensureDraftOwner(): boolean {
+    const owner = personalOwner();
+    if (owner === draftOwner) return true;
+    draftOwner = owner;
+    reminderGeneration += 1;
+    newTitle = '';
+    newNote = '';
+    inputMode = 'lunar';
+    newFrequency = 'yearly';
+    newType = 'gio-chap';
+    formTouched = false;
+    formError = '';
+    invalidField = '';
+    pendingDelete = null;
+    resetDatesToToday();
+    refreshList();
+    return false;
+  }
   $effect(() => {
     if (!open) reminderGeneration += 1;
     else untrack(() => {
@@ -63,14 +87,14 @@
     });
   });
   onMount(() => {
-    const invalidateReminderSetup = () => { reminderGeneration += 1; };
+    const invalidateReminderSetup = () => { reminderGeneration += 1; ensureDraftOwner(); };
     refreshList();
     window.addEventListener('quangtu:personal-events-changed', refreshList);
-    window.addEventListener('quangtu:session-changed', invalidateReminderSetup);
+    window.addEventListener(SESSION_CHANGE_EVENT, invalidateReminderSetup);
     return () => {
       reminderGeneration += 1;
       window.removeEventListener('quangtu:personal-events-changed', refreshList);
-      window.removeEventListener('quangtu:session-changed', invalidateReminderSetup);
+      window.removeEventListener(SESSION_CHANGE_EVENT, invalidateReminderSetup);
     };
   });
 
@@ -205,6 +229,7 @@
 
   function handleAddEvent(event: SubmitEvent): void {
     event.preventDefault();
+    if (!ensureDraftOwner()) return;
     reminderGeneration += 1;
     const copy = personalEventsUi[isEn ? 'en' : 'vi'];
     const issue = personalEventFormIssue({ title: newTitle, frequency: newFrequency, type: newType, calendarMode: inputMode,

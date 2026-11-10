@@ -138,7 +138,7 @@ class NativeGuestUITestCase: XCTestCase {
         tab.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         let marker: XCUIElement
         switch label {
-        case "Cá nhân": marker = app.buttons["Quay lại Trang chủ"].firstMatch
+        case "Cá nhân": marker = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Cài đặt ứng dụng ")).firstMatch
         case "Kinh sách": marker = app.staticTexts["Kho Kinh Sách"].firstMatch
         case "Tu tập": marker = app.staticTexts["Chế Độ Tu Tập"].firstMatch
         default:
@@ -474,6 +474,12 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
 
     @MainActor
     private func select(_ caption: String, option: String, app: XCUIApplication) {
+        if caption == "Chu kỳ:" {
+            let choice = app.buttons[option].firstMatch
+            tap(choice, app: app)
+            waitUntil("Recurrence buttons must expose the selected option \(option)") { self.checked(choice) == true || choice.isSelected }
+            return
+        }
         let control = namedControl(caption, app: app)
         if (control.value as? String) == option { return }
         control.tap()
@@ -520,7 +526,7 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
     private func addEvent(_ title: String, solar: Bool, day: Int, month: Int, app: XCUIApplication) {
         tap(app.buttons["+ Thêm ngày lễ kỷ niệm"].firstMatch, app: app)
         replaceName(title, app: app)
-        if solar { tap(app.buttons["☀️ Dương lịch"].firstMatch, app: app) }
+        if solar { tap(app.buttons["Dương lịch"].firstMatch, app: app) }
         select("Chu kỳ:", option: "Hàng năm", app: app)
         select(solar ? "Ngày Dương:" : "Ngày Âm lịch:", option: String(day), app: app)
         select(solar ? "Tháng Dương:" : "Tháng Âm lịch:", option: "Tháng \(month)", app: app)
@@ -558,12 +564,12 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
     @MainActor
     private func deleteEvent(_ title: String, cancelFirst: Bool = false, app: XCUIApplication) {
         editEvent(title, app: app)
-        tap(app.buttons["Xóa"].firstMatch, app: app)
+        tap(app.buttons["Xóa ngày lễ"].firstMatch, app: app)
         XCTAssertTrue(app.staticTexts["Xóa lịch cá nhân?"].firstMatch.waitForExistence(timeout: 10))
         if cancelFirst {
             tap(app.buttons["Giữ lại"].firstMatch, app: app)
             XCTAssertTrue(app.staticTexts[title].firstMatch.exists, "Cancel deletion must retain the named saved event")
-            tap(app.buttons["Xóa"].firstMatch, app: app)
+            tap(app.buttons["Xóa ngày lễ"].firstMatch, app: app)
             XCTAssertTrue(app.staticTexts["Xóa lịch cá nhân?"].firstMatch.waitForExistence(timeout: 10))
         }
         tap(app.buttons["Xóa lịch"].firstMatch, app: app)

@@ -53,7 +53,9 @@ enum WidgetLocaleStore {
         UserDefaults(suiteName: BuddhistCalendarStore.group)?.set(next, forKey: key)
         return changed
     }
-    static func text(_ vietnamese: String, _ english: String) -> String { locale == "en" ? english : vietnamese }
+    static func text(_ vietnamese: String, _ english: String, locale override: String? = nil) -> String {
+        (override ?? locale) == "en" ? english : vietnamese
+    }
 }
 
 enum PracticeWidgetStore {

@@ -42,7 +42,7 @@
 </script>
 
 {#if event}
-  <dialog use:modalDialog class="anniversary-delete-dialog" data-dialog-glass aria-labelledby="anniversary-delete-title"
+  <dialog use:modalDialog class="anniversary-delete-dialog" aria-labelledby="anniversary-delete-title"
     aria-describedby="anniversary-delete-description"
     oncancel={(e) => { e.preventDefault(); onCancel(); }}>
     <h2 id="anniversary-delete-title">{isEn ? 'Delete anniversary?' : 'Xóa lịch cá nhân?'}</h2>
@@ -58,12 +58,12 @@
 {/if}
 
 <style>
-  dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:calc(100% - 32px);max-width:360px;max-height:calc(100dvh - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));overflow:auto;padding:24px;border:1px solid var(--dialog-surface-border,var(--border));border-radius:22px;background:var(--dialog-surface-background,var(--card));color:var(--text);box-shadow:var(--dialog-surface-shadow,var(--shadow-xl))}
-  dialog::backdrop{background:#17120c66;backdrop-filter:blur(4px)}
-  h2{margin:0 0 12px;font-size:20px;line-height:1.4}
-  p{margin:0;color:var(--muted);font-size:15px;line-height:1.7;overflow-wrap:anywhere}
-  .actions{display:flex;gap:10px;margin-top:24px}
-  button{flex:1;min-width:0;min-height:46px;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--bg2);color:var(--text);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
-  button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
-  .delete{background:#ad3939;border-color:#ad3939;color:#fff}
+  dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(var(--dialog-compact-width),calc(100% - var(--space-page) * 2));max-height:calc(100dvh - var(--space-page) * 2 - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));overflow:auto;padding:var(--space-page);border:1px solid var(--border);border-radius:var(--radius-card);background:var(--card);color:var(--text);box-shadow:var(--shadow-xl);text-align:center}
+  dialog::backdrop{background:var(--practice-dialog-backdrop)}
+  h2{margin:0 0 var(--dialog-action-space);font-size:var(--font-size-dialog-title);line-height:1.4}
+  p{margin:0;color:var(--text2);font-size:var(--font-size-body);line-height:1.6;overflow-wrap:anywhere}
+  .actions{display:flex;gap:var(--dialog-action-gap);margin-top:var(--space-page)}
+  button{flex:1;min-width:0;min-height:calc(var(--touch-target-size) + var(--dialog-action-gap) / 2);padding:var(--dialog-action-gap);border:1px solid var(--border);border-radius:var(--radius-control);background:var(--bg2);color:var(--text);font:inherit;font-size:var(--font-size-body);font-weight:600;cursor:pointer}
+  button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .delete{background:var(--gold);border-color:var(--gold);color:var(--on-gold)}
 </style>

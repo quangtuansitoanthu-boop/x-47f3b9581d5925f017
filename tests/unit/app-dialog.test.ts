@@ -6,6 +6,24 @@ import { alertInApp, appDialogState, cancelAppDialogs, confirmInApp, isAppDialog
 let dispose: (() => void) | undefined;
 afterEach(() => { dispose?.(); dispose = undefined; });
 
+it('keeps a personal validation presentation scoped when the next queued alert is generic', async () => {
+  dispose = registerAppDialogHost();
+  const personal = alertInApp('Missing event name', { title: 'Missing information', presentation: 'personal-event' });
+  const generic = alertInApp('Unrelated notice');
+  const first = get(appDialogState)!;
+  expect(first.title).toBe('Missing information');
+  expect(first.presentation).toBe('personal-event');
+  resolveAppDialog(first.id, true);
+  await personal;
+  await tick();
+  const next = get(appDialogState)!;
+  expect(next.message).toBe('Unrelated notice');
+  expect(next.title).toBeUndefined();
+  expect(next.presentation).toBeUndefined();
+  resolveAppDialog(next.id, true);
+  await generic;
+});
+
 it('cancels safely when the app host is unavailable', async () => {
   await expect(confirmInApp('Delete?')).resolves.toBe(false);
   await expect(alertInApp('Notice')).resolves.toBeUndefined();

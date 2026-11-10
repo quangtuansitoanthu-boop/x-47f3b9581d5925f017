@@ -3,8 +3,11 @@ import argparse
 import json
 import os
 from pathlib import Path
+import queue
+import signal
 import subprocess
 import threading
+import time
 
 
 ROOT = Path.cwd().resolve()
@@ -99,15 +102,53 @@ def run_case(index):
         group_started = True
         with (EVIDENCE / f"{stem}.log").open("w", encoding="utf-8") as log:
             process = subprocess.Popen(command, stdout=subprocess.PIPE,
-                                       stderr=subprocess.STDOUT, text=True, bufsize=1)
-            watchdog = threading.Timer(900, process.kill)
+                                       stderr=subprocess.STDOUT, text=True, bufsize=1,
+                                       encoding="utf-8", errors="replace", start_new_session=True)
+            output = queue.Queue(maxsize=256)
+            timed_out = threading.Event()
+            started = time.monotonic()
+
+            def read_output():
+                try:
+                    for line in process.stdout:
+                        output.put(line)
+                except (OSError, ValueError) as error:
+                    output.put(error)
+                finally:
+                    output.put(None)
+
+            def kill_xcode_group():
+                timed_out.set()
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+
+            # A detached child may retain stdout even after the owned process group dies.
+            # Keep the reader daemonized and bound draining to five seconds after timeout.
+            reader = threading.Thread(target=read_output, daemon=True)
+            reader.start()
+            watchdog = threading.Timer(900, kill_xcode_group)
             watchdog.start()
             try:
-                for line in process.stdout:
+                while True:
+                    if time.monotonic() - started >= 905:
+                        infrastructure_error(record, "Xcode stdout did not close before the watchdog drain deadline")
+                        break
+                    try:
+                        line = output.get(timeout=1)
+                    except queue.Empty:
+                        continue
+                    if line is None:
+                        break
+                    if isinstance(line, Exception):
+                        raise line
                     log.write(line)
                     log.flush()
                     print(line, end="", flush=True)
-                record["xcodeExitCode"] = process.wait()
+                record["xcodeExitCode"] = process.wait(timeout=max(1, 905 - (time.monotonic() - started)))
+                if timed_out.is_set():
+                    infrastructure_error(record, "Xcode exceeded the 900-second watchdog deadline")
             finally:
                 watchdog.cancel()
         data = subprocess.check_output([

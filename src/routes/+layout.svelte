@@ -393,10 +393,10 @@
     <AppDialogHost />
   </div>
 
-  {#if pdfTransitionNotice && !pwaUpdateAvailable && !practiceSyncMessage}
+  {#if pdfTransitionNotice && (page.url.pathname !== '/' || pdfTransitionNotice.removed > 0) && !pwaUpdateAvailable && !practiceSyncMessage}
     <div class="pwa-update-banner" data-pdf-transition-status role="status" aria-live="polite">
       <span>{#if pdfTransitionNotice.removed}{contentUpdateText[locale.current].pdfAutoRemoved} {pdfTransitionNotice.removed}{/if}
-        {#if pdfTransitionNotice.retained} {contentUpdateText[locale.current].pdfAutoRetained}{/if}</span>
+        {#if pdfTransitionNotice.retained && page.url.pathname !== '/'} {contentUpdateText[locale.current].pdfAutoRetained}{/if}</span>
       <button type="button" class="dismiss" aria-label={contentUpdateText[locale.current].close} onclick={() => { pdfTransitionNotice = null; }}>×</button>
     </div>
   {/if}

@@ -2361,7 +2361,7 @@
   .reader-top-bar .reader-top-font-select{min-width:var(--touch-target-size);min-height:var(--touch-target-size)}
   .reader-top-bar .reader-top-speak-btn,.reader-top-bar .reader-top-bookmark-btn{width:var(--touch-target-size);min-width:var(--touch-target-size);height:var(--touch-target-size)}
   @media(max-width:768px){
-    .reader-top-actions{min-width:0;flex-shrink:1;overflow-x:auto;overscroll-behavior-x:contain}
+    .reader-top-actions{min-width:0;flex-shrink:1;justify-content:flex-start;overflow-x:auto;overscroll-behavior-x:contain}
   }
   @media(max-width:380px){
     .reader-top-bar{padding:env(safe-area-inset-top,0px) max(env(safe-area-inset-right,0px),8px) 0 max(env(safe-area-inset-left,0px),8px)}

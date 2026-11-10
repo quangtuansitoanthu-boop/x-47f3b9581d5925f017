@@ -6,24 +6,30 @@ struct BuddhistCalendarEntry: TimelineEntry {
     let day: BuddhistCalendarDay?
     let upcomingDay: BuddhistCalendarDay?
     let isPreview: Bool
+    let locale: String?
 
-    init(date: Date, day: BuddhistCalendarDay?, upcomingDay: BuddhistCalendarDay? = nil, isPreview: Bool = false) {
+    init(date: Date, day: BuddhistCalendarDay?, upcomingDay: BuddhistCalendarDay? = nil, isPreview: Bool = false, locale: String? = nil) {
         self.date = date
         self.day = day
         self.upcomingDay = upcomingDay
         self.isPreview = isPreview
+        self.locale = locale
     }
 }
 
 private enum CalendarWidgetPreview {
     static func entry() -> BuddhistCalendarEntry {
         // Chỉ cho gallery/placeholder; không đọc tài khoản, bộ nhớ riêng hoặc ghi snapshot.
-        let day = BuddhistCalendarDay(date: "2026-11-02", solarDate: "Mẫu · Thứ Hai, 02/11/2026", solarDateShort: "02/11/2026",
-            lunarDay: "24", lunarMonthYear: "Tháng 09 • Bính Ngọ", fastingNote: "Ăn chay, làm lành",
-            buddhistHoliday: "Ngày vía minh họa", thoKhangNote: "Ghi chú Thọ Khang mẫu", personalEventCount: 2,
-            personalEvents: [BuddhistCalendarPersonalEvent(id: "preview-1", title: "Sự kiện mẫu", note: "Ghi chú minh họa", type: "khac"),
-                BuddhistCalendarPersonalEvent(id: "preview-2", title: "Nhắc việc mẫu", note: "Nội dung minh họa", type: "khac")])
-        return BuddhistCalendarEntry(date: BuddhistCalendarStore.dayDate(day.date) ?? Date(), day: day, isPreview: true)
+        let locale = WidgetLocaleStore.locale
+        func text(_ vietnamese: String, _ english: String) -> String {
+            WidgetLocaleStore.text(vietnamese, english, locale: locale)
+        }
+        let day = BuddhistCalendarDay(date: "2026-11-02", solarDate: text("Mẫu · Thứ Hai, 02/11/2026", "Preview · Monday, 02/11/2026"), solarDateShort: "02/11/2026",
+            lunarDay: "24", lunarMonthYear: text("Tháng 09 • Bính Ngọ", "Month 09 • Bính Ngọ"), fastingNote: text("Ăn chay, làm lành", "Eat vegetarian food and do good deeds"),
+            buddhistHoliday: text("Ngày vía minh họa", "Sample observance"), thoKhangNote: text("Ghi chú Thọ Khang mẫu", "Sample Tho Khang note"), personalEventCount: 2,
+            personalEvents: [BuddhistCalendarPersonalEvent(id: "preview-1", title: text("Sự kiện mẫu", "Sample event"), note: text("Ghi chú minh họa", "Sample note"), type: "khac"),
+                BuddhistCalendarPersonalEvent(id: "preview-2", title: text("Nhắc việc mẫu", "Sample reminder"), note: text("Nội dung minh họa", "Sample content"), type: "khac")])
+        return BuddhistCalendarEntry(date: BuddhistCalendarStore.dayDate(day.date) ?? Date(), day: day, isPreview: true, locale: locale)
     }
 }
 
@@ -35,7 +41,9 @@ struct BuddhistCalendarProvider: TimelineProvider {
     private func entry(at date: Date, snapshot: BuddhistCalendarSnapshot?) -> BuddhistCalendarEntry {
         let key = BuddhistCalendarStore.dateFormatter("yyyy-MM-dd").string(from: date)
         let day = snapshot?.days.first { $0.date == key }
-        return BuddhistCalendarEntry(date: date, day: day, upcomingDay: day == nil ? nil : snapshot?.upcomingEvent(after: key))
+        // Snapshot cũ không có locale chứa tiếng Việt; không ghép body cũ với nhãn ngôn ngữ mới.
+        let locale = snapshot.map { $0.locale ?? "vi" }
+        return BuddhistCalendarEntry(date: date, day: day, upcomingDay: day == nil ? nil : snapshot?.upcomingEvent(after: key), locale: locale)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (BuddhistCalendarEntry) -> Void) {
@@ -102,6 +110,9 @@ struct BuddhistCalendarView: View {
     @Environment(\.widgetFamily) private var family
     @Environment(\.colorScheme) private var colorScheme
     private var palette: CalendarPalette { CalendarPalette(dark: colorScheme == .dark) }
+    private func text(_ vietnamese: String, _ english: String) -> String {
+        WidgetLocaleStore.text(vietnamese, english, locale: entry.locale)
+    }
 
     private func monthYear(_ day: BuddhistCalendarDay) -> [String] {
         day.lunarMonthYear.components(separatedBy: "•").map { $0.trimmingCharacters(in: .whitespaces) }
@@ -110,9 +121,9 @@ struct BuddhistCalendarView: View {
     private func year(_ day: BuddhistCalendarDay) -> String { monthYear(day).dropFirst().joined(separator: " • ") }
     private func notices(_ day: BuddhistCalendarDay) -> [CalendarNotice] {
         let values: [(CalendarNoticeKind, String, String?)] = [
-            (.fasting, WidgetLocaleStore.text("Ngày Thập Trai", "Ten fasting days"), day.fastingNote),
-            (.abstinence, WidgetLocaleStore.text("Thọ Khang Bảo Giám", "Tho Khang Bao Giam"), day.thoKhangNote),
-            (.holiday, WidgetLocaleStore.text("Ngày Vía & Đại Lễ", "Buddhist observances"), day.buddhistHoliday)
+            (.fasting, text("Ngày Thập Trai", "Ten fasting days"), day.fastingNote),
+            (.abstinence, text("Thọ Khang Bảo Giám", "Tho Khang Bao Giam"), day.thoKhangNote),
+            (.holiday, text("Ngày Vía & Đại Lễ", "Buddhist observances"), day.buddhistHoliday)
         ]
         return values.compactMap { kind, title, value in
             guard let text = value?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else { return nil }
@@ -144,7 +155,7 @@ struct BuddhistCalendarView: View {
                 title(size: 14)
                 Text(BuddhistCalendarStore.dateFormatter("dd/MM/yyyy").string(from: entry.date))
                     .font(.system(size: 12)).foregroundColor(palette.secondary)
-                Text(WidgetLocaleStore.text("Mở app để cập nhật lịch", "Open the app to update the calendar")).font(.system(size: 13)).multilineTextAlignment(.center)
+                Text(text("Mở app để cập nhật lịch", "Open the app to update the calendar")).font(.system(size: 13)).multilineTextAlignment(.center)
             }.padding(14).frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
@@ -152,7 +163,7 @@ struct BuddhistCalendarView: View {
     private func title(size: CGFloat) -> some View {
         HStack(spacing: 5) {
             Image("PracticeMeditation").resizable().scaledToFit().frame(width: size + 5, height: size + 5).accessibilityHidden(true)
-            Text(WidgetLocaleStore.text("Lịch Phật giáo", "Buddhist calendar")).font(.system(size: size, weight: .bold)).lineLimit(1).minimumScaleFactor(0.85)
+            Text(text("Lịch Phật giáo", "Buddhist calendar")).font(.system(size: size, weight: .bold)).lineLimit(1).minimumScaleFactor(0.85)
         }
     }
 
@@ -160,7 +171,7 @@ struct BuddhistCalendarView: View {
         HStack(spacing: 7) {
             Image("PracticeMeditation").resizable().scaledToFit().frame(width: compact ? 26 : 30, height: compact ? 26 : 30).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
-                Text(WidgetLocaleStore.text("Lịch Phật giáo", "Buddhist calendar")).font(.system(size: compact ? 16 : 18, weight: .bold)).lineLimit(1)
+                Text(text("Lịch Phật giáo", "Buddhist calendar")).font(.system(size: compact ? 16 : 18, weight: .bold)).lineLimit(1)
                 Text(day.solarDate).font(.system(size: compact ? 11 : 12)).foregroundColor(palette.secondary).lineLimit(1).minimumScaleFactor(0.85)
             }
             Spacer(minLength: 0)
@@ -170,7 +181,7 @@ struct BuddhistCalendarView: View {
     private func number(_ day: BuddhistCalendarDay, size: CGFloat) -> some View {
         Text(day.lunarDay).font(.system(size: size, weight: .bold, design: .serif))
             .foregroundColor(colorScheme == .dark ? palette.accent : palette.primary)
-            .minimumScaleFactor(0.8).lineLimit(1).accessibilityLabel(WidgetLocaleStore.text("Ngày \(day.lunarDay) âm lịch", "Lunar day \(day.lunarDay)"))
+            .minimumScaleFactor(0.8).lineLimit(1).accessibilityLabel(text("Ngày \(day.lunarDay) âm lịch", "Lunar day \(day.lunarDay)"))
     }
 
     @ViewBuilder private func noticeIcon(_ kind: CalendarNoticeKind, size: CGFloat) -> some View {
@@ -190,12 +201,12 @@ struct BuddhistCalendarView: View {
     }
 
     private func personalLabel(_ day: BuddhistCalendarDay) -> String {
-        day.personalCount.map { WidgetLocaleStore.text("Cá nhân · \($0)", "Personal · \($0)") } ?? WidgetLocaleStore.text("Cá nhân", "Personal")
+        day.personalCount.map { text("Cá nhân · \($0)", "Personal · \($0)") } ?? text("Cá nhân", "Personal")
     }
 
     private func personalSummary(_ day: BuddhistCalendarDay) -> String {
         guard let count = day.personalCount, count > 0 else { return "" }
-        guard let first = day.personalEvents?.first else { return WidgetLocaleStore.text("Mở lịch xem ngày cá nhân", "Open the calendar for personal events") }
+        guard let first = day.personalEvents?.first else { return text("Mở lịch xem ngày cá nhân", "Open the calendar for personal events") }
         let remaining = count - 1
         return first.title + (remaining > 0 ? " · +\(remaining)" : "")
     }
@@ -215,7 +226,7 @@ struct BuddhistCalendarView: View {
                 Text(day.solarDate).font(.system(size: compact ? 10 : 11)).foregroundColor(palette.secondary)
                     .lineLimit(1).minimumScaleFactor(0.85)
                 number(day, size: compact ? 72 : 88).frame(height: compact ? 66 : 82)
-                Text(WidgetLocaleStore.text("\(month(day)) âm lịch", "\(month(day)) lunar")).font(.system(size: compact ? 11 : 13, weight: .bold)).lineLimit(1).minimumScaleFactor(0.85)
+                Text(text("\(month(day)) âm lịch", "\(month(day)) lunar")).font(.system(size: compact ? 11 : 13, weight: .bold)).lineLimit(1).minimumScaleFactor(0.85)
                 Text(year(day)).font(.system(size: compact ? 10 : 12)).foregroundColor(palette.secondary).lineLimit(1)
                 HStack(spacing: 9) {
                     ForEach(notices(day)) { notice in
@@ -232,10 +243,10 @@ struct BuddhistCalendarView: View {
     }
     private func shortTitle(_ kind: CalendarNoticeKind) -> String {
         switch kind {
-        case .fasting: return WidgetLocaleStore.text("Thập Trai", "Fasting")
-        case .holiday: return WidgetLocaleStore.text("Ngày Vía", "Observance")
-        case .abstinence: return WidgetLocaleStore.text("Thọ Khang", "Abstinence")
-        case .personal: return WidgetLocaleStore.text("Cá nhân", "Personal")
+        case .fasting: return text("Thập Trai", "Fasting")
+        case .holiday: return text("Ngày Vía", "Observance")
+        case .abstinence: return text("Thọ Khang", "Abstinence")
+        case .personal: return text("Cá nhân", "Personal")
         }
     }
 
@@ -246,13 +257,13 @@ struct BuddhistCalendarView: View {
             HStack(spacing: 8) {
                 VStack(spacing: 0) {
                     number(day, size: 50).frame(height: 44)
-                    Text(WidgetLocaleStore.text("\(month(day)) âm lịch", "\(month(day)) lunar")).font(.system(size: 11, weight: .bold)).lineLimit(1).minimumScaleFactor(0.85)
+                    Text(text("\(month(day)) âm lịch", "\(month(day)) lunar")).font(.system(size: 11, weight: .bold)).lineLimit(1).minimumScaleFactor(0.85)
                     Text(year(day)).font(.system(size: 10)).foregroundColor(palette.secondary).lineLimit(1)
                 }.frame(width: 106)
                 Rectangle().fill(palette.border).frame(width: 1)
                 VStack(alignment: .leading, spacing: 2) {
                     if !day.hasNotices {
-                        Text(WidgetLocaleStore.text("Hôm nay an lành, tinh tấn tu tập.", "A peaceful day for steady practice.")).font(.system(size: 12)).foregroundColor(palette.secondary)
+                        Text(text("Hôm nay an lành, tinh tấn tu tập.", "A peaceful day for steady practice.")).font(.system(size: 12)).foregroundColor(palette.secondary)
                     } else {
                         ForEach(todayNotices) { notice in
                             categoryDot(notice.kind, shortTitle(notice.kind), fontSize: 11).accessibilityLabel("\(notice.title): \(notice.text)")
@@ -285,8 +296,8 @@ struct BuddhistCalendarView: View {
 
     @ViewBuilder private func footerText(_ day: BuddhistCalendarDay) -> some View {
         if let personal = day.personalCount, notices(day).count + personal > 0 {
-            personalPrivacy(Text(WidgetLocaleStore.text("Xem đủ \(notices(day).count + personal) mục hôm nay", "View all \(notices(day).count + personal) items today")))
-        } else { Text(WidgetLocaleStore.text("Xem lịch hôm nay", "View the calendar for today")) }
+            personalPrivacy(Text(text("Xem đủ \(notices(day).count + personal) mục hôm nay", "View all \(notices(day).count + personal) items today")))
+        } else { Text(text("Xem lịch hôm nay", "View the calendar for today")) }
     }
     private func todayLink(_ day: BuddhistCalendarDay) -> some View {
         Link(destination: day.openingURL ?? URL(string: "vn.quangtu.tutam:///#home-calendar")!) {
@@ -297,7 +308,7 @@ struct BuddhistCalendarView: View {
             }.padding(.horizontal, 12).frame(minHeight: 44)
                 .foregroundColor(palette.color(0x24180C))
                 .background(palette.accent).clipShape(RoundedRectangle(cornerRadius: 14))
-        }.buttonStyle(.plain).accessibilityLabel(WidgetLocaleStore.text("Mở đầy đủ lịch ngày \(day.solarDate)", "Open the calendar for \(day.solarDate)"))
+        }.buttonStyle(.plain).accessibilityLabel(text("Mở đầy đủ lịch ngày \(day.solarDate)", "Open the calendar for \(day.solarDate)"))
     }
 
     private func large(_ day: BuddhistCalendarDay) -> some View {
@@ -313,14 +324,14 @@ struct BuddhistCalendarView: View {
                 HStack(spacing: 10) {
                     number(day, size: dense ? 52 : compact ? 58 : 72).frame(height: dense ? 46 : compact ? 52 : 66)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(WidgetLocaleStore.text("\(month(day)) âm lịch", "\(month(day)) lunar")).font(.system(size: compact ? 13 : 16, weight: .bold)).lineLimit(1).minimumScaleFactor(0.85)
+                        Text(text("\(month(day)) âm lịch", "\(month(day)) lunar")).font(.system(size: compact ? 13 : 16, weight: .bold)).lineLimit(1).minimumScaleFactor(0.85)
                         Text(year(day)).font(.system(size: compact ? 11 : 14)).foregroundColor(palette.secondary).lineLimit(1)
                     }
                     Spacer(minLength: 0)
                 }
                 VStack(spacing: 3) {
                     if !day.hasNotices {
-                        Text(WidgetLocaleStore.text("Hôm nay an lành, tinh tấn tu tập.", "A peaceful day for steady practice.")).font(.system(size: 13)).foregroundColor(palette.secondary)
+                        Text(text("Hôm nay an lành, tinh tấn tu tập.", "A peaceful day for steady practice.")).font(.system(size: 13)).foregroundColor(palette.secondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     } else {
                         ForEach(todayNotices) { notice in
@@ -334,7 +345,7 @@ struct BuddhistCalendarView: View {
                     personalPrivacy(VStack(alignment: .leading, spacing: 3) {
                         Text(personalLabel(day).uppercased()).font(.system(size: compact ? 10 : 11, weight: .semibold)).foregroundColor(palette.secondary)
                         if personalEvents.isEmpty {
-                            Text(WidgetLocaleStore.text("Mở lịch để xem ngày cá nhân", "Open the calendar for personal events")).font(.system(size: 11)).foregroundColor(palette.secondary)
+                            Text(text("Mở lịch để xem ngày cá nhân", "Open the calendar for personal events")).font(.system(size: 11)).foregroundColor(palette.secondary)
                         } else {
                             ForEach(personalEvents) { event in
                                 HStack(spacing: 8) {
@@ -351,14 +362,14 @@ struct BuddhistCalendarView: View {
                             }
                         }
                         if personalCount > personalEvents.count {
-                            Text(WidgetLocaleStore.text("+\(personalCount - personalEvents.count) ngày cá nhân khác · Xem đầy đủ trong lịch", "+\(personalCount - personalEvents.count) more personal events · View the calendar"))
+                            Text(text("+\(personalCount - personalEvents.count) ngày cá nhân khác · Xem đầy đủ trong lịch", "+\(personalCount - personalEvents.count) more personal events · View the calendar"))
                                 .font(.system(size: 10)).foregroundColor(palette.secondary).lineLimit(1).minimumScaleFactor(0.85)
                         }
                     }.fixedSize(horizontal: false, vertical: true))
                 }
                 if !busy {
                     if let next = entry.upcomingDay { upcoming(next, compact: compact) }
-                    else { Text(WidgetLocaleStore.text("Chưa có mốc sắp tới trong lịch đã lưu.", "No upcoming events in the saved calendar.")).font(.system(size: 11)).foregroundColor(palette.secondary) }
+                    else { Text(text("Chưa có mốc sắp tới trong lịch đã lưu.", "No upcoming events in the saved calendar.")).font(.system(size: 11)).foregroundColor(palette.secondary) }
                 }
                 Spacer(minLength: 0)
                 todayLink(day)
@@ -368,7 +379,7 @@ struct BuddhistCalendarView: View {
     private func upcoming(_ day: BuddhistCalendarDay, compact: Bool) -> some View {
         let nextNotices = notices(day)
         return VStack(alignment: .leading, spacing: 4) {
-            Text(WidgetLocaleStore.text("SẮP TỚI", "UPCOMING")).font(.system(size: 11, weight: .semibold)).foregroundColor(palette.secondary)
+            Text(text("SẮP TỚI", "UPCOMING")).font(.system(size: 11, weight: .semibold)).foregroundColor(palette.secondary)
             Link(destination: day.openingURL ?? URL(string: "vn.quangtu.tutam:///#home-calendar")!) {
                 HStack(spacing: 8) {
                     Text(BuddhistCalendarStore.dayDate(day.date).map { BuddhistCalendarStore.dateFormatter("dd/MM").string(from: $0) } ?? day.solarDateShort)
@@ -380,14 +391,14 @@ struct BuddhistCalendarView: View {
                         personalPrivacy(Text((nextNotices.map { $0.kind == .holiday ? $0.text : $0.title }
                             + ((day.personalCount ?? 0) > 0 ? [personalSummary(day)] : [])).joined(separator: " · ")))
                             .font(.system(size: 12, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.85)
-                        Text(WidgetLocaleStore.text("\(day.lunarDay)/\(month(day).replacingOccurrences(of: "Tháng ", with: "")) âm lịch", "\(day.lunarDay)/\(month(day).replacingOccurrences(of: "Month ", with: "")) lunar"))
+                        Text(text("\(day.lunarDay)/\(month(day).replacingOccurrences(of: "Tháng ", with: "")) âm lịch", "\(day.lunarDay)/\(month(day).replacingOccurrences(of: "Month ", with: "")) lunar"))
                             .font(.system(size: 11)).foregroundColor(palette.secondary).lineLimit(1)
                     }.frame(maxWidth: .infinity, alignment: .leading)
                     Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundColor(palette.accent).accessibilityHidden(true)
                 }.padding(.horizontal, 8).padding(.vertical, 5).frame(minHeight: 44)
                     .background(palette.card).clipShape(RoundedRectangle(cornerRadius: 14))
                     .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: 1))
-            }.buttonStyle(.plain).accessibilityLabel(WidgetLocaleStore.text("\(day.solarDate). \(noticeSummary(day)). Mở lịch ngày này", "\(day.solarDate). \(noticeSummary(day)). Open this date"))
+            }.buttonStyle(.plain).accessibilityLabel(text("\(day.solarDate). \(noticeSummary(day)). Mở lịch ngày này", "\(day.solarDate). \(noticeSummary(day)). Open this date"))
         }.padding(.top, 5).overlay(Rectangle().fill(palette.border).frame(height: 1), alignment: .top)
     }
 }

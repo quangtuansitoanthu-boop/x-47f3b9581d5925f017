@@ -6,6 +6,8 @@ export interface AppDialogRequest {
   kind: 'confirm' | 'alert' | 'prompt';
   message: string;
   defaultValue?: string;
+  title?: string;
+  presentation?: 'personal-event';
 }
 
 interface PendingDialog extends AppDialogRequest {
@@ -22,7 +24,9 @@ let nextId = 0;
 function showNext(): void {
   if (!host || active) return;
   active = queue.shift() ?? null;
-  state.set(active ? { id: active.id, kind: active.kind, message: active.message, defaultValue: active.defaultValue } : null);
+  state.set(active ? { id: active.id, kind: active.kind, message: active.message, defaultValue: active.defaultValue,
+    ...(active.title ? { title: active.title } : {}),
+    ...(active.presentation ? { presentation: active.presentation } : {}) } : null);
 }
 
 function cancelAll(): void {
@@ -48,10 +52,10 @@ export function registerAppDialogHost(): () => void {
   };
 }
 
-function requestDialog(kind: AppDialogRequest['kind'], message: string, defaultValue?: string): Promise<boolean | string | null> {
+function requestDialog(kind: AppDialogRequest['kind'], message: string, defaultValue?: string, options?: Pick<AppDialogRequest, 'title' | 'presentation'>): Promise<boolean | string | null> {
   if (!host) return Promise.resolve(kind === 'prompt' ? null : false);
   return new Promise((resolve) => {
-    queue.push({ id: ++nextId, kind, message, defaultValue, resolve });
+    queue.push({ id: ++nextId, kind, message, defaultValue, ...options, resolve });
     showNext();
   });
 }
@@ -60,8 +64,8 @@ export async function confirmInApp(message: string): Promise<boolean> {
   return await requestDialog('confirm', message) === true;
 }
 
-export async function alertInApp(message: string): Promise<void> {
-  await requestDialog('alert', message);
+export async function alertInApp(message: string, options?: Pick<AppDialogRequest, 'title' | 'presentation'>): Promise<void> {
+  await requestDialog('alert', message, undefined, options);
 }
 
 export async function promptInApp(message: string, defaultValue = ''): Promise<string | null> {

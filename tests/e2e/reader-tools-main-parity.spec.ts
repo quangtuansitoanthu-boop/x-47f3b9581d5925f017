@@ -8,12 +8,31 @@ for (const dark of [false, true]) {
       localStorage.setItem('tutam_locale', 'vi');
       localStorage.setItem('tutam_dark_mode', value ? '1' : '0');
     }, dark);
-    const article = { id: 'reader-ui-test', tieu_de: 'Sách kiểm tra công cụ', noi_dung: `<p>${'Nội dung đọc thử. '.repeat(100)}</p>`, danh_muc: 'SÁCH KHUYẾN THIỆN', tags: [], tac_gia: 'Quang Từ', has_muc_luc: 0, visibility: 'public' };
+    const article = { id: 'reader-ui-test', tieu_de: 'Sách kiểm tra công cụ', noi_dung: '', danh_muc: 'SÁCH KHUYẾN THIỆN', tags: [], tac_gia: 'Quang Từ', has_muc_luc: 1, so_tap: 22, visibility: 'public' };
+    const chapters = Array.from({ length: 22 }, (_, index) => ({
+      id: `reader-ui-chapter-${index + 1}`, so_thu_tu: index,
+      tieu_de: `Chương ${index + 1}`, tom_tat: '',
+      noi_dung: `<p>${`Nội dung chương ${index + 1}. `.repeat(100)}</p>`,
+    }));
     await page.route(/\/api\/(?:data\/baiviet|articles)(?:[/?]|$)/, route => route.fulfill({ json: [article] }));
-    await page.goto('/?article=reader-ui-test');
+    await page.route('**/api/articles/reader-ui-test/chapters?**', route => {
+      const order = new URL(route.request().url()).searchParams.get('so_thu_tu');
+      return route.fulfill({ json: order === null ? chapters : chapters.filter(chapter => `eq.${chapter.so_thu_tu}` === order) });
+    });
+    await page.goto('/?article=reader-ui-test&chap=2');
     await settleClient(page);
-    const reader = page.getByRole('dialog', { name: 'Sách kiểm tra công cụ', exact: true });
+    const reader = page.getByRole('dialog', { name: 'Chương 2', exact: true });
     await expect(reader).toBeVisible();
+    await expect(reader.locator('.reader-top-toc-badge')).toHaveText('2/22');
+    await expect(reader.locator('.reader-content')).toContainText('Nội dung chương 2.');
+    expect(await reader.locator('.reader-top-actions').evaluate(element => element.scrollLeft)).toBe(0);
+    const initialActions = (await reader.locator('.reader-top-actions').boundingBox())!;
+    const initialDecrease = (await reader.locator('.reader-top-font-btn.minus').boundingBox())!;
+    expect(initialDecrease.x, 'A− must be visible at the start of the toolbar before any scroll').toBeGreaterThanOrEqual(initialActions.x);
+    expect(initialDecrease.x + initialDecrease.width).toBeLessThanOrEqual(initialActions.x + initialActions.width);
+    const initialFontGroup = (await reader.locator('.reader-top-font-group').boundingBox())!;
+    expect(initialFontGroup.x, 'The font group must start inside the toolbar with the 2/22 chapter badge').toBeGreaterThanOrEqual(initialActions.x);
+    expect(initialFontGroup.x + initialFontGroup.width).toBeLessThanOrEqual(initialActions.x + initialActions.width);
     for (const viewport of [{ width: 375, height: 812 }, { width: 812, height: 375 }]) {
       await page.setViewportSize(viewport);
       const back = reader.locator('.reader-back');

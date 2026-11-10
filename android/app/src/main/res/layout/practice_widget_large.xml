@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/practice_widget_root" android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:padding="10dp" android:background="@drawable/practice_widget_background">
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/practice_widget_header"
+    <TextView android:id="@+id/practice_widget_heading" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/practice_widget_header"
         android:textSize="20sp" android:textStyle="bold" android:textColor="@color/practice_widget_text" android:maxLines="1" android:ellipsize="end" />
     <TextView android:id="@+id/practice_widget_summary" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_marginTop="4dp" android:layout_marginBottom="6dp" android:text="@string/practice_widget_missing_progress"

@@ -44,14 +44,15 @@
     <dialog
       use:modalDialog
       class="app-dialog"
-      data-dialog-glass
+      class:personal-event-dialog={request.presentation === 'personal-event'}
+      data-dialog-glass={request.presentation === 'personal-event' ? undefined : ''}
       data-app-message
       aria-labelledby="app-dialog-title"
       aria-describedby="app-dialog-message"
       oncancel={(event) => { event.preventDefault(); resolveAppDialog(request.id, false); }}
       onkeydown={(event) => event.stopPropagation()}
     >
-      <h2 id="app-dialog-title">{request.kind === 'alert' ? text.alertTitle : text.confirmTitle}</h2>
+      <h2 id="app-dialog-title">{request.title ?? (request.kind === 'alert' ? text.alertTitle : text.confirmTitle)}</h2>
       <p id="app-dialog-message">{request.message}</p>
       {#if request.kind === 'prompt'}
         <input
@@ -122,4 +123,7 @@
     overflow-wrap: anywhere;
   }
   .app-dialog-actions button.primary { background: var(--gold); color: var(--on-gold); }
+  .app-dialog.personal-event-dialog { background: var(--card); border-color: var(--border); text-align: center; }
+  .personal-event-dialog p { color: var(--text2); font-size: var(--font-size-body); line-height: 1.6; }
+  .personal-event-dialog .app-dialog-actions button { width: 100%; min-height: calc(var(--touch-target-size) + var(--dialog-action-gap) / 2); font-weight: 600; }
 </style>

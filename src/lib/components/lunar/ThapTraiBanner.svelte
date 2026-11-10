@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CalendarDays, ChevronDown, TriangleAlert, Play } from '@lucide/svelte';
+  import { CalendarDays, ChevronDown, TriangleAlert } from '@lucide/svelte';
   import PracticeEntryArtwork from '../guide/PracticeEntryArtwork.svelte';
   import { getPracticeEntryCopy } from '$lib/i18n/practice-entry-cards';
   import { createInterfaceTranslator } from '$lib/i18n/interface';
@@ -147,7 +147,7 @@
           <button class="notification-icon-btn" type="button" aria-label={isEn ? 'Enable practice reminders' : localizeUi("Bật thông báo nhắc nhở tu tập")} title={isEn ? 'Enable practice and abstinence reminders' : localizeUi("Bật thông báo nhắc nhở tu tập & Thọ Khang Bảo Giám")} onclick={requestNotifications}>🔔</button>
         {/if}
         <div class="banner-chevron-btn" aria-hidden="true">
-          <span class="chevron">{#if compact}<Play size={16} fill="currentColor" />{:else}<ChevronDown size={20} />{/if}</span>
+          <span class="chevron"><ChevronDown size={20} /></span>
         </div>
       </div>
     </div>
@@ -332,8 +332,8 @@
     transition: transform 0.25s ease;
     transform: rotate(0deg);
   }
-  .collapsed:not(.compact) .chevron {
-    transform: rotate(-90deg);
+  .thap-trai-banner:not(.collapsed) .chevron {
+    transform: rotate(180deg);
   }
   .banner-kiengdam-chip {
     display: inline-flex;

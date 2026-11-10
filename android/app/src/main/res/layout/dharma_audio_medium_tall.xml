@@ -3,7 +3,7 @@
     android:id="@+id/dharma_root" android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:padding="8dp" android:background="@drawable/dharma_audio_background">
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
-        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+        <TextView android:id="@+id/dharma_heading" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
             android:text="@string/dharma_audio_name" android:textSize="12sp" android:textStyle="bold"
             android:textColor="@color/dharma_audio_text" android:includeFontPadding="false" android:maxLines="1" />
         <TextView android:id="@+id/dharma_status" android:text="@string/dharma_audio_waiting" android:layout_width="wrap_content" android:layout_height="wrap_content"

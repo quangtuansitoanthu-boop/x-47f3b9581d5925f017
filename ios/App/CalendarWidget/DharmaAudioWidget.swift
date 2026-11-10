@@ -12,11 +12,11 @@ private enum DharmaAudioWidgetPreview {
     static func entry() -> DharmaAudioWidgetEntry {
         let now = Date()
         // Chỉ gallery/placeholder: tên chung, asset đóng gói, không đọc lịch sử hoặc artwork riêng.
-        let audio = DharmaAudioWidgetData(trackId: "preview:0", title: "Ngọc Lịch Bửu Phiêu", speakerOrCategory: "Mẫu · Đạm Si",
+        let audio = DharmaAudioWidgetData(trackId: "preview:0", title: "Ngọc Lịch Bửu Phiêu", speakerOrCategory: WidgetLocaleStore.text("Mẫu · Đạm Si", "Preview · Đạm Si"),
             currentTime: "12:35", totalDuration: "45:00", progress: 0.28, isPlaying: true,
-            playlist: [DharmaAudioTrackWidgetData(id: "preview:1", title: "Phần 2", duration: "32:10"),
-                DharmaAudioTrackWidgetData(id: "preview:2", title: "Phần 3", duration: "28:45"),
-                DharmaAudioTrackWidgetData(id: "preview:3", title: "Phần 4", duration: "25:40")],
+            playlist: [DharmaAudioTrackWidgetData(id: "preview:1", title: WidgetLocaleStore.text("Phần 2", "Part 2"), duration: "32:10"),
+                DharmaAudioTrackWidgetData(id: "preview:2", title: WidgetLocaleStore.text("Phần 3", "Part 3"), duration: "28:45"),
+                DharmaAudioTrackWidgetData(id: "preview:3", title: WidgetLocaleStore.text("Phần 4", "Part 4"), duration: "25:40")],
             repeatMode: 0, sleepRemainingMinutes: 30, updatedAt: now, error: "")
         return DharmaAudioWidgetEntry(date: now, audio: audio, isPreview: true)
     }
@@ -65,6 +65,9 @@ struct DharmaAudioWidgetView: View {
     private var border: Color { color(dark ? 0x3A3226 : 0xDDD8CC) }
     private var accent: Color { color(dark ? 0xD4A84B : 0xC8963E) }
     private var tint: Color { color(dark ? 0x2E2415 : 0xF5E9CC) }
+    private func metadata(_ value: String) -> String {
+        value.isEmpty ? WidgetLocaleStore.text("Pháp thoại", "Dharma talks") : value
+    }
     private func recent(_ audio: DharmaAudioWidgetData) -> Bool { entry.date.timeIntervalSince(audio.updatedAt) <= 90 }
     private func status(_ audio: DharmaAudioWidgetData) -> String {
         if entry.isPreview { return WidgetLocaleStore.text("Đang phát · Mẫu", "Playing · Preview") }
@@ -214,7 +217,7 @@ struct DharmaAudioWidgetView: View {
         VStack(alignment: .leading, spacing: 4) {
             Label(entry.isPreview ? WidgetLocaleStore.text("Pháp thoại · Mẫu", "Dharma talks · Preview") : WidgetLocaleStore.text("Pháp thoại", "Dharma talks"), systemImage: "headphones").font(.system(size: 12, weight: .bold)).lineLimit(1)
             HStack { artwork(48); Spacer(minLength: 2); play(audio) }
-            Text(audio.title).font(.system(size: 13, weight: .bold)).lineLimit(2).minimumScaleFactor(0.85)
+            Text(metadata(audio.title)).font(.system(size: 13, weight: .bold)).lineLimit(2).minimumScaleFactor(0.85)
             HStack(spacing: 3) {
                 statusBadge(audio)
                 Text("\(audio.currentTime) / \(audio.totalDuration)").font(.system(size: 9)).foregroundColor(secondary).lineLimit(1).minimumScaleFactor(0.8)
@@ -224,13 +227,13 @@ struct DharmaAudioWidgetView: View {
 
     private func medium(_ audio: DharmaAudioWidgetData) -> some View {
         VStack(alignment: .leading, spacing: 5) {
-            Text(entry.isPreview ? "PHÁP THOẠI · MẪU" : "PHÁP THOẠI · \(status(audio).uppercased())")
+            Text(entry.isPreview ? WidgetLocaleStore.text("PHÁP THOẠI · MẪU", "DHARMA TALKS · PREVIEW") : WidgetLocaleStore.text("PHÁP THOẠI · \(status(audio).uppercased())", "DHARMA TALKS · \(status(audio).uppercased())"))
                 .font(.system(size: 11, weight: .bold)).lineLimit(1)
             HStack(spacing: 10) {
                 artwork(60)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(audio.title).font(.system(size: 15, weight: .bold)).lineLimit(1).minimumScaleFactor(0.85)
-                    Text(audio.speakerOrCategory).font(.system(size: 11)).foregroundColor(secondary).lineLimit(1)
+                    Text(metadata(audio.title)).font(.system(size: 15, weight: .bold)).lineLimit(1).minimumScaleFactor(0.85)
+                    Text(metadata(audio.speakerOrCategory)).font(.system(size: 11)).foregroundColor(secondary).lineLimit(1)
                     progress(audio)
                 }.frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -250,8 +253,8 @@ struct DharmaAudioWidgetView: View {
                 HStack(spacing: 10) {
                     artwork(compact ? 54 : 64)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(audio.title).font(.system(size: compact ? 15 : 17, weight: .bold)).lineLimit(2).minimumScaleFactor(0.85)
-                        Text(audio.speakerOrCategory).font(.system(size: 11)).foregroundColor(secondary).lineLimit(1)
+                        Text(metadata(audio.title)).font(.system(size: compact ? 15 : 17, weight: .bold)).lineLimit(2).minimumScaleFactor(0.85)
+                        Text(metadata(audio.speakerOrCategory)).font(.system(size: 11)).foregroundColor(secondary).lineLimit(1)
                         progress(audio)
                     }.frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -270,7 +273,7 @@ struct DharmaAudioWidgetView: View {
         HStack(spacing: 8) {
             artwork(28)
             VStack(alignment: .leading, spacing: 2) {
-                Text(track.title).font(.system(size: 12, weight: .semibold)).lineLimit(1)
+                Text(metadata(track.title)).font(.system(size: 12, weight: .semibold)).lineLimit(1)
                 if !track.duration.isEmpty { Text(track.duration).font(.system(size: 10)).foregroundColor(secondary) }
             }.frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: "play.fill").font(.system(size: 13)).foregroundColor(accent).accessibilityHidden(true)
@@ -280,9 +283,9 @@ struct DharmaAudioWidgetView: View {
 
     @ViewBuilder private func queueRow(_ track: DharmaAudioTrackWidgetData) -> some View {
         if #available(iOS 17.0, *), !entry.isPreview {
-            Button(intent: PlayTrackIntent(trackId: track.id)) { queueFace(track) }.buttonStyle(.plain).accessibilityLabel(WidgetLocaleStore.text("Phát \(track.title)", "Play \(track.title)"))
+            Button(intent: PlayTrackIntent(trackId: track.id)) { queueFace(track) }.buttonStyle(.plain).accessibilityLabel(WidgetLocaleStore.text("Phát \(metadata(track.title))", "Play \(metadata(track.title))"))
         } else {
-            Link(destination: appURL) { queueFace(track) }.buttonStyle(.plain).accessibilityLabel(WidgetLocaleStore.text("\(track.title): mở trình phát trong app", "\(track.title): open the player in the app"))
+            Link(destination: appURL) { queueFace(track) }.buttonStyle(.plain).accessibilityLabel(WidgetLocaleStore.text("\(metadata(track.title)): mở trình phát trong app", "\(metadata(track.title)): open the player in the app"))
         }
     }
 }
