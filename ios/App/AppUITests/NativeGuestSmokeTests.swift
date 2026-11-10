@@ -148,8 +148,19 @@ class NativeGuestUITestCase: XCTestCase {
             XCTFail("Expected visible bottom navigation link \(label)")
             return
         }
+        let navigation = app.otherElements.matching(NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@", "Điều hướng nhanh", "Quick navigation")).firstMatch
+        XCTAssertTrue(navigation.exists, "Bottom tab tap must belong to the actual navigation group")
         evidence("navigation-before-" + label, app: app)
-        tab.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        let targetViewport = app.frame
+        let navigationFrame = navigation.frame
+        let labelFrame = tab.frame
+        let target = CGPoint(x: labelFrame.midX, y: (navigationFrame.minY + labelFrame.minY) / 2)
+        guard navigationFrame.contains(labelFrame), navigationFrame.contains(target), targetViewport.contains(target), tab.isHittable else {
+            evidence("invalid-bottom-tab-icon-target-" + label, app: app)
+            XCTFail("Visible footer icon target must lie inside its actual navigation group")
+            return
+        }
+        app.coordinate(withNormalizedOffset: CGVector(dx: (target.x - targetViewport.minX) / targetViewport.width, dy: (target.y - targetViewport.minY) / targetViewport.height)).tap()
         let marker: XCUIElement
         switch label {
         case "Cá nhân": marker = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Cài đặt ứng dụng ")).firstMatch
@@ -585,6 +596,7 @@ final class NativePersonalReminderTests: NativeGuestUITestCase {
             }
         }
         field.typeText(text)
+        waitUntil("Personal-event title must settle to the exact full typed value") { (field.value as? String) == text }
         XCTAssertEqual(field.value as? String, text)
     }
 
