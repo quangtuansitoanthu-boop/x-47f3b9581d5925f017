@@ -53,6 +53,22 @@
   let newType = $state<PersonalEventType>('gio-chap');
   let newNote = $state('');
   let formError = $state('');
+  let savedMessage = $state('');
+  let savedTimer: ReturnType<typeof setTimeout> | null = null;
+  function clearSavedMessage(): void {
+    if (savedTimer) clearTimeout(savedTimer);
+    savedTimer = null;
+    savedMessage = '';
+  }
+  function closeDialog(): void {
+    clearSavedMessage();
+    onClose();
+  }
+  function showSavedMessage(): void {
+    clearSavedMessage();
+    savedMessage = isEn ? 'Saved successfully' : 'Đã lưu thành công';
+    savedTimer = setTimeout(clearSavedMessage, 2800);
+  }
   let invalidField = $state('');
   let formTouched = false;
   let reminderGeneration = 0;
@@ -64,6 +80,7 @@
   function ensureDraftOwner(): boolean {
     const owner = personalOwner();
     if (owner === draftOwner) return true;
+    clearSavedMessage();
     draftOwner = owner;
     reminderGeneration += 1;
     newTitle = '';
@@ -80,7 +97,7 @@
     return false;
   }
   $effect(() => {
-    if (!open) reminderGeneration += 1;
+    if (!open) { reminderGeneration += 1; clearSavedMessage(); }
     else untrack(() => {
       currentYear = new Date().getFullYear();
       if (!formTouched) resetDatesToToday();
@@ -92,6 +109,7 @@
     window.addEventListener('quangtu:personal-events-changed', refreshList);
     window.addEventListener(SESSION_CHANGE_EVENT, invalidateReminderSetup);
     return () => {
+      clearSavedMessage();
       reminderGeneration += 1;
       window.removeEventListener('quangtu:personal-events-changed', refreshList);
       window.removeEventListener(SESSION_CHANGE_EVENT, invalidateReminderSetup);
@@ -108,15 +126,16 @@
     newDay = date.lunarDay;
     newMonth = date.lunarMonth;
   }
-  async function reportInvalid(message: string, field: string): Promise<void> {
+  async function reportInvalid(message: string, field: string, title: string): Promise<void> {
     formError = message;
     invalidField = field;
-    await alertInApp(message);
+    await alertInApp(message, { title, presentation: 'personal-event' });
     await tick();
     if (open) document.getElementById(field)?.focus();
   }
 
   function clearFieldError(event: Event): void {
+    clearSavedMessage();
     formTouched = true;
     if (event.target instanceof HTMLElement && event.target.id === invalidField) {
       invalidField = '';
@@ -168,14 +187,15 @@
 
   function setMode(mode: 'lunar' | 'solar'): void {
     if (mode === inputMode) return;
+    clearSavedMessage();
     const copy = personalEventsUi[isEn ? 'en' : 'vi'];
     if (mode === 'solar') {
       const solar = solarDateForLunarDay(Number(newDay), Number(newMonth), currentYear, { day: Number(newSolarDay), month: Number(newSolarMonth) });
-      if (!solar) { void alertInApp(copy.noEquivalentDate); return; }
+      if (!solar) { void alertInApp(copy.noEquivalentDate, { title: copy.invalidDateTitle, presentation: 'personal-event' }); return; }
       newSolarDay = solar.day;
       newSolarMonth = solar.month;
     } else {
-      if (!convertedLunar) { void alertInApp(copy.noEquivalentDate); return; }
+      if (!convertedLunar) { void alertInApp(copy.noEquivalentDate, { title: copy.invalidDateTitle, presentation: 'personal-event' }); return; }
       newDay = convertedLunar.day;
       newMonth = convertedLunar.month;
     }
@@ -229,6 +249,7 @@
 
   function handleAddEvent(event: SubmitEvent): void {
     event.preventDefault();
+    clearSavedMessage();
     if (!ensureDraftOwner()) return;
     reminderGeneration += 1;
     const copy = personalEventsUi[isEn ? 'en' : 'vi'];
@@ -237,7 +258,7 @@
     if (issue) {
       const fields = { missingTitle: 'pem-input-title', missingFrequency: inputMode === 'solar' ? 'pem-solar-freq' : 'pem-select-freq', missingType: 'pem-select-type',
         invalidLunarDay: 'pem-select-day', invalidLunarMonth: 'pem-select-month', invalidSolarDay: 'pem-solar-day', invalidSolarMonth: 'pem-solar-month', invalidSolarDate: 'pem-solar-day' };
-      void reportInvalid(copy[issue], fields[issue]);
+      void reportInvalid(copy[issue], fields[issue], issue.startsWith('missing') ? copy.missingInformationTitle : copy.invalidDateTitle);
       return;
     }
     formError = '';
@@ -268,6 +289,7 @@
     formTouched = false;
     resetDatesToToday();
     refreshList();
+    showSavedMessage();
     void setupPersonalReminders(true);
   }
 
@@ -298,7 +320,7 @@
       use:modalDialog
       class="pem-dialog"
       aria-labelledby="pem-title"
-      oncancel={(event) => { event.preventDefault(); onClose(); }}
+      oncancel={(event) => { event.preventDefault(); closeDialog(); }}
     >
       <!-- Header -->
       <div class="pem-header">
@@ -319,7 +341,7 @@
         <button
           type="button"
           class="pem-close-btn"
-          onclick={onClose}
+          onclick={closeDialog}
           aria-label={isEn ? 'Close dialog' : 'Đóng cửa sổ'}
         >
           ✕
@@ -359,6 +381,7 @@
             <strong>{isEn ? 'Add Personal Anniversary' : 'Thêm Ngày Lễ Cá Nhân Mới'}</strong>
           </div>
 
+          {#if savedMessage}<p class="pem-saved-message" role="status">{savedMessage}</p>{/if}
           {#if formError}
             <div id="pem-validation-error" class="pem-error" role="alert">{formError}</div>
           {/if}
@@ -452,7 +475,7 @@
             <span class="pem-label" id="pem-frequency-label">{isEn ? 'Recurrence' : 'Lặp lại'}</span>
             <div id="pem-select-freq" class="pem-frequency" role="group" aria-labelledby="pem-frequency-label" tabindex="-1" data-invalid={invalidField === 'pem-select-freq' || invalidField === 'pem-solar-freq' || undefined}>
               {#each ['yearly', 'monthly'] as frequency (frequency)}
-                <button type="button" aria-pressed={newFrequency === frequency} onclick={() => { newFrequency = frequency as PersonalEventFrequency; formTouched = true; invalidField = ''; formError = ''; }}>{frequency === 'yearly' ? (isEn ? 'Yearly' : 'Hàng năm') : (isEn ? 'Monthly' : 'Hàng tháng')}</button>
+                <button type="button" aria-pressed={newFrequency === frequency} onclick={() => { clearSavedMessage(); newFrequency = frequency as PersonalEventFrequency; formTouched = true; invalidField = ''; formError = ''; }}>{frequency === 'yearly' ? (isEn ? 'Yearly' : 'Hàng năm') : (isEn ? 'Monthly' : 'Hàng tháng')}</button>
               {/each}
             </div>
           </div>
@@ -495,7 +518,7 @@
             <span class="pem-label" id="pem-frequency-label">{isEn ? 'Recurrence' : 'Lặp lại'}</span>
             <div id="pem-solar-freq" class="pem-frequency" role="group" aria-labelledby="pem-frequency-label" tabindex="-1" data-invalid={invalidField === 'pem-select-freq' || invalidField === 'pem-solar-freq' || undefined}>
               {#each ['yearly', 'monthly'] as frequency (frequency)}
-                <button type="button" aria-pressed={newFrequency === frequency} onclick={() => { newFrequency = frequency as PersonalEventFrequency; formTouched = true; invalidField = ''; formError = ''; }}>{frequency === 'yearly' ? (isEn ? 'Yearly' : 'Hàng năm') : (isEn ? 'Monthly' : 'Hàng tháng')}</button>
+                <button type="button" aria-pressed={newFrequency === frequency} onclick={() => { clearSavedMessage(); newFrequency = frequency as PersonalEventFrequency; formTouched = true; invalidField = ''; formError = ''; }}>{frequency === 'yearly' ? (isEn ? 'Yearly' : 'Hàng năm') : (isEn ? 'Monthly' : 'Hàng tháng')}</button>
               {/each}
             </div>
           </div>
@@ -591,7 +614,7 @@
 
       <!-- Footer -->
       <div class="pem-footer">
-        <button type="button" class="pem-done-btn" onclick={onClose}>
+        <button type="button" class="pem-done-btn" onclick={closeDialog}>
           {isEn ? 'Done' : 'Hoàn tất'}
         </button>
       </div>
@@ -637,6 +660,7 @@
   .conv-icon { display: none; }
   .conversion-pill strong { color: var(--brown); font-weight: 600; }
   :global([data-theme='dark']) .conversion-pill strong { color: var(--gold2); }
+  .pem-saved-message { margin: 0; padding: var(--dialog-action-space); border: 1px solid var(--gold); border-radius: var(--radius-card); background: var(--gold-light); color: var(--text); font-weight: 600; line-height: 1.6; }
   .pem-error { color: var(--danger-text); line-height: 1.6; }
   [aria-invalid='true'], [data-invalid='true'] { border-color: var(--danger-text); }
   .pem-submit-btn { min-height: calc(var(--touch-target-size) + var(--dialog-action-gap) / 2); background: var(--gold); color: var(--on-gold); font-weight: 600; }

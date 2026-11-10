@@ -139,7 +139,7 @@ it('blocks a blank title, reports its field, and focuses it after the alert', as
   open();
   submitAnniversary('   ');
   await settle();
-  expect(mocks.alert).toHaveBeenCalledWith(expect.stringContaining('Tên ngày lễ / Sự kiện'));
+  expect(mocks.alert).toHaveBeenCalledWith(expect.stringContaining('Tên ngày lễ / Sự kiện'), { title: 'Chưa đủ thông tin', presentation: 'personal-event' });
   expect(mocks.add).not.toHaveBeenCalled();
   expect(mocks.sync).not.toHaveBeenCalled();
   expect(document.activeElement?.id).toBe('pem-input-title');
@@ -157,7 +157,7 @@ it.each([
   select.value = ''; select.dispatchEvent(new Event('change', { bubbles: true })); flushSync();
   submitAnniversary('Ngày lễ chưa đầy đủ');
   await settle();
-  expect(mocks.alert).toHaveBeenCalledWith(expect.stringContaining(label));
+  expect(mocks.alert).toHaveBeenCalledWith(expect.stringContaining(label), { title: id === 'pem-select-type' ? 'Chưa đủ thông tin' : 'Ngày chưa hợp lệ', presentation: 'personal-event' });
   expect(document.activeElement?.id).toBe(id);
   expect(mocks.add).not.toHaveBeenCalled();
   expect(mocks.sync).not.toHaveBeenCalled();
@@ -216,6 +216,8 @@ it.each([2, 4])('rejects a yearly solar day 31 in month %i without writing or sc
   expect(writes).not.toHaveBeenCalled();
   expect(requests).not.toHaveBeenCalled();
   expect(document.querySelector('[role="alert"]')?.textContent).toMatch(/ngày.*không hợp lệ/iu);
+  expect(mocks.alert).toHaveBeenCalledWith(expect.stringContaining('Ngày dương lịch không hợp lệ'), { title: 'Ngày chưa hợp lệ', presentation: 'personal-event' });
+  expect(document.querySelector('.pem-saved-message')).toBeNull();
   expect(document.querySelector<HTMLInputElement>('#pem-input-title')!.value).toBe('Ngày không tồn tại');
   expect(unhandled).toEqual([]);
 });
@@ -234,6 +236,7 @@ it.each([
   }));
   expect(mocks.sync).toHaveBeenCalledOnce();
   expect(document.querySelector('[role="alert"]')).toBeNull();
+  expect(document.querySelector('.pem-saved-message[role="status"]')?.textContent).toBe('Đã lưu thành công');
   expect(document.querySelector<HTMLInputElement>('#pem-input-title')!.value).toBe('');
   expect(unhandled).toEqual([]);
 });
@@ -370,6 +373,41 @@ it('keeps a new anniversary draft and reports a local storage failure without an
   expect(mocks.add).toHaveBeenCalledOnce();
   expect(title.value).toBe('Ngày lễ chưa lưu');
   expect(document.querySelector('[role="alert"]')?.textContent?.trim()).toBeTruthy();
+  expect(document.querySelector('.pem-saved-message')).toBeNull();
+  expect(unhandled).toEqual([]);
+});
+
+it.each(['timeout', 'new-draft', 'principal-change', 'close'] as const)('clears local save confirmation after %s', async scenario => {
+  vi.useFakeTimers();
+  let principal = 'saved-owner';
+  vi.spyOn(sessions, 'getBrowserSessionSnapshot').mockImplementation(() => ({
+    authenticated: true, user: { id: principal, displayName: principal, role: 'user', email: '' },
+    csrfToken: null, expiresAt: null,
+  }));
+  mocks.add.mockImplementation(() => {
+    expect(document.querySelector('.pem-saved-message')).toBeNull();
+    return { id: 'saved-event' };
+  });
+  open();
+  expect(document.querySelector('.pem-saved-message')).toBeNull();
+  submitAnniversary();
+  await settle();
+  expect(mocks.add).toHaveBeenCalledOnce();
+  expect(document.querySelector('.pem-saved-message[role="status"]')?.textContent).toBe('Đã lưu thành công');
+  if (scenario === 'timeout') {
+    await vi.advanceTimersByTimeAsync(2800);
+  } else if (scenario === 'new-draft') {
+    const title = document.querySelector<HTMLInputElement>('#pem-input-title')!;
+    title.value = 'Ngày tiếp theo'; title.dispatchEvent(new Event('input', { bubbles: true }));
+  } else if (scenario === 'principal-change') {
+    principal = 'next-owner';
+    window.dispatchEvent(new CustomEvent(sessions.SESSION_CHANGE_EVENT));
+  } else {
+    document.querySelector<HTMLButtonElement>('.pem-close-btn')!.click();
+  }
+  await settle();
+  expect(document.querySelector('.pem-saved-message')).toBeNull();
+  expect(mocks.add).toHaveBeenCalledOnce();
   expect(unhandled).toEqual([]);
 });
 
