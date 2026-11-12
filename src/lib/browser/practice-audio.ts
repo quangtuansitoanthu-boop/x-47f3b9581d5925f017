@@ -11,6 +11,7 @@ const MEDITATION_TRACKS = [
 ] as const;
 
 export const PRACTICE_WOODEN_FISH_TRACK = '/assets/audio/tieng-mo.m4a';
+export const ROSARY_TAP_TRACK = '/assets/audio/rosary-tap.m4a';
 export type MeditationTrack = (typeof MEDITATION_TRACKS)[number];
 
 export interface MeditationTrackOption {
@@ -65,7 +66,8 @@ function createAudioElement(source: string, loop = false): HTMLAudioElement {
 export function createPracticeAudioController(): PracticeAudioController {
   const meditation = createAudioElement('', true);
   const mo = createAudioElement(PRACTICE_WOODEN_FISH_TRACK, true);
-  const rosaryTap = createAudioElement(PRACTICE_WOODEN_FISH_TRACK);
+  mo.preload = 'none';
+  const rosaryTap = createAudioElement(ROSARY_TAP_TRACK);
   rosaryTap.volume = 0.8;
 
   let state: PracticeAudioState = {
@@ -80,7 +82,6 @@ export function createPracticeAudioController(): PracticeAudioController {
   let musicDeadline = 0;
   let pausedRemaining = 0;
   let pendingCompletion: { text: string; locale: string; onUnavailable: () => void } | null = null;
-  let rosaryTapTimer = 0;
   let meditationGeneration = 0;
   let meditationPlayRequestVersion = 0;
   let moGeneration = 0;
@@ -314,10 +315,6 @@ export function createPracticeAudioController(): PracticeAudioController {
   }
 
   function stopTap(): void {
-    if (rosaryTapTimer) {
-      window.clearTimeout(rosaryTapTimer);
-      rosaryTapTimer = 0;
-    }
     rosaryTap.pause();
     rosaryTap.currentTime = 0;
   }
@@ -344,9 +341,8 @@ export function createPracticeAudioController(): PracticeAudioController {
 
   function playRosaryTap(enabled: boolean): void {
     if (!enabled || destroyed || state.moActive) return;
-    stopTap();
+    rosaryTap.currentTime = 0;
     void rosaryTap.play().catch(() => undefined);
-    rosaryTapTimer = window.setTimeout(stopTap, 350);
   }
 
   function playWoodenFishBeat(enabled: boolean): void {

@@ -2,6 +2,8 @@ name: Build signed IPA
 
 on:
   workflow_dispatch:
+  push:
+    branches: [codex/ios-rosary-audio-qa-20261112]
 
 permissions:
   contents: read

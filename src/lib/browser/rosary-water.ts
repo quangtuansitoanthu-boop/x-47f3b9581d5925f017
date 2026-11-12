@@ -38,6 +38,7 @@ interface Wave { x: number; y: number; started: number; strength: number }
 export function createRosaryWater(area: HTMLElement, canvas: HTMLCanvasElement, options?: {
   canStartPointer?: (event: PointerEvent) => boolean;
   paintBackground?: (context: CanvasRenderingContext2D, bounds: DOMRect) => void;
+  maxFrameRate?: number;
 }) {
   const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false, antialias: false, depth: false, preserveDrawingBuffer: false });
   const source = document.createElement('canvas');
@@ -45,6 +46,8 @@ export function createRosaryWater(area: HTMLElement, canvas: HTMLCanvasElement, 
   let enabled = false;
   let disposed = false;
   let frame = 0;
+  let lastDraw = 0;
+  const minFrameInterval = options?.maxFrameRate ? 1000 / options.maxFrameRate : 0;
   let activePointer: number | null = null;
   let pending: { x: number; y: number } | null = null;
   let lastPoint: { x: number; y: number; time: number } | null = null;
@@ -100,6 +103,7 @@ export function createRosaryWater(area: HTMLElement, canvas: HTMLCanvasElement, 
   function clear() {
     cancelAnimationFrame(frame);
     frame = 0;
+    lastDraw = 0;
     waves = [];
     pending = lastPoint = null;
     activePointer = null;
@@ -118,6 +122,11 @@ export function createRosaryWater(area: HTMLElement, canvas: HTMLCanvasElement, 
   function draw(now: number) {
     frame = 0;
     if (!enabled || disposed || document.hidden || !gl || !context || !ready) { clear(); return; }
+    if (lastDraw && now - lastDraw < minFrameInterval - 1) {
+      frame = requestAnimationFrame(draw);
+      return;
+    }
+    lastDraw = now;
     if (pending) {
       const point = pending;
       pending = null;

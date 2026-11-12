@@ -22,6 +22,7 @@ vi.mock('../../../src/lib/components/reader/reader-text-to-speech', () => ({
 import {
   MEDITATION_TRACK_OPTIONS,
   PRACTICE_WOODEN_FISH_TRACK,
+  ROSARY_TAP_TRACK,
   createPracticeAudioController
 } from '../../../src/lib/browser/practice-audio';
 import { downloadAudioTrack, clearAllPracticeAudioCache } from '../../../src/lib/browser/practice-audio-cache';
@@ -210,8 +211,8 @@ describe('practice audio', () => {
 
     controller.playRosaryTap(true);
 
-    expect(tap.src).toBe(PRACTICE_WOODEN_FISH_TRACK);
-    expect(tap.pause).toHaveBeenCalledTimes(1);
+    expect(tap.src).toBe(ROSARY_TAP_TRACK);
+    expect(tap.pause).not.toHaveBeenCalled();
     expect(tap.play).toHaveBeenCalledTimes(1);
   });
 
@@ -330,7 +331,7 @@ describe('practice audio', () => {
     const visibilityListener = documentListeners.get('visibilitychange');
 
     controller.playRosaryTap(true);
-    expect(vi.getTimerCount()).toBe(1);
+    expect(vi.getTimerCount()).toBe(0);
     expect(visibilityListener).toBeTypeOf('function');
 
     controller.destroy();

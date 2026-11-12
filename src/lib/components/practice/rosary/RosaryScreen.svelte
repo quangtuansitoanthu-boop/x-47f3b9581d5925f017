@@ -131,7 +131,7 @@
 
   $effect(() => {
     if (!open || !swipeArea || !waterCanvas) return;
-    const renderer = createRosaryWater(swipeArea, waterCanvas);
+    const renderer = createRosaryWater(swipeArea, waterCanvas, { maxFrameRate: 30 });
     water = renderer;
     return () => { renderer.destroy(); water = null; };
   });

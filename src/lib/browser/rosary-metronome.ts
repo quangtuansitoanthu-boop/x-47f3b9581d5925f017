@@ -2,6 +2,7 @@ import type { AudioPlayerController, PracticeAudioLease } from './audio-player-c
 import { cacheNativeTalk, hasNativeTalkAudio, ROSARY_AUDIO_ALBUM_ID } from './native-talk-audio';
 import { nativeAudioPrincipalRevision } from './native-audio-principal';
 import { isNativeApp } from './native-platform';
+import { ROSARY_TAP_TRACK } from './practice-audio';
 import { createRosaryWave, planRosaryAudioChunks, rosaryChunkProgress, rosaryCountAtPosition, ROSARY_SAMPLE_RATE, validateRosaryRhythm, type RosaryInterval } from '$lib/domain/practice/rosary-rhythm';
 
 export interface RosaryMetronomeState {
@@ -68,12 +69,12 @@ export function createRosaryMetronome(callbacks: {
     try {
       if (isNativeApp() && !hasNativeTalkAudio()) throw new Error('rosary_native_audio_unavailable');
       if (!decodedPulse) {
-        const response = await fetch('/assets/audio/tieng-mo.m4a', { signal: controller.signal });
+        const response = await fetch(ROSARY_TAP_TRACK, { signal: controller.signal });
         if (!response.ok) throw new Error('rosary_audio_unavailable');
         const encoded = await response.arrayBuffer(); assertCurrent();
         const AudioContextClass = globalThis.AudioContext ?? (globalThis as typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
         if (!AudioContextClass) throw new Error('rosary_audio_unavailable');
-        const context = new AudioContextClass({ sampleRate: ROSARY_SAMPLE_RATE });
+        const context = new AudioContextClass();
         try {
           const decoded = await context.decodeAudioData(encoded); assertCurrent();
           const source = decoded.getChannelData(0);
