@@ -129,7 +129,10 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
             .appendingPathComponent("DharmaAudio", isDirectory: true)
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         let hash = SHA256.hash(data: Data(key.utf8)).map { String(format: "%02x", $0) }.joined()
-        return root.appendingPathComponent(hash + (partial ? ".part" : ".audio"))
+        // AVPlayer receives a local file URL. Keep the generated rhythm's WAV extension.
+        let isRosaryWave = key.hasPrefix("asset:///public/assets/audio/rosary-rhythm-v2-") && key.hasSuffix(".wav")
+        let fileExtension = isRosaryWave ? ".wav" : ".audio"
+        return root.appendingPathComponent(hash + (partial ? ".part" : fileExtension))
     }
     private func sourceURL(_ source: String) throws -> URL {
         if source.hasPrefix("asset:///public/") {

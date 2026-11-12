@@ -4,6 +4,12 @@ import { describe, expect, it } from 'vitest';
 const read = (path: string) => readFileSync(new URL(`../../../${path}`, import.meta.url), 'utf8');
 
 describe('rosary native command boundaries (source evidence only)', () => {
+  it('stores generated iOS rosary rhythms as WAV without renaming existing lecture downloads', () => {
+    const swift = read('ios/App/App/DharmaAudioPlugin.swift');
+    expect(swift).toMatch(/key\.hasPrefix\("asset:\/\/\/public\/assets\/audio\/rosary-rhythm-v2-"\) && key\.hasSuffix\("\.wav"\)/);
+    expect(swift).toContain('isRosaryWave ? ".wav" : ".audio"');
+  });
+
   it('excludes rosary from dharma recovery/widgets on both native owners', () => {
     const swift = read('ios/App/App/DharmaAudioPlugin.swift');
     expect(swift).toContain('["practice:meditation", "practice:rosary"].contains');
