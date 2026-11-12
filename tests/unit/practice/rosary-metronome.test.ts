@@ -44,6 +44,19 @@ describe('rosary native transport ownership', () => {
     rhythm.dispose();
   });
 
+  it('decodes the pulse without opening an output audio context when offline decoding is available', async () => {
+    const decode = vi.fn(async () => ({ sampleRate: 8000, getChannelData: () => new Float32Array([.5, -.5, 0]) }));
+    vi.stubGlobal('OfflineAudioContext', class { decodeAudioData = decode; });
+    vi.stubGlobal('AudioContext', class {
+      constructor() { throw new Error('Audio output is unavailable'); }
+    });
+    const rhythm = createRosaryMetronome({ onState: vi.fn(), onInterrupted: vi.fn() });
+    await rhythm.start({ target: 108, intervalMs: 1000, title: 'Niệm Phật' });
+    expect(decode).toHaveBeenCalledOnce();
+    expect(bridge.begin).toHaveBeenCalledOnce();
+    rhythm.dispose();
+  });
+
   it('fails closed on native without a background-capable bridge', async () => {
     bridge.available = false;
     const onState = vi.fn(), rhythm = createRosaryMetronome({ onState, onInterrupted: vi.fn() });

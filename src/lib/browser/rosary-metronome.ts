@@ -72,9 +72,11 @@ export function createRosaryMetronome(callbacks: {
         const response = await fetch(ROSARY_TAP_TRACK, { signal: controller.signal });
         if (!response.ok) throw new Error('rosary_audio_unavailable');
         const encoded = await response.arrayBuffer(); assertCurrent();
-        const AudioContextClass = globalThis.AudioContext ?? (globalThis as typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-        if (!AudioContextClass) throw new Error('rosary_audio_unavailable');
-        const context = new AudioContextClass();
+        // Decoding needs no output device. Let the native player own the audio session.
+        const offline = globalThis.OfflineAudioContext;
+        const realtime = globalThis.AudioContext ?? (globalThis as typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+        const context = offline ? new offline(1, 1, 44_100) : realtime ? new realtime() : null;
+        if (!context) throw new Error('rosary_audio_unavailable');
         try {
           const decoded = await context.decodeAudioData(encoded); assertCurrent();
           const source = decoded.getChannelData(0);
@@ -83,7 +85,9 @@ export function createRosaryMetronome(callbacks: {
           const pulse = new Int16Array(Math.round(length * ROSARY_SAMPLE_RATE / decoded.sampleRate));
           for (let i = 0; i < pulse.length; i++) pulse[i] = Math.round(Math.max(-1, Math.min(1, source[Math.floor(i * decoded.sampleRate / ROSARY_SAMPLE_RATE)])) * 32767);
           decodedPulse = pulse;
-        } finally { await context.close(); }
+        } finally {
+          if ('close' in context) await context.close().catch(() => {});
+        }
       }
       assertCurrent();
       const chunks = planRosaryAudioChunks(next.target - acceptedCount, next.intervalMs);
