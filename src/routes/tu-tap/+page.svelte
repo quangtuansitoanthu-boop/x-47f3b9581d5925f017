@@ -56,7 +56,7 @@
   import PracticePreview from '$lib/components/practice/reader/PracticePreview.svelte';
   import PracticeSession from '$lib/components/practice/reader/PracticeSession.svelte';
   import RosaryScreen from '$lib/components/practice/rosary/RosaryScreen.svelte';
-  import { createRosaryMetronome, type RosaryMetronomeState } from '$lib/browser/rosary-metronome';
+  import { createRosaryMetronome, createRosaryStartupTrace, type RosaryMetronomeState } from '$lib/browser/rosary-metronome';
   import { partitionRosaryDaySegments, rosaryPlaybackAnchor } from '$lib/domain/practice/rosary-day-segments';
   import { validateRosaryRhythm, type RosaryInterval } from '$lib/domain/practice/rosary-rhythm';
   import DailyRoutineSession from '$lib/components/practice/routine/DailyRoutineSession.svelte';
@@ -3138,6 +3138,8 @@
   }
 
   async function startRosaryRhythm(input: { intervalMs: number; target: number }): Promise<void> {
+    const trace = createRosaryStartupTrace();
+    trace.step('start');
     if (rhythmBusy || !storage) return;
     const selection = resolveRosarySelection(rosaryPhrase, customRosaryPhrases);
     if (!selection) return;
@@ -3151,17 +3153,20 @@
     let playbackAnchor = Date.now();
     rhythmBusy = true;
     try {
+      trace.step('settle-previous');
       stopRhythm();
       settleRestoredRosaryCount();
       finishRosaryEvidence();
       if (rosarySession) throw new Error('practice_evidence_not_saved');
       ensureCurrentRosaryDay();
       rhythmAccepted = 0;
+      trace.step('save-session');
       rosarySession = createRosarySession({ dailyCountBeforeSession: preferences.rosaryCount, dailyGoal: rosaryDailyGoal, phrase: rosaryPhrase, size: rosarySize, startedAtMs: performance.now() });
       rosaryEvidenceHandle = startPracticeEvidence({ activityType: 'rosary', sourceId: rosaryPhrase, sourceKind: 'guided_rosary', targetCount: rosarySize }) ?? null;
       if (!rosaryEvidenceHandle) throw new Error('practice_evidence_not_saved');
       rhythm?.dispose();
       rhythm = createRosaryMetronome({
+        onStartupStep: trace.step,
         onState: next => {
           if (generation !== practiceSyncGeneration || principal !== sessionPrincipalId(syncSession)) return;
           try {
@@ -3208,13 +3213,16 @@
         },
         onInterrupted: () => { rhythmState = { ...rhythmState, playing: false }; },
       });
+      trace.step('stop-other-audio');
       audio?.stopAll();
       await rhythm.start({ intervalMs: input.intervalMs as RosaryInterval, target: input.target, title: selection.phrase });
+      trace.step('started');
       if (generation !== practiceSyncGeneration || principal !== sessionPrincipalId(syncSession)) stopRhythm();
     } catch (cause) {
+      const detail = trace.failure(cause);
       stopRhythm();
       if (generation === practiceSyncGeneration) {
-        rhythmState = { ...rhythmState, error: isEn ? 'Unable to start the rhythm. Please try again.' : 'Chưa phát được nhịp mõ. Vui lòng thử lại.' };
+        rhythmState = { ...rhythmState, error: detail ? `qa:${detail}` : isEn ? 'Unable to start the rhythm. Please try again.' : 'Chưa phát được nhịp mõ. Vui lòng thử lại.' };
         reportPracticeEvidenceFailure(cause);
       }
     } finally { rhythmBusy = false; }

@@ -682,8 +682,9 @@ export class AudioPlayerController {
   async beginPracticePlayback(
     album: AudioAlbum, remainingMs: number,
     onState: (state: NativeAudioState) => void, onInterrupted: () => void, signal?: AbortSignal,
-    options: { finite?: boolean } = {},
+    options: { finite?: boolean; onStartupStep?: (step: string) => void } = {},
   ): Promise<PracticeAudioLease | null> {
+    options.onStartupStep?.('player-ready');
     const audio = this.audio;
     if (!(audio instanceof NativeTalkAudio) || !Number.isFinite(remainingMs) || remainingMs <= 0 || signal?.aborted) return null;
     const generation = this.loadGeneration;
@@ -698,6 +699,7 @@ export class AudioPlayerController {
     signal?.addEventListener('abort', abort, { once: true });
     slot.removeAbort = () => signal?.removeEventListener('abort', abort);
     try {
+      options.onStartupStep?.('set-queue');
       await audio.setQueue(album, 0, 0);
       if (!owns()) return null;
       audio.playbackRate = 1;
@@ -705,9 +707,11 @@ export class AudioPlayerController {
       audio.volume = this.snapshot.volume;
       audio.muted = this.snapshot.muted;
       audio.setSleep(options.finite ? 0 : remainingMs, false);
+      options.onStartupStep?.('play');
       await audio.play();
       if (!owns()) return null;
       slot.armed = true;
+      options.onStartupStep?.('read-player-state');
       await audio.refreshState();
       if (!owns()) return null;
       if (audio.error) throw new Error(audio.error.message);

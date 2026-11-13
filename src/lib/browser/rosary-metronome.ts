@@ -1,7 +1,7 @@
 import type { AudioPlayerController, PracticeAudioLease } from './audio-player-controller';
 import { cacheNativeTalk, hasNativeTalkAudio, ROSARY_AUDIO_ALBUM_ID } from './native-talk-audio';
 import { nativeAudioPrincipalRevision } from './native-audio-principal';
-import { isNativeApp } from './native-platform';
+import { isNativeApp, nativePlatform } from './native-platform';
 import { ROSARY_TAP_TRACK } from './practice-audio';
 import { createRosaryWave, planRosaryAudioChunks, rosaryChunkProgress, rosaryCountAtPosition, ROSARY_SAMPLE_RATE, validateRosaryRhythm, type RosaryInterval } from '$lib/domain/practice/rosary-rhythm';
 
@@ -14,10 +14,31 @@ export interface RosaryMetronomeOptions {
   intervalMs: RosaryInterval; target: number; title: string;
 }
 
+export function createRosaryStartupTrace() {
+  const enabled = import.meta.env.VITE_ROSARY_STARTUP_QA === '1' && nativePlatform() === 'ios';
+  let stage = 'start';
+  return {
+    step(next: string) {
+      stage = next;
+      if (enabled) console.info('[rosary-start]', next);
+    },
+    failure(cause: unknown): string {
+      if (!enabled) return '';
+      const code = typeof cause === 'object' && cause && 'code' in cause ? cause.code : undefined;
+      const name = cause instanceof Error ? cause.name : undefined;
+      const identifier = [code, name].find(value => typeof value === 'string' && /^[A-Za-z][A-Za-z0-9_]{1,39}$/.test(value));
+      const detail = identifier ? `${stage}/${identifier}` : stage;
+      console.warn('[rosary-start] failed', detail);
+      return detail;
+    },
+  };
+}
+
 /** Audio transport owns cadence, including native sleep/background. No JS timer manufactures ticks. */
 export function createRosaryMetronome(callbacks: {
   onState: (state: RosaryMetronomeState) => void;
   onInterrupted: () => void;
+  onStartupStep?: (step: string) => void;
 }) {
   let generation = 0;
   let disposed = false;
@@ -67,11 +88,14 @@ export function createRosaryMetronome(callbacks: {
     const controller = new AbortController(); request = controller;
     const assertCurrent = () => { if (!current()) throw new DOMException('Rosary request cancelled', 'AbortError'); };
     try {
+      callbacks.onStartupStep?.('native-bridge');
       if (isNativeApp() && !hasNativeTalkAudio()) throw new Error('rosary_native_audio_unavailable');
       if (!decodedPulse) {
+        callbacks.onStartupStep?.('load-tap');
         const response = await fetch(ROSARY_TAP_TRACK, { signal: controller.signal });
         if (!response.ok) throw new Error('rosary_audio_unavailable');
         const encoded = await response.arrayBuffer(); assertCurrent();
+        callbacks.onStartupStep?.('decode-tap');
         // Decoding needs no output device. Let the native player own the audio session.
         const offline = globalThis.OfflineAudioContext;
         const realtime = globalThis.AudioContext ?? (globalThis as typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -90,6 +114,7 @@ export function createRosaryMetronome(callbacks: {
         }
       }
       assertCurrent();
+      callbacks.onStartupStep?.('generate-wav');
       const chunks = planRosaryAudioChunks(next.target - acceptedCount, next.intervalMs);
       const generated = new Map<string, Blob>();
       for (const chunk of chunks) {
@@ -100,9 +125,11 @@ export function createRosaryMetronome(callbacks: {
         const urls = new Map<string, string>();
         for (const [slot, blob] of generated) {
           const url = new URL(`/assets/audio/rosary-rhythm-v2-${slot}.wav`, document.baseURI).href;
+          callbacks.onStartupStep?.('cache-wav');
           await cacheNativeTalk(url, blob, undefined, current, { replace: true }); assertCurrent();
           urls.set(slot, url);
         }
+        callbacks.onStartupStep?.('load-player');
         const { getAudioPlayer } = await import('$lib/stores/audio-player.svelte');
         const player = await getAudioPlayer(); assertCurrent();
         const nextLease = await player.beginPracticePlayback({
@@ -119,10 +146,11 @@ export function createRosaryMetronome(callbacks: {
           if (!current()) return;
           lease = null; state = { ...state, playing: false };
           callbacks.onState({ ...state }); callbacks.onInterrupted();
-        }, controller.signal, { finite: true });
+        }, controller.signal, callbacks.onStartupStep ? { finite: true, onStartupStep: callbacks.onStartupStep } : { finite: true });
         if (!current()) { nextLease?.stop(); return; }
         if (!nextLease) throw new Error('rosary_native_audio_unavailable');
         lease = nextLease;
+        callbacks.onStartupStep?.('refresh-lease');
         await lease.refresh();
       } else {
         const { getAudioPlayer } = await import('$lib/stores/audio-player.svelte');

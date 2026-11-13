@@ -19,6 +19,7 @@ jobs:
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
       VITE_GOOGLE_IOS_CLIENT_ID: ${{ vars.GOOGLE_IOS_CLIENT_ID }}
+      VITE_ROSARY_STARTUP_QA: '1'
       TUTAM_BUNDLE_SYNCED: '1'
     steps:
       - uses: actions/checkout@v6

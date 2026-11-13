@@ -110,7 +110,8 @@
   const showAutomatic = $derived(automaticMode || autoInProgress);
   const manualCounting = $derived(canCount && !showAutomatic && !routinePaused);
   const autoStatus = $derived(autoBusy ? autoCopy.preparing : autoState?.error
-    ? autoState.error === 'rosary_session_too_long' ? autoCopy.tooLong : autoCopy.failed
+    ? autoState.error === 'rosary_session_too_long' ? autoCopy.tooLong
+      : autoState.error.startsWith('qa:') ? `${autoCopy.failed} (${autoState.error.slice(3)})` : autoCopy.failed
     : autoState?.completed ? autoCopy.complete : autoState?.playing ? autoCopy.playing
     : autoInProgress ? autoCopy.paused : autoCopy.ready);
   const phraseOptions = $derived([
