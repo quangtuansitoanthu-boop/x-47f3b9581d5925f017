@@ -93,8 +93,13 @@ export function createRosaryMetronome(callbacks: {
       if (!decodedPulse) {
         callbacks.onStartupStep?.('load-tap');
         const response = await fetch(ROSARY_TAP_TRACK, { signal: controller.signal });
-        if (!response.ok) throw new Error('rosary_audio_unavailable');
+        // Capacitor serves bundled iOS media with NSURLResponse, which has no HTTP status.
+        const localMedia = !response.ok && response.status === 0 && response.type === 'basic'
+          && nativePlatform() === 'ios' && response.url === new URL(ROSARY_TAP_TRACK, document.baseURI).href
+          && response.url.startsWith('capacitor://localhost/');
+        if (!response.ok && !localMedia) throw new Error('rosary_audio_unavailable');
         const encoded = await response.arrayBuffer(); assertCurrent();
+        if (!encoded.byteLength) throw new Error('rosary_audio_unavailable');
         callbacks.onStartupStep?.('decode-tap');
         // Decoding needs no output device. Let the native player own the audio session.
         const offline = globalThis.OfflineAudioContext;

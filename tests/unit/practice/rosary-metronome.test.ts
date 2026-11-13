@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const bridge = vi.hoisted(() => ({
-  revision: 0, native: true, lecturePlaying: false, pauseLecture: vi.fn(), available: true, onState: null as null | ((state: any) => void), onInterrupted: null as null | (() => void),
+  revision: 0, native: true, platform: 'android', lecturePlaying: false, pauseLecture: vi.fn(), available: true, onState: null as null | ((state: any) => void), onInterrupted: null as null | (() => void),
   lease: { pause: vi.fn(), play: vi.fn(async () => {}), stop: vi.fn(), refresh: vi.fn(async () => {}) },
   begin: vi.fn(),
 }));
 vi.mock('$lib/browser/native-talk-audio', () => ({
   hasNativeTalkAudio: () => bridge.available, cacheNativeTalk: vi.fn(async () => {}), ROSARY_AUDIO_ALBUM_ID: 'practice:rosary',
 }));
-vi.mock('$lib/browser/native-platform', () => ({ isNativeApp: () => bridge.native }));
+vi.mock('$lib/browser/native-platform', () => ({ isNativeApp: () => bridge.native, nativePlatform: () => bridge.platform }));
 vi.mock('$lib/browser/native-audio-principal', () => ({ nativeAudioPrincipalRevision: () => bridge.revision }));
 vi.mock('$lib/stores/audio-player.svelte', () => ({ getAudioPlayer: async () => ({ beginPracticePlayback: bridge.begin,
   ready: Promise.resolve(), snapshot: { get playing() { return bridge.lecturePlaying; } },
@@ -19,7 +19,7 @@ import { cacheNativeTalk } from '../../../src/lib/browser/native-talk-audio';
 
 describe('rosary native transport ownership', () => {
   beforeEach(() => {
-    bridge.revision = 0; bridge.native = true; bridge.lecturePlaying = false; bridge.available = true; bridge.onState = null; bridge.onInterrupted = null;
+    bridge.revision = 0; bridge.native = true; bridge.platform = 'android'; bridge.lecturePlaying = false; bridge.available = true; bridge.onState = null; bridge.onInterrupted = null;
     vi.clearAllMocks();
     bridge.pauseLecture.mockImplementation(() => { bridge.lecturePlaying = false; });
     bridge.lease.refresh.mockImplementation(async () => {});
@@ -34,6 +34,31 @@ describe('rosary native transport ownership', () => {
     });
   });
   afterEach(() => vi.unstubAllGlobals());
+
+  it('loads the bundled tap from the iOS media response without an HTTP status', async () => {
+    bridge.platform = 'ios';
+    vi.stubGlobal('document', { baseURI: 'capacitor://localhost/' });
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: false, status: 0, type: 'basic', url: 'capacitor://localhost/assets/audio/rosary-tap.m4a',
+      arrayBuffer: async () => new ArrayBuffer(4),
+    })));
+    const rhythm = createRosaryMetronome({ onState: vi.fn(), onInterrupted: vi.fn() });
+    await rhythm.start({ target: 108, intervalMs: 1000, title: 'Niệm Phật' });
+    expect(bridge.begin).toHaveBeenCalledOnce();
+    rhythm.dispose();
+  });
+
+  it.each(['opaque', 'error'] as const)('rejects a status-zero %s response even on iOS', async type => {
+    bridge.platform = 'ios';
+    vi.stubGlobal('document', { baseURI: 'capacitor://localhost/' });
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: false, status: 0, type, url: 'capacitor://localhost/assets/audio/rosary-tap.m4a',
+    })));
+    const rhythm = createRosaryMetronome({ onState: vi.fn(), onInterrupted: vi.fn() });
+    await expect(rhythm.start({ target: 108, intervalMs: 1000, title: 'Niệm Phật' })).rejects.toThrow('rosary_audio_unavailable');
+    expect(bridge.begin).not.toHaveBeenCalled();
+    rhythm.dispose();
+  });
 
   it('decodes the bundled pulse with the prefixed audio context on older supported WebViews', async () => {
     vi.stubGlobal('webkitAudioContext', globalThis.AudioContext);
