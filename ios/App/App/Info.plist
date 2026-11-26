@@ -24,8 +24,25 @@
     <true/>
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>
-    <key>UIMainStoryboardFile</key>
-    <string>Main</string>
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+      <key>UIApplicationSupportsMultipleScenes</key>
+      <false/>
+      <key>UISceneConfigurations</key>
+      <dict>
+        <key>UIWindowSceneSessionRoleApplication</key>
+        <array>
+          <dict>
+            <key>UISceneConfigurationName</key>
+            <string>Default Configuration</string>
+            <key>UISceneDelegateClassName</key>
+            <string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+            <key>UISceneStoryboardFile</key>
+            <string>Main</string>
+          </dict>
+        </array>
+      </dict>
+    </dict>
     <key>UIRequiredDeviceCapabilities</key>
     <array>
       <string>armv7</string>
@@ -51,20 +68,40 @@
     </array>
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
-    <key>FacebookAppID</key>
-    <string>2174388996483129</string>
-    <key>FacebookClientToken</key>
-    <string>2ec34abc6b255345ebd3f937cd630ff7</string>
-    <key>FacebookDisplayName</key>
-    <string>Tu Tập</string>
-    <key>FacebookAutoLogAppEventsEnabled</key>
-    <false/>
-    <key>FacebookAdvertiserIDCollectionEnabled</key>
-    <false/>
-    <key>LSApplicationQueriesSchemes</key>
+    <key>UIApplicationShortcutItems</key>
     <array>
-      <string>fbapi</string>
-      <string>fbauth2</string>
+      <dict>
+        <key>UIApplicationShortcutItemType</key>
+        <string>widgets</string>
+        <key>UIApplicationShortcutItemTitle</key>
+        <string>Widgets</string>
+        <key>UIApplicationShortcutItemIconFile</key>
+        <string>ShortcutWidgets</string>
+      </dict>
+      <dict>
+        <key>UIApplicationShortcutItemType</key>
+        <string>scriptures</string>
+        <key>UIApplicationShortcutItemTitle</key>
+        <string>Scriptures</string>
+        <key>UIApplicationShortcutItemIconFile</key>
+        <string>ShortcutScriptures</string>
+      </dict>
+      <dict>
+        <key>UIApplicationShortcutItemType</key>
+        <string>practice</string>
+        <key>UIApplicationShortcutItemTitle</key>
+        <string>Practice</string>
+        <key>UIApplicationShortcutItemIconFile</key>
+        <string>ShortcutPractice</string>
+      </dict>
+      <dict>
+        <key>UIApplicationShortcutItemType</key>
+        <string>talks</string>
+        <key>UIApplicationShortcutItemTitle</key>
+        <string>Dharma Talks</string>
+        <key>UIApplicationShortcutItemIconFile</key>
+        <string>ShortcutTalks</string>
+      </dict>
     </array>
     <key>CFBundleURLTypes</key>
     <array>
@@ -72,7 +109,6 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>vn.quangtu.tutam</string>
-          <string>fb2174388996483129</string>
         </array>
       </dict>
       <dict>

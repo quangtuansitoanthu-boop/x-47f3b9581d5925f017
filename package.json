@@ -1,6 +1,6 @@
 {
   "name": "quangtu-cloudflare-worker",
-  "version": "1.2.26",
+  "version": "1.2.29",
   "private": true,
   "type": "module",
   "engines": {
@@ -65,7 +65,6 @@
   },
   "dependencies": {
     "@capacitor-community/apple-sign-in": "^7.1.0",
-    "@capacitor-community/facebook-login": "^7.0.1",
     "@capacitor/android": "^7.6.9",
     "@capacitor/app": "^7.1.0",
     "@capacitor/cli": "^7.6.9",

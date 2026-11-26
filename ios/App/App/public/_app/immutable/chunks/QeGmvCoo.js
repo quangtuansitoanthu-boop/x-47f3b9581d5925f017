@@ -1,0 +1,1 @@
+function e(){return globalThis.Capacitor}function t(){try{var t,n;return((t=e())==null||(n=t.isNativePlatform)==null?void 0:n.call(t))===!0}catch{return!1}}function n(){var t,n;let r=(t=e())==null||(n=t.getPlatform)==null?void 0:n.call(t);return r===`android`||r===`ios`?r:`web`}export{n,t};

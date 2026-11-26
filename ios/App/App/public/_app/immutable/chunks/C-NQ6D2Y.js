@@ -1,0 +1,1 @@
+function e(e){let t=String(e??``).trim();return t?t.startsWith(`http://`)||t.startsWith(`https://`)?t:t.startsWith(`pdfs/`)?`https://media.quangtu.vn/${t}`:t.startsWith(`/pdfs/`)?`https://media.quangtu.vn${t}`:t.startsWith(`/`)?t:`https://media.quangtu.vn/${t}`:``}export{e as t};

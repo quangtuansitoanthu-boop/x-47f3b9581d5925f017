@@ -1,0 +1,1 @@
+var e=[`five`,`ten`,`eight`,`sutra`,`mantra`,`ritual`,`meditation`,`rosary`,`bowing`,`sutra-copy`,`name-copy`,`talk`,`purity`,`reflection`,`routine`],t=[`five`,`ten`,`eight`,`purity`,`reflection`,`routine`],n=[`started`,`recorded`,`completed`];function r(t){return typeof t==`string`&&e.includes(t)}export{r as i,n,e as r,t};

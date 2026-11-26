@@ -15,7 +15,7 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
         "cacheStatus", "cacheChunk", "backgroundStatus", "openBackgroundSettings", "selectPrincipal"
     ].map { CAPPluginMethod(name: $0, returnType: CAPPluginReturnPromise) }
 
-    private let player = AVPlayer()
+    private var player = AVPlayer()
     private var tracks: [JSObject] = []
     private var album: JSObject = [:]
     private var queueID = ""
@@ -37,6 +37,7 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
     private var pendingSeekCall: CAPPluginCall?
     private var seekTimeout: DispatchWorkItem?
     private var retainedPosition: Double = 0
+    private var resetTrackDuration: Double?
     private var itemStatus: NSKeyValueObservation?
     private var timeStatus: NSKeyValueObservation?
     private var endObserver: NSObjectProtocol?
@@ -61,14 +62,7 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
     private func configure() {
         guard !configured else { return }
         configured = true
-        player.actionAtItemEnd = .pause
-        timeStatus = player.observe(\.timeControlStatus, options: [.new]) { [weak self] _, _ in
-            DispatchQueue.main.async { self?.publish() }
-        }
-        timeObserver = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: 600), queue: .main) { [weak self] _ in
-            guard let self = self, !self.queueID.isEmpty else { return }
-            self.publish()
-        }
+        observePlayer()
         observe(NativeAudioSession.willStart) { [weak self] note in
             guard let self = self, note.object as AnyObject? !== self else { return }
             self.pausePlayback()
@@ -79,12 +73,53 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
                reason == AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue { self?.pausePlayback() }
         }
         observe(AVAudioSession.mediaServicesWereResetNotification) { [weak self] _ in
-            // Không tự phát lại sau khi audio service của hệ điều hành bị reset.
-            self?.pausePlayback()
-            self?.errorMessage = "Audio service was reset. Please play the track again."
-            self?.publish()
+            self?.recoverAfterMediaServicesReset()
         }
         configureCommands()
+    }
+
+    private func observePlayer() {
+        let observedPlayer = player
+        observedPlayer.actionAtItemEnd = .pause
+        timeStatus = observedPlayer.observe(\.timeControlStatus, options: [.new]) { [weak self] observed, _ in
+            DispatchQueue.main.async { [weak observed] in
+                guard let self = self, self.player === observed else { return }
+                self.publish()
+            }
+        }
+        timeObserver = observedPlayer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: 600), queue: .main) { [weak self, weak observedPlayer] _ in
+            guard let self = self, self.player === observedPlayer, !self.queueID.isEmpty else { return }
+            self.publish()
+        }
+    }
+
+    private func removePlayerObservers() {
+        timeStatus?.invalidate(); timeStatus = nil
+        if let token = timeObserver { player.removeTimeObserver(token) }
+        timeObserver = nil
+    }
+
+    private func recoverAfterMediaServicesReset() {
+        // Player cũ có thể mất thời gian hiện tại ngay khi dịch vụ dừng.
+        let position = pendingSeekPosition ?? retainedPosition
+        let volume = player.volume
+        resetTrackDuration = queueID.isEmpty ? nil : trackDuration()
+        tickSleep()
+        intendedPlaying = false; wasPlaying = false; resumeAfterInterruption = false
+        itemGeneration += 1
+        removePlayerObservers()
+        removeTrackObservers()
+        cancelPendingSeek(code: "AUDIO_SERVICES_RESET", message: "Audio service was reset")
+        player.pause()
+        NativeAudioSession.deactivate(self)
+
+        player = AVPlayer()
+        player.volume = volume
+        observePlayer()
+        retainedPosition = position
+        errorMessage = ""
+        // Chờ thao tác Phát/tua để tạo item mới và tránh tải lại bài lúc reset.
+        publish()
     }
 
     private func observe(_ name: Notification.Name, handler: @escaping (Notification) -> Void) {
@@ -129,7 +164,10 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
             .appendingPathComponent("DharmaAudio", isDirectory: true)
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         let hash = SHA256.hash(data: Data(key.utf8)).map { String(format: "%02x", $0) }.joined()
-        return root.appendingPathComponent(hash + (partial ? ".part" : ".audio"))
+        // AVPlayer receives a local file URL. Keep the generated rhythm's WAV extension.
+        let isRosaryWave = key.hasPrefix("asset:///public/assets/audio/rosary-rhythm-v2-") && key.hasSuffix(".wav")
+        let fileExtension = isRosaryWave ? ".wav" : ".audio"
+        return root.appendingPathComponent(hash + (partial ? ".part" : fileExtension))
     }
     private func sourceURL(_ source: String) throws -> URL {
         if source.hasPrefix("asset:///public/") {
@@ -156,9 +194,7 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
         itemGeneration += 1
         let generation = itemGeneration
         cancelPendingSeek()
-        itemStatus?.invalidate()
-        if let observer = endObserver { NotificationCenter.default.removeObserver(observer) }
-        endObserver = nil
+        removeTrackObservers()
         player.pause()
         ended = false; pausedAtTrackEnd = false; errorMessage = ""; intendedPlaying = autoplay
         let item = AVPlayerItem(url: url)
@@ -179,8 +215,15 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
             self.trackFinished()
         }
         player.replaceCurrentItem(with: item)
+        resetTrackDuration = nil
         lastTick = ProcessInfo.processInfo.systemUptime; wasPlaying = false
         beginSeek(position: position.isFinite ? max(0, position) : 0, call: call)
+    }
+
+    private func removeTrackObservers() {
+        itemStatus?.invalidate(); itemStatus = nil
+        if let observer = endObserver { NotificationCenter.default.removeObserver(observer) }
+        endObserver = nil
     }
 
     private func cancelPendingSeek(code: String = "SEEK_CANCELLED", message: String = "Seek was superseded") {
@@ -240,9 +283,18 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
+    private func seekTrack(position: Double, call: CAPPluginCall? = nil) throws {
+        if resetTrackDuration != nil {
+            try loadTrack(position: position, autoplay: false, call: call)
+        } else {
+            ended = false; pausedAtTrackEnd = false
+            beginSeek(position: position, call: call)
+        }
+    }
+
     private func startPlayback() throws {
         if isRosaryPlayback && ended { throw failure("Rosary session has completed") }
-        guard !queueID.isEmpty, player.currentItem != nil else { throw failure("No active playlist") }
+        guard !queueID.isEmpty else { throw failure("No active playlist") }
         try NativeAudioSession.activate(self)
         resumeAfterInterruption = false
         if pausedAtTrackEnd {
@@ -250,10 +302,14 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
             if repeatMode != 1 && index + 1 < tracks.count { index += 1 }
             else if repeatMode == 2 { index = 0 }
             try loadTrack(position: 0, autoplay: true)
+            return
         }
-        if ended { try loadTrack(position: 0, autoplay: true) }
-        if player.currentItem?.status == .failed {
-            // Tạo lại item lỗi ở vị trí đã giữ; play không tải lại item đã thất bại.
+        if ended {
+            try loadTrack(position: 0, autoplay: true)
+            return
+        }
+        if player.currentItem == nil || player.currentItem?.status == .failed || !errorMessage.isEmpty {
+            // Chuẩn bị lại bài tại vị trí đã lưu nếu lần phục hồi trước thất bại.
             try loadTrack(position: retainedPosition, autoplay: true)
             return
         }
@@ -294,14 +350,15 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
         wasPlaying = player.timeControlStatus == .playing
     }
     private func seconds(_ time: CMTime) -> Double { let value = time.seconds; return value.isFinite ? max(0, value) : 0 }
+    private func trackDuration() -> Double { resetTrackDuration ?? seconds(player.currentItem?.duration ?? .zero) }
     private func playbackPosition() -> Double {
         if let position = pendingSeekPosition { return position }
-        if errorMessage.isEmpty { retainedPosition = seconds(player.currentTime()) }
+        if resetTrackDuration == nil && errorMessage.isEmpty { retainedPosition = seconds(player.currentTime()) }
         return retainedPosition
     }
     private func state(includeAlbum: Bool = false) -> JSObject {
         var value: JSObject = ["queueId": queueID, "trackIndex": index, "position": playbackPosition(), "observedAtMs": Date().timeIntervalSince1970 * 1000,
-            "duration": seconds(player.currentItem?.duration ?? .zero), "playing": player.timeControlStatus == .playing,
+            "duration": trackDuration(), "playing": player.timeControlStatus == .playing,
             "playWhenReady": intendedPlaying, "buffering": pendingSeekPosition != nil || player.timeControlStatus == .waitingToPlayAtSpecifiedRate,
             "ended": ended, "speed": Double(speed), "volume": Double(player.volume), "repeat": repeatMode,
             "error": errorMessage, "sleepRemainingMs": sleepRemaining, "sleepAtEnd": sleepAtEnd]
@@ -323,10 +380,8 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
 
     private func stopAndClearWidget() {
         pausePlayback(); itemGeneration += 1
-        cancelPendingSeek(); retainedPosition = 0
-        itemStatus?.invalidate(); itemStatus = nil
-        if let observer = endObserver { NotificationCenter.default.removeObserver(observer) }
-        endObserver = nil
+        cancelPendingSeek(); retainedPosition = 0; resetTrackDuration = nil
+        removeTrackObservers()
         player.replaceCurrentItem(with: nil)
         queueID = ""; album = [:]; tracks = []; index = 0; ended = false; pausedAtTrackEnd = false
         sleepRemaining = 0; sleepAtEnd = false
@@ -364,10 +419,9 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
             guard let self = self else { call.reject("Audio bridge closed", "CLOSED"); return }
             guard !self.isRosaryPlayback else { call.reject("Rosary seeking is unavailable", "ROSARY_SEEK_DISABLED"); return }
             let position = call.getDouble("position") ?? 0
-            guard position.isFinite, self.player.currentItem != nil else { call.reject("Invalid seek position", "INVALID_SEEK"); return }
-            self.ended = false; self.pausedAtTrackEnd = false
-            self.errorMessage = ""
-            self.beginSeek(position: max(0, position), call: call)
+            guard position.isFinite, self.player.currentItem != nil || self.resetTrackDuration != nil else { call.reject("Invalid seek position", "INVALID_SEEK"); return }
+            do { try self.seekTrack(position: max(0, position), call: call) }
+            catch { call.reject("Cannot prepare audio for seeking", "PLAYBACK_FAILED", error) }
         }
     }
     @objc public func options(_ call: CAPPluginCall) {
@@ -488,17 +542,22 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
         command(center.skipBackwardCommand) { [weak self] in self?.skip(-10) }
         let token = center.changePlaybackPositionCommand.addTarget { [weak self] event in
             guard let self = self, let seek = event as? MPChangePlaybackPositionCommandEvent, !self.queueID.isEmpty, !self.isRosaryPlayback else { return .noSuchContent }
-            DispatchQueue.main.async { self.beginSeek(position: max(0, seek.positionTime)); self.ended = false; self.pausedAtTrackEnd = false; self.publish() }
+            DispatchQueue.main.async { self.seekFromSystem(position: max(0, seek.positionTime)) }
             return .success
         }
         commands.append((center.changePlaybackPositionCommand, token))
     }
     private func skip(_ delta: Double) {
         guard !isRosaryPlayback else { return }
-        let duration = seconds(player.currentItem?.duration ?? .zero)
+        let duration = trackDuration()
         let target = max(0, playbackPosition() + delta)
-        beginSeek(position: duration > 0 ? min(duration, target) : target)
-        ended = false; pausedAtTrackEnd = false; publish()
+        seekFromSystem(position: duration > 0 ? min(duration, target) : target)
+    }
+
+    private func seekFromSystem(position: Double) {
+        do { try seekTrack(position: position) }
+        catch { errorMessage = error.localizedDescription }
+        publish()
     }
     private func isBrandingArtwork(_ source: String) -> Bool {
         let decoded = source.removingPercentEncoding ?? source
@@ -547,7 +606,7 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
         guard !queueID.isEmpty, tracks.indices.contains(index) else { return }
         var info: [String: Any] = [MPMediaItemPropertyTitle: tracks[index]["title"] as? String ?? "",
             MPMediaItemPropertyAlbumTitle: album["title"] as? String ?? "", MPMediaItemPropertyArtist: album["description"] as? String ?? "",
-            MPMediaItemPropertyPlaybackDuration: seconds(player.currentItem?.duration ?? .zero),
+            MPMediaItemPropertyPlaybackDuration: trackDuration(),
             MPNowPlayingInfoPropertyElapsedPlaybackTime: playbackPosition(),
             MPNowPlayingInfoPropertyPlaybackRate: intendedPlaying && pendingSeekPosition == nil ? Double(speed) : 0,
             MPNowPlayingInfoPropertyDefaultPlaybackRate: Double(speed)]
@@ -744,7 +803,7 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
         let fingerprint = "\(queueID)|\(index)|\(intendedPlaying)|\(ended)|\(repeatMode)|\(sleepMinutes)|\(errorMessage)"
         let changed = fingerprint != widgetFingerprint
         guard force || changed || (intendedPlaying && Date().timeIntervalSince(widgetSavedAt) >= 15) else { return }
-        let duration = seconds(player.currentItem?.duration ?? .zero)
+        let duration = trackDuration()
         let position = playbackPosition()
         let upcoming = tracks.indices.dropFirst(index + 1).prefix(3).map { next in
             let row = tracks[next]
@@ -765,8 +824,8 @@ public class DharmaAudioPlugin: CAPPlugin, CAPBridgedPlugin {
         widgetReload?.cancel()
         seekTimeout?.cancel()
         pendingSeekCall?.reject("Audio bridge closed", "CLOSED")
-        if let token = timeObserver { player.removeTimeObserver(token) }
-        if let token = endObserver { NotificationCenter.default.removeObserver(token) }
+        removePlayerObservers()
+        removeTrackObservers()
         observers.forEach(NotificationCenter.default.removeObserver)
         commands.forEach { $0.0.removeTarget($0.1) }
         artworkTask?.cancel()

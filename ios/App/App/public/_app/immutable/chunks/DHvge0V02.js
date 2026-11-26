@@ -1,0 +1,1 @@
+import{n as e}from"./xjJcPqcb.js";function t(t,n){throw new e(t,n)}function n(t,n){return t instanceof e?!n||t.status===n:!1}export{n,t};

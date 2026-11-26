@@ -1,0 +1,1 @@
+var e=`quangtu_active_url`,t=[`https://quangtu-web.quangtu-ansitoanthu.workers.dev`,`https://quangtu.vn`];function n(e){let n=String(e??``).trim().replace(/\/+$/,``);return n===`https://quangtu.vercel.app`?`https://quangtu.vn`:t.find(e=>e===n)??t[0]}export{e as n,n as r,t};

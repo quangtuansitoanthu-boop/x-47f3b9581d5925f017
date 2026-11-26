@@ -1,0 +1,1 @@
+function e(e){var t;return e.authenticated&&(t=e.user)!=null&&t.id?String(e.user.id):null}function t(t){let n=e(t),r=0;return{capture(){return{generation:r,principalId:n}},invalidate(){r+=1},isCurrent(e){return e.generation===r&&e.principalId===n},transition(t){let i=e(t);return i===n?!1:(n=i,r+=1,!0)}}}export{t};

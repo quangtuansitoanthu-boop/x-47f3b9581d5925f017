@@ -4,13 +4,13 @@ const config: CapacitorConfig = {
   appId: 'vn.quangtu.tutam',
   appName: 'Tu tập',
   webDir: 'build',
+  zoomEnabled: false,
   android: {
     // MainActivity xử lý cả IME; handler mặc định chỉ tính system bars/cutout.
     adjustMarginsForEdgeToEdge: 'disable',
     // Android dùng AppSystemBars; iOS vẫn giữ StatusBar và toàn bộ plugin hiện có.
     includePlugins: [
       '@capacitor-community/apple-sign-in',
-      '@capacitor-community/facebook-login',
       '@capacitor/app',
       '@capacitor/filesystem',
       '@capacitor/local-notifications',
@@ -18,25 +18,10 @@ const config: CapacitorConfig = {
     ],
   },
   server: {
+    // Keep the main WebView on bundled assets. Capacitor opens external pages
+    // separately, while API requests and media can still use remote URLs.
     cleartext: false,
-    androidScheme: 'https',
-    allowNavigation: [
-      'quangtu.vn',
-      '*.quangtu.vn',
-      'media.quangtu.vn',
-      'archive.org',
-      '*.archive.org',
-      // URL dự phòng – hoạt động miễn phí vĩnh viễn kể cả khi quangtu.vn hết hạn
-      'quangtu-web.quangtu-ansitoanthu.workers.dev',
-      'quangtu.vercel.app',
-      'accounts.google.com',
-      'drive.google.com',
-      '*.google.com',
-      '*.googleusercontent.com',
-      'facebook.com',
-      '*.facebook.com',
-      'appleid.apple.com'
-    ]
+    androidScheme: 'https'
   },
   plugins: {
     // API quangtu.vn không trả header CORS cho origin https://localhost của WebView,
@@ -54,11 +39,6 @@ const config: CapacitorConfig = {
       serverClientId: '18472854734-2hpib1tghifb2li4s42vqaqvthfbn1jp.apps.googleusercontent.com',
       clientId: '18472854734-2hpib1tghifb2li4s42vqaqvthfbn1jp.apps.googleusercontent.com',
       forceCodeForRefreshToken: false
-    },
-    FacebookLogin: {
-      appId: '2174388996483129',
-      appName: 'Tu tập',
-      permissions: ['public_profile', 'email']
     },
     SplashScreen: {
       launchShowDuration: 0,

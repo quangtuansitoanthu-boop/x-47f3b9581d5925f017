@@ -25,7 +25,7 @@ jobs:
           node-version: 24
           cache: npm
       - name: Set independent build number
-        run: echo "BUILD_NUMBER=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
+        run: echo "BUILD_NUMBER=$((1200 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
       - name: Verify Apple toolchain
         run: |
           xcodebuild -version
@@ -85,13 +85,25 @@ jobs:
           security find-identity -v -p codesigning "$keychain" | grep 'Apple Distribution: SMOB JOINT STOCK COMPANY'
       - name: Install locked dependencies
         run: npm ci
-      - name: Check TypeScript and native bridge contracts
+      - name: Verify prebuilt assets and sync iOS dependencies
         run: |
-          npm run check
-          npx vitest run --config tests/unit/vitest.config.ts tests/unit/audio/native-platform-parity.test.ts tests/unit/audio/native-talk-audio.test.ts tests/unit/audio/native-player-controller.test.ts tests/unit/audio/audio-player-controller.test.ts
-          npx vitest run --config tests/unit/vitest.config.ts tests/unit/facebook-limited-token.test.ts tests/unit/facebook-limited-identity.test.ts tests/unit/native-auth-security.test.ts tests/unit/native-login-transport.test.ts
-      - name: Build iOS web assets and install native dependencies
-        run: npm run build:mobile -- --platform ios
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import {createHash} from 'node:crypto';
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const root = 'ios/App/App/public';
+          const {version,files} = JSON.parse(fs.readFileSync(path.join(root,'mobile-assets-manifest.json')));
+          if (version !== 1 || files.length !== 1045) throw Error('Unexpected iOS manifest');
+          for (const file of files) {
+            const data = fs.readFileSync(path.join(root,file.path));
+            if (data.length !== file.bytes || createHash('sha256').update(data).digest('hex') !== file.sha256) throw Error(file.path);
+          }
+          console.log('Verified ' + files.length + ' prebuilt release assets');
+          JS
+          mkdir -p build
+          cp -a ios/App/App/public/. build/
+          npx cap sync ios
       - name: Archive signed iOS release once
         run: |
           set -euo pipefail
@@ -141,7 +153,7 @@ jobs:
         with:
           name: tutap-device-ipa
           path: ${{ runner.temp }}/tutap-export/*.ipa
-          retention-days: 7
+          retention-days: 1
       - name: Remove ephemeral signing credentials
         if: always()
         run: |

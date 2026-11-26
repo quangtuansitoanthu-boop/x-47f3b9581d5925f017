@@ -1,0 +1,1 @@
+function e(e){let t=String(e??``),n=`#pos=`;if(!t.includes(n))return{position:`center`,src:t};let[r,i=`center`]=t.split(n,2);try{return{position:decodeURIComponent(i)||`center`,src:r}}catch{return{position:`center`,src:r}}}export{e as t};

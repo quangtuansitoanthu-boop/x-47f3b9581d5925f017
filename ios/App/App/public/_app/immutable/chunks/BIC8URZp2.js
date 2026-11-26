@@ -1,0 +1,1 @@
+import{o as e,s as t}from"./BaVX7Rps.js";import"./Cm7Mh80k.js";import{t as n}from"./Blw5wJI2.js";var r=new Set([`$$slots`,`$$events`,`$$legacy`]);function i(i,a){let o=e(a,r),s=[[`rect`,{x:`14`,y:`3`,width:`5`,height:`18`,rx:`1`}],[`rect`,{x:`5`,y:`3`,width:`5`,height:`18`,rx:`1`}]];n(i,t({name:`pause`},()=>o,{get iconNode(){return s}}))}export{i as t};

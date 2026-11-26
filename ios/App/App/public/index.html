@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#FAF1E4" />
+    <script data-url-fragment-guard>
+      (function() {
+        function normalizeFragment() {
+          try { decodeURIComponent(location.hash); }
+          catch (_) { history.replaceState(history.state, '', location.pathname + location.search); }
+        }
+        // Run before the router decodes the initial URL or a history change.
+        normalizeFragment();
+        window.addEventListener('hashchange', normalizeFragment);
+        window.addEventListener('popstate', normalizeFragment);
+      })();
+    </script>
+    <link rel="icon" sizes="48x48" href="/assets/branding/temple-favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" />
+    </noscript>
+    <script>
+      (function() {
+        if ((window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) ||
+            (location.protocol === 'https:' && location.hostname === 'localhost')) {
+          document.documentElement.setAttribute('data-native-app', 'true');
+          if (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'android' &&
+              window.Capacitor.isPluginAvailable && window.Capacitor.isPluginAvailable('AppSystemBars')) {
+            document.documentElement.setAttribute('data-native-insets', 'true');
+          }
+          if (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'android' &&
+              window.Capacitor.isPluginAvailable && window.Capacitor.isPluginAvailable('StartupScreen')) {
+            document.documentElement.setAttribute('data-native-startup', 'true');
+          }
+        }
+        try {
+          var savedUiFontScale = localStorage.getItem('tutam_ui_font_scale');
+          var uiFontScale = Number(savedUiFontScale && savedUiFontScale.trim() ? savedUiFontScale : '1');
+          if (!Number.isFinite(uiFontScale)) uiFontScale = 1;
+          uiFontScale = Math.round(Math.min(1.2, Math.max(0.8, uiFontScale)) * 10) / 10;
+          document.documentElement.style.setProperty('--ui-font-scale', String(uiFontScale));
+        } catch (e) {}
+        try {
+          var mode = localStorage.getItem('tutam_dark_mode');
+          var savedPalette = localStorage.getItem('tutam_app_light_palette');
+          if (savedPalette === null) {
+            savedPalette = [localStorage.getItem('tutam_read_bg'), localStorage.getItem('tt_bg'), localStorage.getItem('tt_practice_bg')]
+              .filter(function(value) { return ['white', 'cream', 'gray', 'purple'].indexOf(value) >= 0; })[0];
+          }
+          var palette = ['white', 'cream', 'gray', 'purple'].indexOf(savedPalette) >= 0 ? savedPalette : 'white';
+          var isDark = mode === '1' || (mode !== '0' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-app-palette', isDark ? 'dark' : mode === '0' ? palette : 'cream');
+          document.documentElement.style.backgroundColor = 'var(--bg)';
+          if (isDark) {
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', '#15120d');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      :root[data-theme='dark'], html[data-theme='dark'], html[data-theme='dark'] body {
+        background-color: #15120d !important;
+        color: #e6dfd5;
+      }
+      :root, html, body {
+        background-color: var(--bg, #fff);
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+    <style>
+      #app-startup { display: none; }
+      html[data-native-app='true'] #app-startup {
+        position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+        overflow: hidden; background: #f6efe0; opacity: 1; transition: opacity 220ms ease-out;
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      }
+      #app-startup .startup-blur {
+        display: none; position: absolute; inset: -24px; width: calc(100% + 48px); height: calc(100% + 48px);
+        object-fit: cover; filter: blur(26px) saturate(1.06); opacity: 0.92; pointer-events: none;
+      }
+      #app-startup .startup-bg, #app-startup .startup-title {
+        position: absolute; inset: 0; width: 100%; height: 100%;
+        object-fit: cover; object-position: center center; pointer-events: none;
+      }
+      #app-startup .startup-scrim {
+        position: absolute; left: 0; right: 0; bottom: 0;
+        height: calc(96px + env(safe-area-inset-bottom, 0px));
+        background: linear-gradient(180deg, rgba(24, 17, 10, 0) 0%, rgba(24, 17, 10, 0.28) 45%, rgba(24, 17, 10, 0.58) 100%);
+        pointer-events: none;
+      }
+      #app-startup .startup-loading {
+        position: relative; display: inline-flex; align-items: center; gap: 8px;
+        margin: 0 18px calc(22px + env(safe-area-inset-bottom, 0px));
+        font-size: 12.5px; font-weight: 600; color: #fff8ea; letter-spacing: 0.02em;
+        text-shadow: 0 1px 6px rgba(18, 11, 4, 0.65); pointer-events: none;
+      }
+      #app-startup .startup-spinner {
+        width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box;
+        border: 2px solid rgba(255, 245, 222, 0.30); border-top-color: #f5ce7a; border-right-color: #e3b14e;
+        box-shadow: 0 1px 4px rgba(18, 11, 4, 0.35);
+        animation: startup-spin 0.9s linear infinite;
+      }
+      html[data-native-app='true'] #app-startup.startup-ready { opacity: 0; pointer-events: none; }
+      @keyframes startup-spin { to { transform: rotate(360deg); } }
+      @media (min-aspect-ratio: 3/5), (max-aspect-ratio: 9/20) {
+        #app-startup .startup-blur { display: block; }
+        #app-startup .startup-bg, #app-startup .startup-title { object-fit: contain; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #app-startup .startup-spinner { animation: none; }
+        html[data-native-app='true'] #app-startup { transition: none; }
+      }
+    </style>
+    <style>
+      html[data-native-startup='true'] #app-startup { display: none; }
+    </style>
+    <link href="/_app/immutable/entry/start.vuaGV7X5.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/CDuTbr92.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BfHvCCDo.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/xjJcPqcb.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BaVX7Rps.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/zV3o4ufC.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/fCjs79qj.js" rel="modulepreload">
+		<link href="/_app/immutable/entry/app.SS2ZUVLv.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BkSJcFVj.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/Cm7Mh80k.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/sSgbRg4C.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DJvgheLU.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/Cv9IoIg9.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/QeGmvCoo.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/zNInJmJO.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BJtJjE0v.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/bp9j-J-_.js" rel="modulepreload">
+		<link href="/_app/immutable/nodes/0.BYhzygKa.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DdrV_Ohm.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/CXOjqDWv.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/D9QL22bp2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/ChvLsayO.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BFe0x1TY.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/Blw5wJI2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/CN1848uT2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BJiKcgZn2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/fdwH6ppI.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/D7ungy0Z.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/COKoQ7zD.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BtRJqOUi.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DzPl-sDU.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/9fbmNQdi.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DHZpBuCo2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BwJKl4Fq.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/CU7wfVBX2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BpSPOPhP.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DzquzyXU.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DuSuUyVU.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BCQv8xyw2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BXLV5FXU2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/CokiulS8.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/meOvpwU5.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/B41ANyuc.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/D8RR8yue.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/CJEhveof.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DwyhP9nf.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BCE6pRi82.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/pKeeHT1q2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BN7X1_yJ.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BK_UFzfd2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/D6Kn5Uip.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/_ATxNF1m2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/NgX1QPAr2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/CQIYpNKd2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/1vfHZhRz.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/B_E5n-6P.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DTRED9lo.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/0_ZJLrTn.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/C-xHD9W6.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/GcR83oP62.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/CMDjPrKn2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/j5-nkZ_F.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/B3aM5lyu.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DW2TaZsO.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BMcM4_hq.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BA3kIV6a.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/B1_zcGv72.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/C3wp6m19.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DPYhOzO1.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/D_doqzXx2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DMzkquRm2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/CDXYenGY.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BjGovOrW.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/X4VyUMzx2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/Dxi9bL8M.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/CLqyrQA7.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BVXQ1rxs.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/Bk3ziZES2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/_DFyb7_h.js" rel="modulepreload">
+		
+		<link href="/_app/immutable/assets/AppArtwork.AH6iPkhE.css" rel="stylesheet">
+		<link href="/_app/immutable/assets/NotificationBell.C4R1RYXU.css" rel="stylesheet">
+		<link href="/_app/immutable/assets/RosarySelect.D8yeCwET.css" rel="stylesheet">
+		<link href="/_app/immutable/assets/0.BV5mJU29.css" rel="stylesheet">
+		<link href="/_app/immutable/assets/PhapBaoModal.pulLqVUV.css" rel="stylesheet">
+    <script>
+      // CSS đã nạp: lấy đúng token nền trước khi body được vẽ, không sao chép bảng màu.
+      try {
+        var appBackground = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+        var appThemeMeta = document.querySelector('meta[name="theme-color"]');
+        if (appBackground && appThemeMeta) appThemeMeta.setAttribute('content', appBackground);
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-sveltekit-preload-data="hover">
+    <div id="app-startup" role="status" aria-label="Ứng dụng Tu tập Phật pháp">
+      <img class="startup-blur" data-startup-blur alt="" aria-hidden="true" />
+      <img class="startup-bg" data-startup-bg alt="" />
+      <img class="startup-title" data-startup-title alt="" />
+      <div class="startup-scrim" aria-hidden="true"></div>
+      <div class="startup-loading">
+        <span class="startup-spinner" aria-hidden="true"></span>
+        <span data-startup-loading>Đang tải ứng dụng...</span>
+      </div>
+    </div>
+    <script data-startup-artwork>
+      if (document.documentElement.dataset.nativeStartup === 'true') {
+        document.getElementById('app-startup').remove();
+      } else if (document.documentElement.dataset.nativeApp === 'true') {
+        var indexKey = 'tutam_startup_background_index';
+        var launchIndex;
+        try { launchIndex = sessionStorage.getItem(indexKey); } catch (e) {}
+        var backgroundIndex = 0;
+        if (/^[0-9]$/.test(launchIndex)) {
+          backgroundIndex = Number(launchIndex);
+        } else {
+          try {
+            var previous = localStorage.getItem(indexKey);
+            if (/^[0-9]$/.test(previous)) backgroundIndex = (Number(previous) + 1) % 10;
+            localStorage.setItem(indexKey, String(backgroundIndex));
+          } catch (e) {}
+          try { sessionStorage.setItem(indexKey, String(backgroundIndex)); } catch (e) {}
+        }
+        var startupSrc = '/images/calendar/cu-si/' + String(backgroundIndex + 1).padStart(2, '0') + '.webp';
+        document.querySelector('[data-startup-blur]').src = startupSrc;
+        var painting = document.querySelector('[data-startup-bg]');
+        var title = document.querySelector('[data-startup-title]');
+        painting.src = startupSrc;
+        title.src = '/images/calendar/cu-si-title.webp';
+        try { if (localStorage.getItem('tutam_locale') === 'en') document.querySelector('[data-startup-loading]').textContent = 'Loading app...'; } catch (e) {}
+        var cover = document.getElementById('app-startup');
+        cover.artworkPainted = Promise.all([painting, title].map(function (image) {
+          if (image.decode) return image.decode().catch(function () {});
+          if (!image.complete) return new Promise(function (resolve) { image.onload = image.onerror = resolve; });
+        })).then(function () {
+          return new Promise(function (resolve) {
+            requestAnimationFrame(function () {
+              var shownAt = performance.now();
+              cover.dataset.shownAt = String(shownAt);
+              resolve(shownAt);
+            });
+          });
+        });
+      }
+      // A recoverable startup error must never leave a permanent cover over the app.
+      window.setTimeout(function() { var screen = document.getElementById('app-startup'); if (screen) screen.remove(); }, 30000);
+    </script>
+    <div style="display: contents">
+			<script>
+				{
+					__sveltekit_7gbu0l = {
+						base: ""
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("/_app/immutable/entry/start.vuaGV7X5.js"),
+						import("/_app/immutable/entry/app.SS2ZUVLv.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element);
+					});
+				}
+			</script>
+		</div>
+  </body>
+</html>

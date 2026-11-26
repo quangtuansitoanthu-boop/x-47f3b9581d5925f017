@@ -1,0 +1,1 @@
+import{o as e,s as t}from"./BaVX7Rps.js";import"./Cm7Mh80k.js";import{t as n}from"./Blw5wJI2.js";var r=new Set([`$$slots`,`$$events`,`$$legacy`]);function i(i,a){let o=e(a,r),s=[[`path`,{d:`M5 12h14`}],[`path`,{d:`M12 5v14`}]];n(i,t({name:`plus`},()=>o,{get iconNode(){return s}}))}export{i as t};

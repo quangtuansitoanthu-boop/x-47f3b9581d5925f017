@@ -1,0 +1,1 @@
+function e(e){let t=String(e??``).trim(),n=t.indexOf(`#pos=`),r=t.lastIndexOf(`#pos=`);if(n<0)return{src:t,position:`center`};let i=t.slice(0,n);try{return{src:i,position:decodeURIComponent(t.slice(r+5))||`center`}}catch{return{src:i,position:`center`}}}export{e as t};

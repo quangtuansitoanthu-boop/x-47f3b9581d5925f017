@@ -7,12 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+BC0000000000000000000083 /* Widget PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BC0000000000000000000082 /* Widget PrivacyInfo.xcprivacy */; };
 D7A110000000000000000004 /* NativeGuestSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A110000000000000000003; };
 		C0F17E200000000000000004 /* DharmaAudioPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0F17E100000000000000004 /* DharmaAudioPlugin.swift */; };
 		C0F17E200000000000000003 /* ReaderSpeechPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0F17E100000000000000003 /* ReaderSpeechPlugin.swift */; };
 		C0F17E200000000000000002 /* NativeAudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0F17E100000000000000002 /* NativeAudioSession.swift */; };
 		C0F17E200000000000000001 /* TuTapBridgeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0F17E100000000000000001 /* TuTapBridgeViewController.swift */; };
 		C0F17E000000000000000001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C0F17E000000000000000002 /* PrivacyInfo.xcprivacy */; };
+		E5A30C510000000000000001 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E5A30C510000000000000003 /* InfoPlist.strings */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
@@ -40,6 +42,7 @@ BC0000000000000000000081 = {isa = PBXBuildFile; fileRef = BC00000000000000000000
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+BC0000000000000000000082 /* Widget PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 D7A110000000000000000002 /* AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 D7A110000000000000000003 /* NativeGuestSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeGuestSmokeTests.swift; sourceTree = "<group>"; };
 		C0F17E100000000000000004 /* DharmaAudioPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DharmaAudioPlugin.swift; sourceTree = "<group>"; };
@@ -47,6 +50,7 @@ D7A110000000000000000003 /* NativeGuestSmokeTests.swift */ = {isa = PBXFileRefer
 		C0F17E100000000000000002 /* NativeAudioSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAudioSession.swift; sourceTree = "<group>"; };
 		C0F17E100000000000000001 /* TuTapBridgeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TuTapBridgeViewController.swift; sourceTree = "<group>"; };
 		C0F17E000000000000000002 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		E5A30C510000000000000002 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -136,6 +140,7 @@ BC0000000000000000000064 /* PracticeWidgetPlugin.swift */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
 				504EC3131FED79650016851F /* Info.plist */,
+				E5A30C510000000000000003 /* InfoPlist.strings */,
 				2FAD9762203C412B000D30F8 /* config.xml */,
 				50B271D01FEDC1A000F3C39B /* public */,
 			);
@@ -152,7 +157,7 @@ BC0000000000000000000064 /* PracticeWidgetPlugin.swift */,
 			sourceTree = "<group>";
 		};
 BC0000000000000000000021 /* CalendarShared */ = {isa = PBXGroup; children = (BC0000000000000000000012, BC0000000000000000000065, ); path = CalendarShared; sourceTree = "<group>"; };
-BC0000000000000000000022 /* CalendarWidget */ = {isa = PBXGroup; children = (BC0000000000000000000013, BC0000000000000000000014, BC0000000000000000000015, BC0000000000000000000063, BC0000000000000000000066, ); path = CalendarWidget; sourceTree = "<group>"; };
+BC0000000000000000000022 /* CalendarWidget */ = {isa = PBXGroup; children = (BC0000000000000000000013, BC0000000000000000000014, BC0000000000000000000015, BC0000000000000000000063, BC0000000000000000000066, BC0000000000000000000082, ); path = CalendarWidget; sourceTree = "<group>"; };
 BC0000000000000000000068 /* Shared */ = {isa = PBXGroup; children = (BC0000000000000000000061, BC0000000000000000000062, BC0000000000000000000067, ); path = Shared; sourceTree = "<group>"; };
 D7A110000000000000000005 /* AppUITests */ = {isa = PBXGroup; children = (D7A110000000000000000003, ); path = AppUITests; sourceTree = "<group>"; };
 /* End PBXGroup section */
@@ -218,6 +223,7 @@ SystemCapabilities = {com.apple.ApplicationGroups.iOS = {enabled = 1; }; };
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				vi,
 				Base,
 			);
 			mainGroup = 504EC2FB1FED79650016851F;
@@ -241,6 +247,7 @@ D7A110000000000000000008 /* UI Test Resources */ = {isa = PBXResourcesBuildPhase
 			buildActionMask = 2147483647;
 			files = (
 				C0F17E000000000000000001 /* PrivacyInfo.xcprivacy in Resources */,
+				E5A30C510000000000000001 /* InfoPlist.strings in Resources */,
 BC0000000000000000000080 /* WidgetAssets.xcassets in App Resources */,
 				504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */,
 				50B271D11FEDC1A000F3C39B /* public in Resources */,
@@ -251,7 +258,7 @@ BC0000000000000000000080 /* WidgetAssets.xcassets in App Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-BC0000000000000000000042 /* Widget Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (BC0000000000000000000081, ); runOnlyForDeploymentPostprocessing = 0; };
+BC0000000000000000000042 /* Widget Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (BC0000000000000000000081, BC0000000000000000000083, ); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -314,6 +321,14 @@ BC0000000000000000000041 /* Widget Sources */ = {isa = PBXSourcesBuildPhase; bui
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		E5A30C510000000000000003 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E5A30C510000000000000002 /* vi */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
 		504EC30B1FED79650016851F /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -453,7 +468,7 @@ D7A11000000000000000000B /* UI Test Release */ = {isa = XCBuildConfiguration; bu
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.3;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
 				PRODUCT_BUNDLE_IDENTIFIER = vn.quangtu.tutam;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -474,7 +489,7 @@ D7A11000000000000000000B /* UI Test Release */ = {isa = XCBuildConfiguration; bu
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = vn.quangtu.tutam;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
@@ -483,8 +498,8 @@ D7A11000000000000000000B /* UI Test Release */ = {isa = XCBuildConfiguration; bu
 			};
 			name = Release;
 		};
-BC0000000000000000000051 /* Widget Debug */ = {isa = XCBuildConfiguration; buildSettings = {APPLICATION_EXTENSION_API_ONLY = YES; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) WIDGET_EXTENSION"; CODE_SIGN_STYLE = Automatic; CODE_SIGN_ENTITLEMENTS = CalendarWidget/CalendarWidget.entitlements; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = CalendarWidget/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 15.0; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = vn.quangtu.tutam.calendarwidget; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; }; name = Debug; };
-BC0000000000000000000052 /* Widget Release */ = {isa = XCBuildConfiguration; buildSettings = {APPLICATION_EXTENSION_API_ONLY = YES; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) WIDGET_EXTENSION"; CODE_SIGN_STYLE = Automatic; CODE_SIGN_ENTITLEMENTS = CalendarWidget/CalendarWidget.entitlements; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = CalendarWidget/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 15.0; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = vn.quangtu.tutam.calendarwidget; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Release; };
+BC0000000000000000000051 /* Widget Debug */ = {isa = XCBuildConfiguration; buildSettings = {APPLICATION_EXTENSION_API_ONLY = YES; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) WIDGET_EXTENSION"; CODE_SIGN_STYLE = Automatic; CODE_SIGN_ENTITLEMENTS = CalendarWidget/CalendarWidget.entitlements; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = CalendarWidget/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 15.0; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"; MARKETING_VERSION = 1.0.3; PRODUCT_BUNDLE_IDENTIFIER = vn.quangtu.tutam.calendarwidget; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; }; name = Debug; };
+BC0000000000000000000052 /* Widget Release */ = {isa = XCBuildConfiguration; buildSettings = {APPLICATION_EXTENSION_API_ONLY = YES; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) WIDGET_EXTENSION"; CODE_SIGN_STYLE = Automatic; CODE_SIGN_ENTITLEMENTS = CalendarWidget/CalendarWidget.entitlements; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = CalendarWidget/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 15.0; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"; MARKETING_VERSION = 1.0.3; PRODUCT_BUNDLE_IDENTIFIER = vn.quangtu.tutam.calendarwidget; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Release; };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */

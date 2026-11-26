@@ -1,0 +1,1 @@
+var e=`quangtu:calendar-widget-date`;function t(e){if(!e||!/^[1-9]\d{3}-\d{2}-\d{2}$/u.test(e))return null;let[t,n,r]=e.split(`-`).map(Number),i=new Date(t,n-1,r,12);return i.getFullYear()===t&&i.getMonth()===n-1&&i.getDate()===r?i:null}export{t as n,e as t};

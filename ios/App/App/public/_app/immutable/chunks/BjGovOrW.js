@@ -1,0 +1,1 @@
+var e=[`offensive`,`harassment`,`spam`,`other`],t=`quangtu:community-blocks-changed`;export{e as n,t};
