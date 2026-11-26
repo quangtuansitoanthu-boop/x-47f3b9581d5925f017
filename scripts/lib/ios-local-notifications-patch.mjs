@@ -169,6 +169,95 @@ const patchedSchedule = String.raw`    @objc func schedule(_ call: CAPPluginCall
     }`;
 
 const relativeSwift = 'ios/Sources/LocalNotificationsPlugin/LocalNotificationsPlugin.swift';
+const atomicScheduleHash = '7166240b5023fa27eb9aa20472377e21ab10eda4df308b0d8fb500b6ee9313d0';
+const originalCheckPermissions = String.raw`    @objc override public func checkPermissions(_ call: CAPPluginCall) {
+        self.notificationDelegationHandler.checkPermissions { status in
+            let permission: String
+
+            switch status {
+            case .authorized, .ephemeral, .provisional:
+                permission = "granted"
+            case .denied:
+                permission = "denied"
+            case .notDetermined:
+                permission = "prompt"
+            @unknown default:
+                permission = "prompt"
+            }
+
+            call.resolve(["display": permission])
+        }
+    }`;
+const diagnosticHelper = String.raw`#if DEBUG
+private func tuTapNotificationQA(_ phase: String, status: Int = -1, error: Error? = nil) {
+    guard ProcessInfo.processInfo.arguments.contains("-tutam-qa-events") else { return }
+    let phases: Set<String> = [
+        "check_entry", "check_settings_callback", "check_resolve",
+        "schedule_entry", "schedule_invalid_batch", "schedule_invalid_id",
+        "schedule_content_reject", "schedule_past_reject", "schedule_trigger_reject",
+        "schedule_pending_start", "schedule_pending_callback", "schedule_add_error",
+        "schedule_callbacks_complete", "schedule_restore_error", "schedule_rollback_expired",
+        "schedule_rollback_reject", "schedule_rollback_incomplete", "schedule_reject", "schedule_resolve"
+    ]
+    guard phases.contains(phase) else { return }
+    let failure = error.map { $0 as NSError }
+    let domains: Set<String> = ["UNErrorDomain", "NSCocoaErrorDomain", "NSPOSIXErrorDomain", "NSURLErrorDomain", "TuTapLocalNotifications"]
+    let domain = failure.map { domains.contains($0.domain) ? $0.domain : "other" } ?? "none"
+    let code = failure.map { (-999999...999999).contains($0.code) ? $0.code : 0 } ?? 0
+    let state = (-1...4).contains(status) ? status : -1
+    NSLog("TUTAM_NOTIFICATION_QA phase=%@ status=%ld domain=%@ errorCode=%ld", phase, state, domain, code)
+}
+#endif`;
+const observedDiagnosticHelper = diagnosticHelper.replace('\n}\n#endif', String.raw`
+    let process = ProcessInfo.processInfo
+    let pid = Int(process.processIdentifier)
+    let uptime = process.systemUptime
+    guard pid > 0, uptime.isFinite else { return }
+    let payload: [String: Any] = [
+        "type": "native-notification-sdk", "phase": phase, "pid": pid, "uptime": uptime,
+        "status": state, "domain": domain, "errorCode": code
+    ]
+    NotificationCenter.default.post(name: Notification.Name("TuTapQANativeDiagnostic"),
+        object: nil, userInfo: payload)
+}
+#endif`);
+
+// Chỉ chèn log sau các đoạn đã ghim; bỏ DEBUG phải trả lại đúng method cũ.
+function insertDebugLogs(value, sites) {
+  for (const [anchor, phase, argumentsText = '', position = 'before', inner = false] of sites) {
+    if (value.split(anchor).length !== 2) throw new Error('Unsupported LocalNotifications diagnostic anchor');
+    const line = position === 'after' ? anchor.split('\n').at(-1) : anchor;
+    const indent = line.match(/^[ \t]*/u)[0] + (inner ? '    ' : '');
+    const block = `${indent}#if DEBUG\n${indent}tuTapNotificationQA("${phase}"${argumentsText})\n${indent}#endif`;
+    value = value.replace(anchor, position === 'after' ? anchor + '\n' + block : block + '\n' + anchor);
+  }
+  return value;
+}
+
+const diagnosticSchedule = insertDebugLogs(patchedSchedule, [
+  ['    @objc func schedule(_ call: CAPPluginCall) {', 'schedule_entry', '', 'after', true],
+  ['            call.reject("Must provide notifications array as notifications option")', 'schedule_invalid_batch'],
+  ['                call.reject("Notification missing identifier")', 'schedule_invalid_id'],
+  ['                call.reject("Unable to make notification", nil, error)', 'schedule_content_reject', ', error: error'],
+  ['                call.reject("Scheduled time must be *after* current time")', 'schedule_past_reject'],
+  ['                call.reject("Unable to create notification, trigger failed", nil, error)', 'schedule_trigger_reject', ', error: error'],
+  ['        center.getPendingNotificationRequests { allPending in', 'schedule_pending_start'],
+  ['        center.getPendingNotificationRequests { allPending in', 'schedule_pending_callback', '', 'after', true],
+  ['                            if firstError == nil { firstError = theError }\n                            stateLock.unlock()', 'schedule_add_error', ', error: theError', 'after'],
+  ['                    let error = firstError\n                    stateLock.unlock()', 'schedule_callbacks_complete', ', error: error', 'after'],
+  ['                                        rollbackError = NSError(domain: "TuTapLocalNotifications", code: 1, userInfo: [NSLocalizedDescriptionKey: "Previous notification deadline expired or unavailable"])\n                                    }\n                                    stateLock.unlock()', 'schedule_rollback_expired', '', 'after'],
+  ['                                    if rollbackError == nil { rollbackError = restoreError }\n                                    stateLock.unlock()', 'schedule_restore_error', ', error: restoreError', 'after'],
+  ['                                        call.reject("Notification rollback failed: \\(restoreError.localizedDescription); original: \\(theError.localizedDescription)")', 'schedule_rollback_reject', ', error: restoreError'],
+  ['                                        call.reject("Notification rollback incomplete; original: \\(theError.localizedDescription)")', 'schedule_rollback_incomplete', ', error: theError'],
+  ['                                        call.reject(theError.localizedDescription)', 'schedule_reject', ', error: theError'],
+  ['                    call.resolve(["notifications": ret])', 'schedule_resolve'],
+]);
+const diagnosticCheckPermissions = insertDebugLogs(originalCheckPermissions, [
+  ['    @objc override public func checkPermissions(_ call: CAPPluginCall) {', 'check_entry', '', 'after', true],
+  ['        self.notificationDelegationHandler.checkPermissions { status in', 'check_settings_callback', ', status: status.rawValue', 'after', true],
+  ['            call.resolve(["display": permission])', 'check_resolve', ', status: status.rawValue'],
+]);
+const helperAnchor = 'import UserNotifications\n';
 const oldEnum = '    case triggerConstructionFailed\n';
 const newEnum = oldEnum + '    case triggerDateInPast\n';
 const oldPastDate = '            if dateInfo.date! < Date() {\n                call.reject("Scheduled time must be *after* current time")\n                return nil\n            }';
@@ -203,6 +292,14 @@ function scheduleMethod(source) {
   return { start, end, value: source.slice(start, end) };
 }
 
+function checkPermissionsMethod(source) {
+  const marker = '    @objc override public func checkPermissions(_ call: CAPPluginCall) {';
+  const start = source.indexOf(marker);
+  const closing = start < 0 ? -1 : source.indexOf('\n    }', start);
+  if (start < 0 || closing < 0 || occurrences(source, marker) !== 1) throw new Error('Unsupported LocalNotifications permission source');
+  return source.slice(start, closing + '\n    }'.length);
+}
+
 /** Vá SDK đã khóa phiên bản; không ghi vào checkout hay node_modules liên kết khác. */
 export function patchIosLocalNotifications(packageDirectory = path.resolve('node_modules/@capacitor/local-notifications')) {
   const cwd = path.resolve(process.cwd());
@@ -225,24 +322,46 @@ export function patchIosLocalNotifications(packageDirectory = path.resolve('node
   if (crlf && /(?<!\r)\n/u.test(original)) throw new Error('Unsupported mixed LocalNotifications source line endings');
   const source = original.replaceAll('\r\n', '\n');
   const method = scheduleMethod(source);
-  if (method.value === patchedSchedule) {
+  const permissionMethod = checkPermissionsMethod(source);
+  const supportsDiagnosticHelper = (helper) => {
+    const remainder = source.replace(diagnosticSchedule, '').replace(diagnosticCheckPermissions, '').replace(helper, '');
+    return method.value === diagnosticSchedule && permissionMethod === diagnosticCheckPermissions &&
+      occurrences(source, helperAnchor + '\n' + helper + '\n') === 1 &&
+      !remainder.includes('tuTapNotificationQA') && !remainder.includes('TUTAM_NOTIFICATION_QA') &&
+      !remainder.includes('TuTapQANativeDiagnostic');
+  };
+  const previousDiagnosticPatch = supportsDiagnosticHelper(diagnosticHelper);
+  const observedDiagnosticPatch = supportsDiagnosticHelper(observedDiagnosticHelper);
+  if (previousDiagnosticPatch || observedDiagnosticPatch) {
     if (occurrences(source, '    case triggerDateInPast\n') !== 1 ||
         occurrences(source, newPastDate) !== 1 || source.includes(oldPastDate)) {
       throw new Error('Unsupported partial LocalNotifications source patch');
     }
-    return false;
+    if (observedDiagnosticPatch) return false;
+  }
+  if (!previousDiagnosticPatch && (source.includes('tuTapNotificationQA') || source.includes('TUTAM_NOTIFICATION_QA') ||
+      source.includes('TuTapQANativeDiagnostic') || permissionMethod !== originalCheckPermissions || occurrences(source, helperAnchor) !== 1)) {
+    throw new Error('Unsupported partial or unexpected LocalNotifications diagnostic patch');
   }
   const methodHash = createHash('sha256').update(method.value).digest('hex');
   const upgradingCompletionPatch = methodHash === completionScheduleHash;
-  const validDateSource = upgradingCompletionPatch
+  const upgradingAtomicPatch = methodHash === atomicScheduleHash && method.value === patchedSchedule;
+  const validDateSource = previousDiagnosticPatch || upgradingCompletionPatch || upgradingAtomicPatch
     ? occurrences(source, '    case triggerDateInPast\n') === 1 && occurrences(source, newPastDate) === 1 && !source.includes(oldPastDate)
     : occurrences(source, oldEnum) === 1 && !source.includes('    case triggerDateInPast\n') && occurrences(source, oldPastDate) === 1 && !source.includes(newPastDate);
-  if ((!upgradingCompletionPatch && methodHash !== legacyScheduleHash) || !validDateSource) {
+  if ((!previousDiagnosticPatch && !upgradingCompletionPatch && !upgradingAtomicPatch && methodHash !== legacyScheduleHash) || !validDateSource) {
     throw new Error('Unsupported LocalNotifications SDK source; refusing partial or unexpected patch');
   }
 
-  let updated = source.slice(0, method.start) + patchedSchedule + source.slice(method.end);
-  if (!upgradingCompletionPatch) updated = updated.replace(oldEnum, newEnum).replace(oldPastDate, newPastDate);
+  let updated;
+  if (previousDiagnosticPatch) {
+    updated = source.replace(diagnosticHelper, observedDiagnosticHelper);
+  } else {
+    updated = source.slice(0, method.start) + diagnosticSchedule + source.slice(method.end);
+    if (!upgradingCompletionPatch && !upgradingAtomicPatch) updated = updated.replace(oldEnum, newEnum).replace(oldPastDate, newPastDate);
+    updated = updated.replace(originalCheckPermissions, diagnosticCheckPermissions)
+      .replace(helperAnchor, helperAnchor + '\n' + observedDiagnosticHelper + '\n');
+  }
   if (crlf) updated = updated.replaceAll('\n', '\r\n');
   const temporary = swiftFile + '.tutam-schedule.tmp';
   if (fs.existsSync(temporary)) throw new Error('LocalNotifications patch temporary source already exists');
