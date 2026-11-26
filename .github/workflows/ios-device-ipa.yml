@@ -12,10 +12,9 @@ concurrency:
 
 jobs:
   ipa:
-    runs-on: macos-15-intel
+    runs-on: xcode-27
     timeout-minutes: 20
     env:
-      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
       VITE_GOOGLE_IOS_CLIENT_ID: ${{ vars.GOOGLE_IOS_CLIENT_ID }}
       TUTAM_BUNDLE_SYNCED: '1'
     steps:
@@ -28,7 +27,11 @@ jobs:
         run: echo "BUILD_NUMBER=$((1200 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
       - name: Verify Apple toolchain
         run: |
+          set -euo pipefail
           xcodebuild -version
+          sdk="$(xcrun --sdk iphoneos --show-sdk-version)"
+          echo "iOS SDK: $sdk"
+          test "${sdk%%.*}" -ge 27
           pod --version
       - name: Install and verify existing signing credentials
         env:
@@ -133,6 +136,13 @@ jobs:
             -archivePath "$RUNNER_TEMP/TuTap.xcarchive" \
             CURRENT_PROJECT_VERSION="$BUILD_NUMBER" archive
           app="$RUNNER_TEMP/TuTap.xcarchive/Products/Applications/App.app"
+          for bundle in "$app" "$app/PlugIns/CalendarWidget.appex"; do
+            sdk_name="$(/usr/libexec/PlistBuddy -c "Print :DTSDKName" "$bundle/Info.plist")"
+            sdk_version="${sdk_name#iphoneos}"
+            test "$sdk_name" != "$sdk_version"
+            test "${sdk_version%%.*}" -ge 27
+            echo "Verified $(basename "$bundle") built with $sdk_name"
+          done
           codesign --verify --deep --strict "$app"
           test -d "$app/PlugIns/CalendarWidget.appex"
           codesign --verify --strict "$app/PlugIns/CalendarWidget.appex"
