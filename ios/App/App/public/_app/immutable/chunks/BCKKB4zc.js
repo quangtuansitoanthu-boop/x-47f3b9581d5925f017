@@ -1,0 +1,1 @@
+import{a as e}from"./DJvgheLU.js";import{n as t,t as n}from"./QeGmvCoo.js";var r=e(`StartupScreen`);async function i(){n()&&t()===`android`&&await r.ready()}async function a(e){if(!(!n()||t()!==`android`))try{await r.setLocale({locale:e})}catch{}}export{i as finishNativeStartup,a as syncNativeStartupLocale};

@@ -1,1 +1,0 @@
-import{a as e}from"./DJvgheLU.js";import{n as t,t as n}from"./QeGmvCoo.js";var r=e(`StartupScreen`);async function i(){n()&&t()===`android`&&await r.ready()}export{i as finishNativeStartup};

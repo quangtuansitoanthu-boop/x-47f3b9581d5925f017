@@ -255,14 +255,19 @@ class TuTapBridgeViewController: CAPBridgeViewController {
 #endif
     }
 
-#if DEBUG
     override func webViewConfiguration(for instanceConfiguration: InstanceConfiguration) -> WKWebViewConfiguration {
+#if DEBUG
         recordNativeStartup(.configurationBefore)
+#endif
         let configuration = super.webViewConfiguration(for: instanceConfiguration)
+        configuration.ignoresViewportScaleLimits = false
+#if DEBUG
         recordNativeStartup(.configurationAfter)
+#endif
         return configuration
     }
 
+#if DEBUG
     override func viewDidLoad() {
         recordNativeStartup(.viewDidLoadBeforeSuper)
         super.viewDidLoad()

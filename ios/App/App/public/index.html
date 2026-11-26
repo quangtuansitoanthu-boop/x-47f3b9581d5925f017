@@ -23,9 +23,14 @@
     <noscript>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" />
     </noscript>
-    <script>
+    <script data-app-bootstrap>
       (function() {
-        if ((window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) ||
+        var isNativePlatform = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+        if (isNativePlatform) {
+          var viewport = document.querySelector('meta[name="viewport"]');
+          viewport.setAttribute('content', viewport.getAttribute('content') + ', minimum-scale=1, maximum-scale=1, user-scalable=no');
+        }
+        if (isNativePlatform ||
             (location.protocol === 'https:' && location.hostname === 'localhost')) {
           document.documentElement.setAttribute('data-native-app', 'true');
           if (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'android' &&
@@ -122,14 +127,14 @@
     <style>
       html[data-native-startup='true'] #app-startup { display: none; }
     </style>
-    <link href="/_app/immutable/entry/start.vuaGV7X5.js" rel="modulepreload">
-		<link href="/_app/immutable/chunks/CDuTbr92.js" rel="modulepreload">
+    <link href="/_app/immutable/entry/start.CXpY4HwL.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/De572fef.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/BfHvCCDo.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/xjJcPqcb.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/BaVX7Rps.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/zV3o4ufC.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/fCjs79qj.js" rel="modulepreload">
-		<link href="/_app/immutable/entry/app.SS2ZUVLv.js" rel="modulepreload">
+		<link href="/_app/immutable/entry/app.k5vMRt7k.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/BkSJcFVj.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/Cm7Mh80k.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/sSgbRg4C.js" rel="modulepreload">
@@ -139,15 +144,15 @@
 		<link href="/_app/immutable/chunks/zNInJmJO.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/BJtJjE0v.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/bp9j-J-_.js" rel="modulepreload">
-		<link href="/_app/immutable/nodes/0.BYhzygKa.js" rel="modulepreload">
+		<link href="/_app/immutable/nodes/0.DwjQKEFA.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/DdrV_Ohm.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/CXOjqDWv.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/D9QL22bp2.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/ChvLsayO.js" rel="modulepreload">
-		<link href="/_app/immutable/chunks/BFe0x1TY.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/CTRaTSAs.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/Blw5wJI2.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/CN1848uT2.js" rel="modulepreload">
-		<link href="/_app/immutable/chunks/BJiKcgZn2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DG9a6kGr2.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/fdwH6ppI.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/D7ungy0Z.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/COKoQ7zD.js" rel="modulepreload">
@@ -156,7 +161,7 @@
 		<link href="/_app/immutable/chunks/9fbmNQdi.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/DHZpBuCo2.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/BwJKl4Fq.js" rel="modulepreload">
-		<link href="/_app/immutable/chunks/CU7wfVBX2.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/Csf0COkq2.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/BpSPOPhP.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/DzquzyXU.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/DuSuUyVU.js" rel="modulepreload">
@@ -198,7 +203,7 @@
 		<link href="/_app/immutable/chunks/X4VyUMzx2.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/Dxi9bL8M.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/CLqyrQA7.js" rel="modulepreload">
-		<link href="/_app/immutable/chunks/BVXQ1rxs.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DPb3xLpP.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/Bk3ziZES2.js" rel="modulepreload">
 		<link href="/_app/immutable/chunks/_DFyb7_h.js" rel="modulepreload">
 		
@@ -217,14 +222,14 @@
     </script>
   </head>
   <body data-sveltekit-preload-data="hover">
-    <div id="app-startup" role="status" aria-label="Ứng dụng Tu tập Phật pháp">
+    <div id="app-startup" role="status">
       <img class="startup-blur" data-startup-blur alt="" aria-hidden="true" />
       <img class="startup-bg" data-startup-bg alt="" />
       <img class="startup-title" data-startup-title alt="" />
       <div class="startup-scrim" aria-hidden="true"></div>
       <div class="startup-loading">
         <span class="startup-spinner" aria-hidden="true"></span>
-        <span data-startup-loading>Đang tải ứng dụng...</span>
+        <span data-startup-loading></span>
       </div>
     </div>
     <script data-startup-artwork>
@@ -250,9 +255,14 @@
         var painting = document.querySelector('[data-startup-bg]');
         var title = document.querySelector('[data-startup-title]');
         painting.src = startupSrc;
-        title.src = '/images/calendar/cu-si-title.webp';
-        try { if (localStorage.getItem('tutam_locale') === 'en') document.querySelector('[data-startup-loading]').textContent = 'Loading app...'; } catch (e) {}
+        var startupLocale = 'vi';
+        try { if (localStorage.getItem('tutam_locale') === 'en') startupLocale = 'en'; } catch (e) {}
+        var englishStartup = startupLocale === 'en';
+        title.src = englishStartup ? '/images/calendar/cu-si-title-en.webp' : '/images/calendar/cu-si-title.webp';
+        document.querySelector('[data-startup-loading]').textContent = englishStartup ? 'Loading app...' : 'Đang tải ứng dụng...';
         var cover = document.getElementById('app-startup');
+        cover.lang = startupLocale;
+        cover.setAttribute('aria-label', englishStartup ? 'Daily Buddhist Practice. For lay practitioners.' : 'Ứng dụng Tu tập Phật pháp. Dành cho cư sĩ tại gia.');
         cover.artworkPainted = Promise.all([painting, title].map(function (image) {
           if (image.decode) return image.decode().catch(function () {});
           if (!image.complete) return new Promise(function (resolve) { image.onload = image.onerror = resolve; });
@@ -272,15 +282,15 @@
     <div style="display: contents">
 			<script>
 				{
-					__sveltekit_7gbu0l = {
+					__sveltekit_1sd67v = {
 						base: ""
 					};
 
 					const element = document.currentScript.parentElement;
 
 					Promise.all([
-						import("/_app/immutable/entry/start.vuaGV7X5.js"),
-						import("/_app/immutable/entry/app.SS2ZUVLv.js")
+						import("/_app/immutable/entry/start.CXpY4HwL.js"),
+						import("/_app/immutable/entry/app.k5vMRt7k.js")
 					]).then(([kit, app]) => {
 						kit.start(app, element);
 					});

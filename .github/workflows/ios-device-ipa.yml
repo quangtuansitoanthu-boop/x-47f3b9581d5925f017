@@ -97,7 +97,7 @@ jobs:
           import path from 'node:path';
           const root = 'ios/App/App/public';
           const {version,files} = JSON.parse(fs.readFileSync(path.join(root,'mobile-assets-manifest.json')));
-          if (version !== 1 || files.length !== 1045) throw Error('Unexpected iOS manifest');
+          if (version !== 1 || files.length !== 1046) throw Error('Unexpected iOS manifest');
           for (const file of files) {
             const data = fs.readFileSync(path.join(root,file.path));
             if (data.length !== file.bytes || createHash('sha256').update(data).digest('hex') !== file.sha256) throw Error(file.path);
